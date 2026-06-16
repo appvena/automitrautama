@@ -902,12 +902,12 @@
   <!-- WIDGET TOGGLE (mobile only) -->
   <button class="widget-toggle-btn" onclick="toggleWidgetPanel()">⚙ Pilih Widget</button>
   <div class="widget-panel" id="widgetPanel">
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('kendaraan')"> 🚗 Stok</label>
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('pendapatan')"> 💰 Pendapatan</label>
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('terjual')"> 📈 Terjual</label>
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('pelanggan')"> 👥 Pelanggan</label>
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('servis')"> 🔧 Servis</label>
-    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('sparepart')"> 🔩 Sparepart</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="kendaraan" onchange="toggleWidget('kendaraan')"> 🚗 Stok</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="pendapatan" onchange="toggleWidget('pendapatan')"> 💰 Pendapatan</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="terjual" onchange="toggleWidget('terjual')"> 📈 Terjual</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="pelanggan" onchange="toggleWidget('pelanggan')"> 👥 Pelanggan</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="servis" onchange="toggleWidget('servis')"> 🔧 Servis</label>
+    <label class="widget-item"><input type="checkbox" checked data-widget="sparepart" onchange="toggleWidget('sparepart')"> 🔩 Sparepart</label>
   </div>
 
   <!-- STAT CARDS -->
@@ -1046,7 +1046,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs }
+  import { getFirestore, collection, getDocs, doc, getDoc, setDoc }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1062,12 +1062,18 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
+  let currentUserId = null;
+  const DEFAULT_WIDGETS = ['kendaraan','pendapatan','terjual','pelanggan','servis','sparepart'];
+  let activeWidgets = [...DEFAULT_WIDGETS];
+
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = '/automitrautama/index.html';
       return;
     }
+
+    currentUserId = user.uid;
 
     // User info navbar
     const email   = user.email || '';
@@ -1086,8 +1092,39 @@
       document.getElementById('overlay').classList.add('hide');
     }, 1800);
 
+    await loadWidgetPrefs();
     await loadData();
   });
+
+  // ── Load preferensi widget dari Firebase ──
+  async function loadWidgetPrefs() {
+    try {
+      const snap = await getDoc(doc(db, 'preferensi_user', currentUserId));
+      if (snap.exists() && snap.data().widgets) {
+        activeWidgets = snap.data().widgets;
+      }
+    } catch(e) { activeWidgets = [...DEFAULT_WIDGETS]; }
+    applyWidgetPrefs();
+  }
+
+  function applyWidgetPrefs() {
+    DEFAULT_WIDGETS.forEach(id => {
+      const el = document.getElementById(`widget-${id}`);
+      if (el) el.style.display = activeWidgets.includes(id) ? '' : 'none';
+    });
+    // Sync checkbox di panel
+    document.querySelectorAll('[data-widget]').forEach(cb => {
+      cb.checked = activeWidgets.includes(cb.dataset.widget);
+    });
+  }
+
+  async function saveWidgetPrefs() {
+    try {
+      await setDoc(doc(db, 'preferensi_user', currentUserId), {
+        widgets: activeWidgets
+      }, { merge: true });
+    } catch(e) { console.log('Gagal simpan preferensi:', e); }
+  }
 
   // ── Load Firestore ──
   async function loadData() {
@@ -1214,14 +1251,21 @@
     }
   });
 
-  // ── Widget toggle (mobile) ──
+  // ── Widget toggle (mobile) — simpan ke Firebase ──
   window.toggleWidgetPanel = function() {
     document.getElementById('widgetPanel').classList.toggle('show');
   };
 
-  window.toggleWidget = function(id) {
+  window.toggleWidget = async function(id) {
     const el = document.getElementById(`widget-${id}`);
-    if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+    if (activeWidgets.includes(id)) {
+      activeWidgets = activeWidgets.filter(w => w !== id);
+      if (el) el.style.display = 'none';
+    } else {
+      activeWidgets.push(id);
+      if (el) el.style.display = '';
+    }
+    await saveWidgetPrefs();
   };
 
   // ── Sidebar ──
