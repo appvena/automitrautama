@@ -137,11 +137,32 @@
     .col-toggle-wrap { display: flex; align-items: center; gap: 6px; margin-left: auto; }
     .btn-col-toggle { padding: 7px 12px; background: var(--content); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 0.78em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
     .btn-col-toggle:hover { border-color: var(--gold-dim); color: var(--gold); }
-    .col-panel { position: absolute; top: 100%; right: 0; background: var(--card); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; z-index: 50; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+    .col-panel {
+      position: absolute;
+      top: 100%; right: 0;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px;
+      z-index: 50;
+      min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      display: none;
+    }
     .col-panel.show { display: block; }
     .col-panel-title { font-size: 0.68em; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
     .col-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 0.8em; color: var(--text2); cursor: pointer; }
     .col-item input { accent-color: var(--gold); }
+
+    /* Fix panel kolom di mobile */
+    @media (max-width: 768px) {
+      .col-panel {
+        right: auto;
+        left: 0;
+        width: calc(100vw - 24px);
+        max-width: 320px;
+      }
+    }
 
     /* ══ MODAL FORM ══ */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
