@@ -421,10 +421,22 @@
     /* ══ STAT CARDS ══ */
     .stats {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* kartu pendukung lebih kecil */
+    .stats-sm {
+      grid-template-columns: repeat(2, 1fr);
       margin-bottom: 16px;
     }
+
+    .stats-sm .stat { padding: 8px 12px; }
+    .stats-sm .stat-icon { font-size: 0.9em; margin-bottom: 4px; }
+    .stats-sm .stat-val { font-size: 1.4em; }
+    .stats-sm .stat-lbl { font-size: 0.6em; }
+    .stats-sm .stat-foot { margin-top: 4px; padding-top: 4px; }
 
     .stat {
       background: var(--card);
@@ -660,7 +672,9 @@
 
     /* ══ RESPONSIVE ══ */
     @media (max-width: 900px) {
-      .stats { grid-template-columns: repeat(3, 1fr); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stats-sm { grid-template-columns: repeat(2, 1fr); }
+      .row2 { grid-template-columns: 1fr !important; }
     }
 
     @media (max-width: 768px) {
@@ -680,19 +694,17 @@
       .s-overlay.show { display: block; }
 
       .main { margin-left: 0; padding: 12px; }
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        margin-bottom: 12px;
-      }
-      .row2 { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+      .stats-sm { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .row2 { grid-template-columns: 1fr !important; }
       .pg-header { flex-direction: column; align-items: flex-start; gap: 2px; }
       .pg-title { font-size: 1.2em; }
       .stat-val { font-size: 1.5em; }
     }
 
     @media (max-width: 400px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: 1fr; }
+      .stats-sm { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -840,11 +852,33 @@
     <div class="stat s-gold">
       <span class="stat-icon">🚗</span>
       <div class="stat-val" id="sKendaraan">—</div>
-      <div class="stat-lbl">Kendaraan</div>
+      <div class="stat-lbl">Stok Kendaraan</div>
       <div class="stat-foot">
         <span id="sTersedia">—</span> tersedia &nbsp;·&nbsp; <span id="sTerjual">—</span> terjual
       </div>
     </div>
+    <div class="stat s-green">
+      <span class="stat-icon">💰</span>
+      <div class="stat-val" id="sPendapatan">—</div>
+      <div class="stat-lbl">Pendapatan</div>
+      <div class="stat-foot">Bulan ini (juta)</div>
+    </div>
+    <div class="stat s-blue">
+      <span class="stat-icon">📈</span>
+      <div class="stat-val" id="sTerjualBulan">—</div>
+      <div class="stat-lbl">Terjual Bulan Ini</div>
+      <div class="stat-foot">Unit kendaraan</div>
+    </div>
+    <div class="stat s-orange">
+      <span class="stat-icon">👥</span>
+      <div class="stat-val" id="sPelanggan">—</div>
+      <div class="stat-lbl">Pelanggan</div>
+      <div class="stat-foot">Terdaftar</div>
+    </div>
+  </div>
+
+  <!-- STAT CARDS KECIL - Divisi Pendukung -->
+  <div class="stats stats-sm">
     <div class="stat s-blue">
       <span class="stat-icon">🔧</span>
       <div class="stat-val" id="sServis">—</div>
@@ -857,27 +891,15 @@
       <div class="stat-lbl">Item Sparepart</div>
       <div class="stat-foot">Stok aktif</div>
     </div>
-    <div class="stat s-green">
-      <span class="stat-icon">💰</span>
-      <div class="stat-val" id="sPendapatan">—</div>
-      <div class="stat-lbl">Pendapatan</div>
-      <div class="stat-foot">Bulan ini (juta)</div>
-    </div>
-    <div class="stat s-red">
-      <span class="stat-icon">👥</span>
-      <div class="stat-val" id="sPelanggan">—</div>
-      <div class="stat-lbl">Pelanggan</div>
-      <div class="stat-foot">Terdaftar</div>
-    </div>
   </div>
 
-  <!-- ROW 2 -->
-  <div class="row2">
+  <!-- ROW 2 - Kendaraan dominan -->
+  <div class="row2" style="grid-template-columns: 2fr 1fr;">
 
-    <!-- Kendaraan Terbaru -->
+    <!-- Stok Kendaraan - UTAMA -->
     <div class="panel">
       <div class="panel-hd">
-        <div class="panel-title">Kendaraan Terbaru</div>
+        <div class="panel-title">🚗 Stok Kendaraan</div>
         <a class="panel-link" onclick="goPage('kendaraan')">Lihat semua →</a>
       </div>
       <div class="panel-bd">
@@ -886,11 +908,12 @@
             <tr>
               <th>Unit</th>
               <th>Tahun</th>
+              <th>Harga Jual</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="tbKendaraan">
-            <tr><td colspan="3">
+            <tr><td colspan="4">
               <div class="empty">
                 <div class="empty-icon">🚗</div>
                 Belum ada kendaraan
@@ -904,22 +927,21 @@
     <!-- Aktivitas -->
     <div class="panel">
       <div class="panel-hd">
-        <div class="panel-title">Aktivitas Terakhir</div>
-        <a class="panel-link">Refresh</a>
+        <div class="panel-title">⚡ Aktivitas</div>
       </div>
       <div class="panel-bd">
         <ul class="act-list" id="actList">
           <li class="act-item">
             <div class="act-dot" style="background:var(--gold)"></div>
             <div>
-              <div class="act-text">Sistem AMU siap digunakan</div>
+              <div class="act-text">Sistem AMU siap</div>
               <div class="act-time">Baru saja</div>
             </div>
           </li>
           <li class="act-item">
             <div class="act-dot" style="background:var(--success)"></div>
             <div>
-              <div class="act-text">Firebase berhasil terhubung</div>
+              <div class="act-text">Firebase terhubung</div>
               <div class="act-time">Baru saja</div>
             </div>
           </li>
@@ -929,10 +951,10 @@
 
   </div>
 
-  <!-- Antrian Servis -->
-  <div class="panel">
+  <!-- Antrian Servis - PENDUKUNG, lebih kecil -->
+  <div class="panel" style="margin-bottom:24px;">
     <div class="panel-hd">
-      <div class="panel-title">Antrian Servis Hari Ini</div>
+      <div class="panel-title">🔧 Antrian Servis Hari Ini</div>
       <a class="panel-link" onclick="goPage('servis')">Lihat semua →</a>
     </div>
     <div class="panel-bd">
@@ -1019,6 +1041,7 @@
       document.getElementById('sKendaraan').textContent = total;
       document.getElementById('sTersedia').textContent  = tersedia;
       document.getElementById('sTerjual').textContent   = terjual;
+      document.getElementById('sTerjualBulan').textContent = terjual;
       document.getElementById('b-kendaraan').textContent = tersedia;
 
       if (total > 0) {
