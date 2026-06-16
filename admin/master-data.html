@@ -1031,7 +1031,8 @@
   // ── Navigasi ──
   window.goTo = (page) => {
     const paths = {
-      dashboard: '/automitrautama/admin/dashboard.html',
+      'dashboard':   '/automitrautama/admin/dashboard.html',
+      'kendaraan':   '/automitrautama/admin/kendaraan.html',
       'master-data': '/automitrautama/admin/master-data.html',
     };
     if (paths[page]) { window.location.href = paths[page]; return; }
