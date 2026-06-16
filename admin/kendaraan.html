@@ -229,74 +229,14 @@
     .detail-ft { padding: 12px 20px; display: flex; gap: 8px; justify-content: flex-end; background: var(--card2); }
     .btn-edit-detail { padding: 8px 18px; background: rgba(72,144,232,0.1); border: 1px solid rgba(72,144,232,0.3); border-radius: 6px; color: var(--info); font-size: 0.82em; cursor: pointer; font-family: 'Inter', sans-serif; }
 
-    /* ══ BIAYA OPERASIONAL ══ */
-    .btn-add-biaya {
-      padding: 4px 10px;
-      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
-      border: none; border-radius: 4px;
-      color: #1a1000; font-size: 0.7em; font-weight: 700;
-      cursor: pointer; font-family: 'Inter', sans-serif;
-      letter-spacing: 0.5px;
-    }
-
-    .biaya-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      font-size: 0.82em;
-    }
-    .biaya-item:last-child { border-bottom: none; }
-    .biaya-item-info { flex: 1; }
-    .biaya-item-nama { color: var(--text2); font-weight: 500; }
-    .biaya-item-ket  { font-size: 0.78em; color: var(--text3); margin-top: 1px; }
-    .biaya-item-tgl  { font-size: 0.7em; color: var(--text3); }
-    .biaya-item-nom  { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; color: var(--error); font-weight: 600; white-space: nowrap; }
-    .biaya-item-del  { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.8em; padding: 2px 4px; transition: color 0.15s; }
-    .biaya-item-del:hover { color: var(--error); }
-
-    .biaya-summary {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border2);
-    }
-    .biaya-sum-row {
-      display: flex; justify-content: space-between;
-      font-size: 0.78em; color: var(--text);
-      padding: 3px 0;
-    }
-    .biaya-sum-modal {
-      font-weight: 600; color: var(--silver2);
-      border-top: 1px solid var(--border);
-      margin-top: 4px; padding-top: 6px;
-    }
-    .biaya-sum-laba {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.95em; font-weight: 700;
-      color: var(--success);
-      border-top: 1px solid var(--border);
-      margin-top: 4px; padding-top: 6px;
-    }
-
-    /* Modal biaya */
-    .biaya-modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 300;
-      display: none; align-items: center; justify-content: center; padding: 20px;
-    }
-    .biaya-modal-overlay.show { display: flex; }
-    .biaya-modal {
-      background: var(--card); border: 1px solid var(--border2);
-      border-radius: 10px; width: 100%; max-width: 400px;
-      overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      animation: modalIn 0.2s ease;
-    }
-
     /* toast */
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 0.82em; color: var(--silver2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 400; display: none; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 0.82em; color: var(--silver2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 300; display: none; }
     .toast.show { display: block; }
     .toast.success { border-left: 3px solid var(--success); }
     .toast.error   { border-left: 3px solid var(--error); }
+
+    /* loading */
+    .overlay { position: fixed; inset: 0; background: #141414; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; transition: opacity 0.5s; }
     .overlay.hide { opacity: 0; pointer-events: none; }
     .overlay img { width: 64px; animation: pulse 1.5s ease-in-out infinite; filter: brightness(0.85); }
     .ov-fallback { font-family:'Rajdhani',sans-serif; font-size:2em; font-weight:700; letter-spacing:6px; color:var(--silver); display:none; }
@@ -305,6 +245,25 @@
     .ld-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); animation:ldfill 1.8s ease-in-out forwards; }
     @keyframes ldfill { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
     .ld-text { font-size:0.58em; letter-spacing:3px; color:var(--text3); text-transform:uppercase; }
+
+    /* ══ BIAYA OPERASIONAL ══ */
+    .btn-add-biaya { padding: 4px 10px; background: linear-gradient(135deg, var(--gold-dim), var(--gold)); border: none; border-radius: 4px; color: #1a1000; font-size: 0.7em; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .biaya-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.82em; }
+    .biaya-item:last-child { border-bottom: none; }
+    .biaya-item-info { flex: 1; }
+    .biaya-item-nama { color: var(--text2); font-weight: 500; }
+    .biaya-item-ket  { font-size: 0.78em; color: var(--text3); margin-top: 1px; }
+    .biaya-item-tgl  { font-size: 0.7em; color: var(--text3); }
+    .biaya-item-nom  { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; color: var(--error); font-weight: 600; white-space: nowrap; }
+    .biaya-item-del  { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.8em; padding: 2px 4px; transition: color 0.15s; }
+    .biaya-item-del:hover { color: var(--error); }
+    .biaya-summary { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border2); }
+    .biaya-sum-row { display: flex; justify-content: space-between; font-size: 0.78em; color: var(--text); padding: 3px 0; }
+    .biaya-sum-modal { font-weight: 600; color: var(--silver2); border-top: 1px solid var(--border); margin-top: 4px; padding-top: 6px; }
+    .biaya-sum-laba { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; font-weight: 700; color: var(--success); border-top: 1px solid var(--border); margin-top: 4px; padding-top: 6px; }
+    .biaya-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .biaya-modal-overlay.show { display: flex; }
+    .biaya-modal { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; width: 100%; max-width: 400px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: modalIn 0.2s ease; }
 
     /* responsive */
     @media (max-width: 768px) {
@@ -621,33 +580,17 @@
           <span>💸 Biaya Operasional</span>
           <button class="btn-add-biaya" onclick="openBiayaModal()">+ Catat Biaya</button>
         </div>
-
-        <!-- List biaya -->
         <div id="biayaList">
-          <div class="empty" style="padding:16px 0">
-            <div style="font-size:1.4em;opacity:0.3">💸</div>
+          <div class="empty" style="padding:16px 0;font-size:0.78em">
+            <div style="opacity:0.3;font-size:1.5em">💸</div>
             <div style="margin-top:4px">Belum ada biaya tercatat</div>
           </div>
         </div>
-
-        <!-- Ringkasan -->
         <div class="biaya-summary" id="biayaSummary" style="display:none">
-          <div class="biaya-sum-row">
-            <span>Harga Beli</span>
-            <span id="bsHargaBeli">–</span>
-          </div>
-          <div class="biaya-sum-row">
-            <span>Total Biaya Operasional</span>
-            <span id="bsTotalBiaya" style="color:var(--error)">–</span>
-          </div>
-          <div class="biaya-sum-row biaya-sum-modal">
-            <span>Modal Sesungguhnya</span>
-            <span id="bsModal" style="color:var(--warning)">–</span>
-          </div>
-          <div class="biaya-sum-row biaya-sum-laba">
-            <span>Laba Bersih</span>
-            <span id="bsLaba">–</span>
-          </div>
+          <div class="biaya-sum-row"><span>Harga Beli</span><span id="bsHargaBeli">–</span></div>
+          <div class="biaya-sum-row"><span>Total Biaya Operasional</span><span id="bsTotalBiaya" style="color:var(--error)">–</span></div>
+          <div class="biaya-sum-row biaya-sum-modal"><span>Modal Sesungguhnya</span><span id="bsModal" style="color:var(--warning)">–</span></div>
+          <div class="biaya-sum-row biaya-sum-laba"><span>Laba Bersih</span><span id="bsLaba">–</span></div>
         </div>
       </div>
 
@@ -659,7 +602,7 @@
   </div>
 </div>
 
-<!-- MODAL BIAYA OPERASIONAL -->
+<!-- MODAL BIAYA -->
 <div class="biaya-modal-overlay" id="biayaModalOverlay">
   <div class="biaya-modal">
     <div class="modal-hd">
@@ -667,17 +610,23 @@
       <button class="modal-close" onclick="closeBiayaModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-field">
+      <div class="form-field" style="margin-bottom:12px">
         <label class="form-label">Kategori Biaya *</label>
         <select class="form-select" id="bKategori">
           <option value="">— Pilih —</option>
+          <option value="Perbaikan">Perbaikan</option>
+          <option value="Administrasi">Administrasi</option>
+          <option value="Pajak/STNK">Pajak/STNK</option>
+          <option value="Detailing">Detailing</option>
+          <option value="Ban">Ban</option>
+          <option value="Lainnya">Lainnya</option>
         </select>
       </div>
-      <div class="form-field">
+      <div class="form-field" style="margin-bottom:12px">
         <label class="form-label">Keterangan</label>
         <input type="text" class="form-input" id="bKeterangan" placeholder="Contoh: Ganti ban 4 pcs..."/>
       </div>
-      <div class="form-field">
+      <div class="form-field" style="margin-bottom:12px">
         <label class="form-label">Nominal (Rp) *</label>
         <input type="number" class="form-input" id="bNominal" placeholder="500000"/>
       </div>
@@ -1187,100 +1136,72 @@
   // ══════════════════════════════════
   // BIAYA OPERASIONAL
   // ══════════════════════════════════
-
   let currentKendaraanId = null;
 
-  // Load kategori biaya dari master data
-  async function loadKategoriBiaya() {
-    try {
-      const snap = await getDocs(query(collection(db, 'master_kategori_biaya'), orderBy('nama')));
-      const opts = snap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
-      const el = document.getElementById('bKategori');
-      el.innerHTML = `<option value="">— Pilih —</option>` +
-        opts.map(o => `<option value="${o.nama}">${o.nama}</option>`).join('') +
-        `<option value="Lainnya">Lainnya</option>`;
-    } catch(e) {
-      document.getElementById('bKategori').innerHTML = `
-        <option value="">— Pilih —</option>
-        <option value="Perbaikan">Perbaikan</option>
-        <option value="Administrasi">Administrasi</option>
-        <option value="Pajak/STNK">Pajak/STNK</option>
-        <option value="Detailing">Detailing</option>
-        <option value="Lainnya">Lainnya</option>
-      `;
-    }
-  }
-
-  // Load biaya per kendaraan
   async function loadBiaya(kendaraanId) {
     currentKendaraanId = kendaraanId;
-    try {
-      const snap = await getDocs(
-        query(collection(db, `kendaraan/${kendaraanId}/biaya`), orderBy('tanggal', 'desc'))
-      );
-      const biayaData = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      renderBiaya(biayaData, kendaraanId);
-    } catch(e) {
-      renderBiaya([], kendaraanId);
-    }
-  }
-
-  function renderBiaya(data, kendaraanId) {
     const kendaraan = allData.find(k => k.id === kendaraanId);
     const hargaBeli = parseInt(kendaraan?.hargaBeli || 0);
     const hargaJual = parseInt(kendaraan?.hargaJual || 0);
     const fmt = v => 'Rp ' + v.toLocaleString('id-ID');
 
-    if (data.length === 0) {
-      document.getElementById('biayaList').innerHTML = `
-        <div class="empty" style="padding:16px 0">
-          <div style="font-size:1.4em;opacity:0.3">💸</div>
-          <div style="margin-top:4px">Belum ada biaya tercatat</div>
-        </div>`;
-      document.getElementById('biayaSummary').style.display = 'none';
+    try {
+      const snap = await getDocs(
+        query(collection(db, `kendaraan/${kendaraanId}/biaya`), orderBy('tanggal','desc'))
+      );
+      const data = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
-      // Update laba estimasi di header (tanpa biaya)
-      const laba = hargaJual - hargaBeli;
-      document.getElementById('dLaba').textContent = fmt(laba);
-      document.getElementById('dLaba').style.color = laba >= 0 ? 'var(--success)' : 'var(--error)';
-      return;
-    }
+      if (data.length === 0) {
+        document.getElementById('biayaList').innerHTML = `
+          <div class="empty" style="padding:16px 0;font-size:0.78em">
+            <div style="opacity:0.3;font-size:1.5em">💸</div>
+            <div style="margin-top:4px">Belum ada biaya tercatat</div>
+          </div>`;
+        document.getElementById('biayaSummary').style.display = 'none';
+        // Update laba tanpa biaya
+        const laba = hargaJual - hargaBeli;
+        document.getElementById('dLaba').textContent = fmt(laba);
+        document.getElementById('dLaba').style.color = laba >= 0 ? 'var(--success)' : 'var(--error)';
+        return;
+      }
 
-    const totalBiaya = data.reduce((s, b) => s + parseInt(b.nominal || 0), 0);
-    const modal      = hargaBeli + totalBiaya;
-    const labaBersih = hargaJual - modal;
+      const totalBiaya = data.reduce((s, b) => s + parseInt(b.nominal || 0), 0);
+      const modal      = hargaBeli + totalBiaya;
+      const labaBersih = hargaJual - modal;
 
-    document.getElementById('biayaList').innerHTML = data.map(b => `
-      <div class="biaya-item">
-        <div class="biaya-item-info">
-          <div class="biaya-item-nama">${b.kategori || '-'}</div>
-          <div class="biaya-item-ket">${b.keterangan || ''}</div>
-          <div class="biaya-item-tgl">${b.tanggal || ''}</div>
+      document.getElementById('biayaList').innerHTML = data.map(b => `
+        <div class="biaya-item">
+          <div class="biaya-item-info">
+            <div class="biaya-item-nama">${b.kategori||'-'}</div>
+            <div class="biaya-item-ket">${b.keterangan||''}</div>
+            <div class="biaya-item-tgl">${b.tanggal||''}</div>
+          </div>
+          <div class="biaya-item-nom">${fmt(parseInt(b.nominal||0))}</div>
+          <button class="biaya-item-del" onclick="hapusBiaya('${kendaraanId}','${b.id}','${b.kategori}')">✕</button>
         </div>
-        <div class="biaya-item-nom">${fmt(parseInt(b.nominal || 0))}</div>
-        <button class="biaya-item-del" onclick="hapusBiaya('${kendaraanId}','${b.id}','${b.kategori}')">✕</button>
-      </div>
-    `).join('');
+      `).join('');
 
-    // Tampilkan ringkasan
-    document.getElementById('biayaSummary').style.display = 'block';
-    document.getElementById('bsHargaBeli').textContent  = fmt(hargaBeli);
-    document.getElementById('bsTotalBiaya').textContent = fmt(totalBiaya);
-    document.getElementById('bsModal').textContent      = fmt(modal);
-    document.getElementById('bsLaba').textContent       = fmt(labaBersih);
-    document.getElementById('bsLaba').style.color       = labaBersih >= 0 ? 'var(--success)' : 'var(--error)';
+      document.getElementById('biayaSummary').style.display = 'block';
+      document.getElementById('bsHargaBeli').textContent  = fmt(hargaBeli);
+      document.getElementById('bsTotalBiaya').textContent = fmt(totalBiaya);
+      document.getElementById('bsModal').textContent      = fmt(modal);
+      document.getElementById('bsLaba').textContent       = fmt(labaBersih);
+      document.getElementById('bsLaba').style.color       = labaBersih >= 0 ? 'var(--success)' : 'var(--error)';
 
-    // Update laba di header detail
-    document.getElementById('dLaba').textContent    = fmt(labaBersih);
-    document.getElementById('dLaba').style.color    = labaBersih >= 0 ? 'var(--success)' : 'var(--error)';
+      // Update laba di header
+      document.getElementById('dLaba').textContent = fmt(labaBersih);
+      document.getElementById('dLaba').style.color = labaBersih >= 0 ? 'var(--success)' : 'var(--error)';
+
+    } catch(e) {
+      document.getElementById('biayaList').innerHTML = '<div style="padding:12px;color:var(--text3);font-size:0.8em">Gagal memuat biaya</div>';
+    }
   }
 
-  window.openBiayaModal = async function() {
-    document.getElementById('bKategori').value  = '';
+  window.openBiayaModal = function() {
+    document.getElementById('bKategori').value   = '';
     document.getElementById('bKeterangan').value = '';
     document.getElementById('bNominal').value    = '';
     document.getElementById('bTanggal').value    = new Date().toISOString().split('T')[0];
-    await loadKategoriBiaya();
     document.getElementById('biayaModalOverlay').classList.add('show');
   };
 
@@ -1293,22 +1214,17 @@
     const keterangan = document.getElementById('bKeterangan').value;
     const nominal    = document.getElementById('bNominal').value;
     const tanggal    = document.getElementById('bTanggal').value;
-
     if (!kategori) { showToast('Pilih kategori biaya!', 'error'); return; }
     if (!nominal)  { showToast('Nominal tidak boleh kosong!', 'error'); return; }
-    if (!tanggal)  { showToast('Tanggal tidak boleh kosong!', 'error'); return; }
-
     try {
       await addDoc(collection(db, `kendaraan/${currentKendaraanId}/biaya`), {
-        kategori, keterangan, nominal: parseInt(nominal), tanggal,
-        createdAt: new Date().toISOString()
+        kategori, keterangan, nominal: parseInt(nominal),
+        tanggal, createdAt: new Date().toISOString()
       });
       showToast('Biaya berhasil dicatat ✓', 'success');
       closeBiayaModal();
       await loadBiaya(currentKendaraanId);
-    } catch(e) {
-      showToast('Gagal menyimpan: ' + e.message, 'error');
-    }
+    } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
   };
 
   window.hapusBiaya = async function(kendaraanId, biayaId, nama) {
@@ -1317,29 +1233,24 @@
       await deleteDoc(doc(db, `kendaraan/${kendaraanId}/biaya`, biayaId));
       showToast('Biaya dihapus ✓', 'success');
       await loadBiaya(kendaraanId);
-    } catch(e) {
-      showToast('Gagal menghapus', 'error');
-    }
+    } catch(e) { showToast('Gagal menghapus', 'error'); }
   };
 
   // ══════════════════════════════════
-  // AUTO LOGOUT (5 menit tidak aktif)
+  // AUTO LOGOUT 5 MENIT
   // ══════════════════════════════════
   let autoLogoutTimer;
-
   function resetTimer() {
     clearTimeout(autoLogoutTimer);
     autoLogoutTimer = setTimeout(async () => {
-      showToast('Sesi berakhir karena tidak aktif. Silakan login kembali.', 'error');
+      showToast('Sesi berakhir karena tidak aktif.', 'error');
       setTimeout(async () => {
         await signOut(auth);
         window.location.href = '/automitrautama/index.html';
       }, 2000);
-    }, 5 * 60 * 1000); // 5 menit
+    }, 5 * 60 * 1000);
   }
-
-  // Reset timer setiap ada aktivitas
-  ['click','keydown','scroll','mousemove','touchstart'].forEach(e => {
+  ['click','keydown','scroll','touchstart'].forEach(e => {
     document.addEventListener(e, resetTimer, { passive: true });
   });
   resetTimer();
