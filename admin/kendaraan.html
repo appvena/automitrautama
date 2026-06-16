@@ -255,7 +255,7 @@
     .biaya-item-ket  { font-size: 0.78em; color: var(--text3); margin-top: 1px; }
     .biaya-item-tgl  { font-size: 0.7em; color: var(--text3); }
     .biaya-item-nom  { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; color: var(--error); font-weight: 600; white-space: nowrap; }
-    .biaya-item-del  { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.8em; padding: 2px 4px; transition: color 0.15s; }
+    .biaya-item-del  { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.8em; padding: 2px 4px; }
     .biaya-item-del:hover { color: var(--error); }
     .biaya-summary { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border2); }
     .biaya-sum-row { display: flex; justify-content: space-between; font-size: 0.78em; color: var(--text); padding: 3px 0; }
@@ -580,7 +580,7 @@
           <span>💸 Biaya Operasional</span>
           <button class="btn-add-biaya" onclick="openBiayaModal()">+ Catat Biaya</button>
         </div>
-        <div id="biayaList"><div style="padding:16px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada biaya tercatat</div></div>
+        <div id="biayaList"><div style="padding:14px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada biaya tercatat</div></div>
         <div class="biaya-summary" id="biayaSummary" style="display:none">
           <div class="biaya-sum-row"><span>Harga Beli</span><span id="bsHargaBeli">–</span></div>
           <div class="biaya-sum-row"><span>Total Biaya</span><span id="bsTotalBiaya" style="color:var(--error)">–</span></div>
@@ -801,8 +801,10 @@
   // ── Load data ──
   async function loadData() {
     try {
-      const snap = await getDocs(query(collection(db, 'kendaraan'), orderBy('tglMasuk', 'desc')));
+      const snap = await getDocs(collection(db, 'kendaraan'));
       allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      // Sort di client side biar tidak error kalau field kosong
+      allData.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
     } catch(e) { allData = []; }
     updateStats();
     renderTable(allData);
@@ -1126,6 +1128,48 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
+  // ── Clock ──
+  function tick() {
+    const now  = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Logout ──
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth);
+      window.location.href = '/automitrautama/index.html';
+    }
+  };
+
+  // ── Navigasi ──
+  const pages = {
+    'dashboard':   '/automitrautama/admin/dashboard.html',
+    'kendaraan':   '/automitrautama/admin/kendaraan.html',
+    'master-data': '/automitrautama/admin/master-data.html',
+    'servis':      '/automitrautama/admin/servis.html',
+    'sparepart':   '/automitrautama/admin/sparepart.html',
+    'keuangan':    '/automitrautama/admin/keuangan.html',
+    'laporan':     '/automitrautama/admin/laporan.html',
+    'pelanggan':   '/automitrautama/admin/pelanggan.html',
+    'staff':       '/automitrautama/admin/staff.html',
+    'pengaturan':  '/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => {
+    if (pages[page]) { window.location.href = pages[page]; return; }
+    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+  };
+
+  // ── Sidebar ──
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDetail(); } });
+
   // ══ BIAYA OPERASIONAL ══
   let currentKendaraanId = null;
 
@@ -1139,14 +1183,14 @@
       const snap = await getDocs(query(collection(db, `kendaraan/${kendaraanId}/biaya`), orderBy('tanggal','desc')));
       const data = snap.docs.map(d => ({id: d.id, ...d.data()}));
       if (data.length === 0) {
-        document.getElementById('biayaList').innerHTML = '<div style="padding:16px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada biaya tercatat</div>';
+        document.getElementById('biayaList').innerHTML = '<div style="padding:14px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada biaya tercatat</div>';
         document.getElementById('biayaSummary').style.display = 'none';
         const laba = hargaJual - hargaBeli;
         document.getElementById('dLaba').textContent = fmt(laba);
         document.getElementById('dLaba').style.color = laba >= 0 ? 'var(--success)' : 'var(--error)';
         return;
       }
-      const totalBiaya = data.reduce((s, b) => s + parseInt(b.nominal || 0), 0);
+      const totalBiaya = data.reduce((s, b) => s + parseInt(b.nominal||0), 0);
       const modal      = hargaBeli + totalBiaya;
       const labaBersih = hargaJual - modal;
       document.getElementById('biayaList').innerHTML = data.map(b => `
@@ -1179,10 +1223,7 @@
     document.getElementById('bTanggal').value    = new Date().toISOString().split('T')[0];
     document.getElementById('biayaModalOverlay').classList.add('show');
   };
-
-  window.closeBiayaModal = function() {
-    document.getElementById('biayaModalOverlay').classList.remove('show');
-  };
+  window.closeBiayaModal = function() { document.getElementById('biayaModalOverlay').classList.remove('show'); };
 
   window.saveBiaya = async function() {
     const kategori   = document.getElementById('bKategori').value;
@@ -1238,48 +1279,6 @@
       window.history.pushState(null, '', window.location.href);
     }
   });
-
-  // ── Clock ──
-  function tick() {
-    const now  = new Date();
-    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
-  }
-  tick(); setInterval(tick, 1000);
-
-  // ── Logout ──
-  window.doLogout = async () => {
-    if (confirm('Yakin mau keluar dari sistem AMU?')) {
-      await signOut(auth);
-      window.location.href = '/automitrautama/index.html';
-    }
-  };
-
-  // ── Navigasi ──
-  const pages = {
-    'dashboard':   '/automitrautama/admin/dashboard.html',
-    'kendaraan':   '/automitrautama/admin/kendaraan.html',
-    'master-data': '/automitrautama/admin/master-data.html',
-    'servis':      '/automitrautama/admin/servis.html',
-    'sparepart':   '/automitrautama/admin/sparepart.html',
-    'keuangan':    '/automitrautama/admin/keuangan.html',
-    'laporan':     '/automitrautama/admin/laporan.html',
-    'pelanggan':   '/automitrautama/admin/pelanggan.html',
-    'staff':       '/automitrautama/admin/staff.html',
-    'pengaturan':  '/automitrautama/admin/pengaturan.html',
-  };
-  window.goTo = (page) => {
-    if (pages[page]) { window.location.href = pages[page]; return; }
-    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
-  };
-
-  // ── Sidebar ──
-  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
-  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
-
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDetail(); } });
 </script>
 </body>
 </html>
