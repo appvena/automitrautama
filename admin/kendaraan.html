@@ -130,6 +130,19 @@
     .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 0.82em; }
     .empty-icon { font-size: 2.5em; margin-bottom: 10px; opacity: 0.3; }
 
+    /* huruf kapital otomatis */
+    .caps { text-transform: uppercase; }
+
+    /* custom kolom toggle */
+    .col-toggle-wrap { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .btn-col-toggle { padding: 7px 12px; background: var(--content); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 0.78em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .btn-col-toggle:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .col-panel { position: absolute; top: 100%; right: 0; background: var(--card); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; z-index: 50; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+    .col-panel.show { display: block; }
+    .col-panel-title { font-size: 0.68em; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+    .col-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 0.8em; color: var(--text2); cursor: pointer; }
+    .col-item input { accent-color: var(--gold); }
+
     /* ══ MODAL FORM ══ */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
     .modal-overlay.show { display: flex; }
@@ -331,6 +344,23 @@
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="Cari kendaraan..." oninput="applyFilter()"/>
     </div>
+    <div style="position:relative;">
+      <button class="btn-col-toggle" onclick="toggleColPanel()">⚙ Kolom</button>
+      <div class="col-panel" id="colPanel">
+        <div class="col-panel-title">Pilih Kolom Tampil</div>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="foto"> Foto</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="merek"> Merek/Model</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="tahun"> Tahun</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="warna"> Warna</label>
+        <label class="col-item"><input type="checkbox" onchange="updateCols()" data-col="nopol"> No. Polisi</label>
+        <label class="col-item"><input type="checkbox" onchange="updateCols()" data-col="noRangka"> No. Rangka</label>
+        <label class="col-item"><input type="checkbox" onchange="updateCols()" data-col="namaBpkb"> Nama BPKB</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="hargaBeli"> Harga Beli</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="hargaJual"> Harga Jual</label>
+        <label class="col-item"><input type="checkbox" onchange="updateCols()" data-col="waPenjual"> WA Penjual</label>
+        <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="status"> Status</label>
+      </div>
+    </div>
     <button class="btn-add" onclick="openModal()">+ Tambah</button>
   </div>
 
@@ -381,12 +411,12 @@
 
       <div class="modal-section">Identitas Dokumen</div>
       <div class="form-grid">
-        <div class="form-field"><label class="form-label">No. Polisi</label><input type="text" class="form-input" id="fNopol" placeholder="BL 1234 AB"/></div>
-        <div class="form-field"><label class="form-label">No. Rangka</label><input type="text" class="form-input" id="fNoRangka" placeholder="MHFXXX..."/></div>
-        <div class="form-field"><label class="form-label">No. Mesin</label><input type="text" class="form-input" id="fNoMesin" placeholder="DXXX..."/></div>
-        <div class="form-field"><label class="form-label">Nama di BPKB</label><input type="text" class="form-input" id="fNamaBpkb" placeholder="Nama pemilik BPKB"/></div>
-        <div class="form-field"><label class="form-label">No. BPKB</label><input type="text" class="form-input" id="fNoBpkb" placeholder="BPKB..."/></div>
-        <div class="form-field"><label class="form-label">No. STNK</label><input type="text" class="form-input" id="fNoStnk" placeholder="STNK..."/></div>
+        <div class="form-field"><label class="form-label">No. Polisi</label><input type="text" class="form-input caps" id="fNopol" placeholder="BL 1234 AB"/></div>
+        <div class="form-field"><label class="form-label">No. Rangka</label><input type="text" class="form-input caps" id="fNoRangka" placeholder="MHFXXX..."/></div>
+        <div class="form-field"><label class="form-label">No. Mesin</label><input type="text" class="form-input caps" id="fNoMesin" placeholder="DXXX..."/></div>
+        <div class="form-field"><label class="form-label">Nama di BPKB</label><input type="text" class="form-input caps" id="fNamaBpkb" placeholder="Nama pemilik BPKB"/></div>
+        <div class="form-field"><label class="form-label">No. BPKB</label><input type="text" class="form-input caps" id="fNoBpkb" placeholder="BPKB..."/></div>
+        <div class="form-field"><label class="form-label">No. STNK</label><input type="text" class="form-input caps" id="fNoStnk" placeholder="STNK..."/></div>
         <div class="form-field"><label class="form-label">Expired STNK</label><input type="date" class="form-input" id="fExpiredStnk"/></div>
         <div class="form-field"><label class="form-label">Pajak Terakhir</label><input type="date" class="form-input" id="fPajakTerakhir"/></div>
         <div class="form-field"><label class="form-label">Jatuh Tempo Pajak</label><input type="date" class="form-input" id="fJatuhTempoPajak"/></div>
@@ -394,13 +424,17 @@
 
       <div class="modal-section">Pembelian & Harga</div>
       <div class="form-grid">
-        <div class="form-field"><label class="form-label">Nama Penjual / Pemasok</label><input type="text" class="form-input" id="fNamaPenjual" placeholder="Nama penjual"/></div>
+        <div class="form-field"><label class="form-label">Nama Penjual / Pemasok</label><input type="text" class="form-input caps" id="fNamaPenjual" placeholder="Nama penjual"/></div>
+        <div class="form-field"><label class="form-label">No. WA Penjual</label><input type="text" class="form-input" id="fWaPenjual" placeholder="08xx / 62xx" oninput="formatWA(this)"/></div>
         <div class="form-field"><label class="form-label">Tanggal Beli</label><input type="date" class="form-input" id="fTglBeli"/></div>
         <div class="form-field"><label class="form-label">Harga Beli (Rp) *</label><input type="number" class="form-input" id="fHargaBeli" placeholder="150000000"/></div>
         <div class="form-field"><label class="form-label">Harga Jual (Rp) *</label><input type="number" class="form-input" id="fHargaJual" placeholder="165000000"/></div>
         <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="tersedia">Tersedia</option><option value="proses">Proses</option><option value="terjual">Terjual</option></select></div>
         <div class="form-field"><label class="form-label">Tanggal Masuk</label><input type="date" class="form-input" id="fTglMasuk"/></div>
       </div>
+
+      <!-- DYNAMIC FIELDS (dari Master Data) -->
+      <div id="dynamicFieldsWrap"></div>
 
       <div class="modal-section">Foto & Catatan</div>
       <div class="form-grid">
@@ -482,9 +516,16 @@
         <div class="detail-section-title">Pembelian</div>
         <div class="detail-grid">
           <div class="detail-item"><div class="detail-item-label">Nama Penjual</div><div class="detail-item-value" id="dNamaPenjual">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">WA Penjual</div><div class="detail-item-value" id="dWaPenjual">–</div></div>
           <div class="detail-item"><div class="detail-item-label">Tanggal Beli</div><div class="detail-item-value" id="dTglBeli">–</div></div>
           <div class="detail-item"><div class="detail-item-label">Tanggal Masuk</div><div class="detail-item-value" id="dTglMasuk">–</div></div>
         </div>
+      </div>
+
+      <!-- Dynamic Fields -->
+      <div class="detail-section" id="dDynamicFields" style="display:none">
+        <div class="detail-section-title">Field Tambahan</div>
+        <div class="detail-grid"></div>
       </div>
 
       <!-- Catatan -->
@@ -522,6 +563,8 @@
   let allData    = [];
   let editId     = null;
   let detailData = null;
+  let dynamicFields = [];
+  let visibleCols = ['foto','merek','tahun','warna','hargaBeli','hargaJual','status'];
 
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
@@ -533,8 +576,105 @@
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadMasterDropdowns();
+    await loadDynamicFields();
     await loadData();
   });
+
+  // ── Kapital otomatis ──
+  document.addEventListener('input', e => {
+    if (e.target.classList.contains('caps')) {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos, pos);
+    }
+  });
+
+  // ── Format WA ──
+  window.formatWA = function(el) {
+    let val = el.value.replace(/\D/g, '');
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    else if (val.startsWith('8')) val = '62' + val;
+    el.value = val;
+  };
+
+  // ── Custom kolom ──
+  window.toggleColPanel = function() {
+    document.getElementById('colPanel').classList.toggle('show');
+  };
+
+  window.updateCols = function() {
+    visibleCols = [];
+    document.querySelectorAll('[data-col]').forEach(el => {
+      if (el.checked) visibleCols.push(el.dataset.col);
+    });
+    applyFilter();
+  };
+
+  // Tutup panel kolom kalau klik di luar
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.col-panel') && !e.target.closest('.btn-col-toggle')) {
+      document.getElementById('colPanel').classList.remove('show');
+    }
+  });
+
+  // ── Load dynamic fields ──
+  async function loadDynamicFields() {
+    try {
+      const snap = await getDocs(query(collection(db, 'field_kendaraan'), orderBy('urutan')));
+      dynamicFields = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(f => f.status === 'aktif');
+    } catch(e) { dynamicFields = []; }
+    renderDynamicFields();
+  }
+
+  function renderDynamicFields() {
+    const wrap = document.getElementById('dynamicFieldsWrap');
+    if (!dynamicFields.length) { wrap.innerHTML = ''; return; }
+
+    const sections = {};
+    dynamicFields.forEach(f => {
+      if (!sections[f.section]) sections[f.section] = [];
+      sections[f.section].push(f);
+    });
+
+    const sectionNama = {identitas:'Identitas Tambahan', dokumen:'Dokumen Tambahan', pembelian:'Pembelian Tambahan', lainnya:'Lainnya'};
+
+    wrap.innerHTML = Object.entries(sections).map(([sec, fields]) => `
+      <div class="modal-section">${sectionNama[sec] || sec}</div>
+      <div class="form-grid">
+        ${fields.map(f => `
+          <div class="form-field ${f.tipe === 'textarea' ? 'span2' : ''}">
+            <label class="form-label">${f.nama}${f.wajib ? ' *' : ''}</label>
+            ${renderFieldInput(f)}
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function renderFieldInput(f) {
+    const id = `df_${f.id}`;
+    switch(f.tipe) {
+      case 'text':     return `<input type="text" class="form-input" id="${id}" placeholder="${f.nama}..."/>`;
+      case 'number':   return `<input type="number" class="form-input" id="${id}" placeholder="0"/>`;
+      case 'date':     return `<input type="date" class="form-input" id="${id}"/>`;
+      case 'textarea': return `<textarea class="form-textarea" id="${id}" placeholder="${f.nama}..."></textarea>`;
+      case 'boolean':  return `<select class="form-select" id="${id}"><option value="">— Pilih —</option><option value="ya">Ya</option><option value="tidak">Tidak</option></select>`;
+      case 'dropdown': return `<select class="form-select" id="${id}"><option value="">— Memuat —</option></select>`;
+      default:         return `<input type="text" class="form-input" id="${id}"/>`;
+    }
+  }
+
+  // Load dropdown options untuk dynamic fields
+  async function loadDynamicDropdowns() {
+    for (const f of dynamicFields.filter(f => f.tipe === 'dropdown' && f.dropdownSource)) {
+      try {
+        const snap = await getDocs(query(collection(db, `master_${f.dropdownSource}`), orderBy('nama')));
+        const opts = snap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
+        const el = document.getElementById(`df_${f.id}`);
+        if (el) el.innerHTML = `<option value="">— Pilih —</option>` + opts.map(o => `<option value="${o.nama}">${o.nama}</option>`).join('');
+      } catch(e) {}
+    }
+  }
 
   // ── Load master dropdowns ──
   async function loadMasterDropdowns() {
@@ -602,26 +742,44 @@
       document.getElementById('tblBody').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🚗</div>Belum ada data kendaraan</div></td></tr>`;
       return;
     }
-    document.getElementById('tblBody').innerHTML = data.map((d, i) => `
-      <tr>
-        <td style="color:var(--text3)">${i+1}</td>
-        <td>${d.foto ? `<img src="${d.foto}" class="foto-thumb" onerror="this.style.display='none'">` : `<div class="foto-placeholder">🚗</div>`}</td>
-        <td>
-          <div style="font-weight:600;color:var(--silver2)">${d.merek||'-'} ${d.model||''}</div>
-          <div style="font-size:0.75em;color:var(--text3)">${d.kategori||''} · ${d.kondisi||''}</div>
-        </td>
-        <td>${d.tahun||'-'}</td>
-        <td>${d.warna||'-'}</td>
-        <td><span class="harga">${d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>
-        <td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>
-        <td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>
-        <td>
-          <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
-          <button class="btn-edit"   onclick="editData('${d.id}')">Edit</button>
-          <button class="btn-del"    onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>
-        </td>
-      </tr>
-    `).join('');
+
+    // Build header
+    let thHtml = '<th style="width:40px">#</th>';
+    if (visibleCols.includes('foto'))      thHtml += '<th style="width:60px">Foto</th>';
+    if (visibleCols.includes('merek'))     thHtml += '<th>Merek / Model</th>';
+    if (visibleCols.includes('tahun'))     thHtml += '<th>Tahun</th>';
+    if (visibleCols.includes('warna'))     thHtml += '<th>Warna</th>';
+    if (visibleCols.includes('nopol'))     thHtml += '<th>No. Polisi</th>';
+    if (visibleCols.includes('noRangka'))  thHtml += '<th>No. Rangka</th>';
+    if (visibleCols.includes('namaBpkb'))  thHtml += '<th>Nama BPKB</th>';
+    if (visibleCols.includes('hargaBeli')) thHtml += '<th>Harga Beli</th>';
+    if (visibleCols.includes('hargaJual')) thHtml += '<th>Harga Jual</th>';
+    if (visibleCols.includes('waPenjual')) thHtml += '<th>WA Penjual</th>';
+    if (visibleCols.includes('status'))    thHtml += '<th>Status</th>';
+    thHtml += '<th>Aksi</th>';
+
+    document.querySelector('.tbl thead').innerHTML = `<tr>${thHtml}</tr>`;
+
+    document.getElementById('tblBody').innerHTML = data.map((d, i) => {
+      let tdHtml = `<td style="color:var(--text3)">${i+1}</td>`;
+      if (visibleCols.includes('foto'))      tdHtml += `<td>${d.foto ? `<img src="${d.foto}" class="foto-thumb" onerror="this.style.display='none'">` : `<div class="foto-placeholder">🚗</div>`}</td>`;
+      if (visibleCols.includes('merek'))     tdHtml += `<td><div style="font-weight:600;color:var(--silver2)">${d.merek||'-'} ${d.model||''}</div><div style="font-size:0.75em;color:var(--text3)">${d.kategori||''} · ${d.kondisi||''}</div></td>`;
+      if (visibleCols.includes('tahun'))     tdHtml += `<td>${d.tahun||'-'}</td>`;
+      if (visibleCols.includes('warna'))     tdHtml += `<td>${d.warna||'-'}</td>`;
+      if (visibleCols.includes('nopol'))     tdHtml += `<td>${d.nopol||'-'}</td>`;
+      if (visibleCols.includes('noRangka'))  tdHtml += `<td style="font-size:0.78em">${d.noRangka||'-'}</td>`;
+      if (visibleCols.includes('namaBpkb'))  tdHtml += `<td>${d.namaBpkb||'-'}</td>`;
+      if (visibleCols.includes('hargaBeli')) tdHtml += `<td><span class="harga">${d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>`;
+      if (visibleCols.includes('hargaJual')) tdHtml += `<td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>`;
+      if (visibleCols.includes('waPenjual')) tdHtml += `<td>${d.waPenjual ? `<a href="https://wa.me/${d.waPenjual}" target="_blank" style="color:var(--success)">${d.waPenjual}</a>` : '-'}</td>`;
+      if (visibleCols.includes('status'))    tdHtml += `<td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>`;
+      tdHtml += `<td>
+        <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
+        <button class="btn-edit"   onclick="editData('${d.id}')">Edit</button>
+        <button class="btn-del"    onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>
+      </td>`;
+      return `<tr>${tdHtml}</tr>`;
+    }).join('');
   }
 
   // ── Detail ──
@@ -680,6 +838,26 @@
     set('dTglBeli',     d.tglBeli);
     set('dTglMasuk',    d.tglMasuk);
 
+    // WA Penjual
+    const dWaEl = document.getElementById('dWaPenjual');
+    if (dWaEl) {
+      dWaEl.innerHTML = d.waPenjual
+        ? `<a href="https://wa.me/${d.waPenjual}" target="_blank" style="color:var(--success)">+${d.waPenjual}</a>`
+        : '-';
+    }
+
+    // Dynamic fields di detail
+    const dfWrap = document.getElementById('dDynamicFields');
+    if (dfWrap && dynamicFields.length > 0) {
+      dfWrap.style.display = 'block';
+      dfWrap.querySelector('.detail-grid').innerHTML = dynamicFields.map(f => `
+        <div class="detail-item">
+          <div class="detail-item-label">${f.nama}</div>
+          <div class="detail-item-value">${d[`df_${f.id}`] || '-'}</div>
+        </div>
+      `).join('');
+    }
+
     // Catatan
     if (d.catatan) {
       document.getElementById('dCatatanWrap').style.display = 'block';
@@ -703,23 +881,25 @@
   };
 
   // ── Modal tambah ──
-  window.openModal = function() {
+  window.openModal = async function() {
     editId = null;
     document.getElementById('modalTitle').textContent = 'Tambah Kendaraan';
     const fields = ['fKategori','fMerek','fModel','fWarna','fTransmisi','fBahanBakar',
       'fTahun','fNopol','fNoRangka','fNoMesin','fNamaBpkb','fNoBpkb','fNoStnk',
-      'fExpiredStnk','fPajakTerakhir','fJatuhTempoPajak','fNamaPenjual','fTglBeli',
+      'fExpiredStnk','fPajakTerakhir','fJatuhTempoPajak','fNamaPenjual','fWaPenjual','fTglBeli',
       'fHargaBeli','fHargaJual','fFoto','fCatatan','fAsal'];
     fields.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('fKondisi').value      = 'bekas';
     document.getElementById('fKondisiFisik').value = 'mulus';
     document.getElementById('fStatus').value       = 'tersedia';
     document.getElementById('fTglMasuk').value     = new Date().toISOString().split('T')[0];
+    dynamicFields.forEach(f => { const el = document.getElementById(`df_${f.id}`); if(el) el.value = ''; });
     document.getElementById('modalOverlay').classList.add('show');
+    await loadDynamicDropdowns();
   };
 
   // ── Modal edit ──
-  window.editData = function(id) {
+  window.editData = async function(id) {
     const d = allData.find(x => x.id === id);
     if (!d) return;
     editId = id;
@@ -732,14 +912,21 @@
       fNamaBpkb:'namaBpkb', fNoBpkb:'noBpkb', fNoStnk:'noStnk',
       fExpiredStnk:'expiredStnk', fPajakTerakhir:'pajakTerakhir',
       fJatuhTempoPajak:'jatuhTempoPajak', fNamaPenjual:'namaPenjual',
-      fTglBeli:'tglBeli', fHargaBeli:'hargaBeli', fHargaJual:'hargaJual',
-      fStatus:'status', fTglMasuk:'tglMasuk', fFoto:'foto', fCatatan:'catatan'
+      fWaPenjual:'waPenjual', fTglBeli:'tglBeli', fHargaBeli:'hargaBeli',
+      fHargaJual:'hargaJual', fStatus:'status', fTglMasuk:'tglMasuk',
+      fFoto:'foto', fCatatan:'catatan'
     };
     Object.entries(map).forEach(([elId, key]) => {
       const el = document.getElementById(elId);
       if (el) el.value = d[key] || '';
     });
+    // Isi dynamic fields
+    dynamicFields.forEach(f => {
+      const el = document.getElementById(`df_${f.id}`);
+      if (el) el.value = d[`df_${f.id}`] || '';
+    });
     document.getElementById('modalOverlay').classList.add('show');
+    await loadDynamicDropdowns();
   };
 
   window.closeModal = function() {
@@ -781,6 +968,7 @@
       pajakTerakhir:   document.getElementById('fPajakTerakhir').value,
       jatuhTempoPajak: document.getElementById('fJatuhTempoPajak').value,
       namaPenjual:     document.getElementById('fNamaPenjual').value,
+      waPenjual:       document.getElementById('fWaPenjual').value,
       tglBeli:         document.getElementById('fTglBeli').value,
       hargaBeli:       parseInt(hargaBeli),
       hargaJual:       parseInt(hargaJual),
@@ -789,6 +977,12 @@
       foto:            document.getElementById('fFoto').value,
       catatan:         document.getElementById('fCatatan').value,
     };
+
+    // Simpan dynamic fields
+    dynamicFields.forEach(f => {
+      const el = document.getElementById(`df_${f.id}`);
+      if (el) payload[`df_${f.id}`] = el.value;
+    });
 
     try {
       if (editId) {
@@ -807,14 +1001,26 @@
     btn.disabled = false; btn.textContent = 'Simpan';
   };
 
-  // ── Hapus ──
+  // ── Hapus dengan konfirmasi password ──
   window.hapusData = async function(id, nama) {
     if (!confirm(`Yakin hapus "${nama}"?`)) return;
+    const pw = prompt('Masukkan password untuk konfirmasi penghapusan:');
+    if (!pw) return;
     try {
+      const user = auth.currentUser;
+      const { EmailAuthProvider, reauthenticateWithCredential } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+      const credential = EmailAuthProvider.credential(user.email, pw);
+      await reauthenticateWithCredential(user, credential);
       await deleteDoc(doc(db, 'kendaraan', id));
       showToast('Kendaraan berhasil dihapus ✓', 'success');
       await loadData();
-    } catch(e) { showToast('Gagal menghapus: ' + e.message, 'error'); }
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        showToast('Password salah! Data tidak dihapus.', 'error');
+      } else {
+        showToast('Gagal menghapus: ' + e.message, 'error');
+      }
+    }
   };
 
   // ── Toast ──
