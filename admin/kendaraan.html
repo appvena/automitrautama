@@ -371,15 +371,9 @@
     <div class="mini-stat"><div class="mini-stat-icon">🏷️</div><div><div class="mini-stat-val" id="statTerjual">0</div><div class="mini-stat-lbl">Terjual</div></div></div>
   </div>
 
-  <div class="toolbar">
-    <select class="filter-select" id="filterStatus" onchange="applyFilter()">
-      <option value="">Semua Status</option>
-      <option value="tersedia">Tersedia</option>
-      <option value="proses">Proses</option>
-      <option value="terjual">Terjual</option>
-    </select>
-    <select class="filter-select" id="filterKategori" onchange="applyFilter()"><option value="">Semua Kategori</option></select>
-    <select class="filter-select" id="filterMerek" onchange="applyFilter()"><option value="">Semua Merek</option></select>
+  <!-- Toolbar baris 1: tombol aksi -->
+  <div class="toolbar" style="border-radius:10px 10px 0 0;border-bottom:none;">
+    <button class="btn-col-toggle" id="btnFilterToggle" onclick="toggleFilter()">🔽 Filter</button>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="Cari kendaraan..." oninput="applyFilter()"/>
@@ -402,6 +396,18 @@
       </div>
     </div>
     <button class="btn-add" onclick="openModal()">+ Tambah</button>
+  </div>
+
+  <!-- Toolbar baris 2: filter (tersembunyi default) -->
+  <div id="filterWrap" style="display:none;background:var(--card);border:1px solid var(--border);border-top:1px solid var(--border2);padding:10px 16px;gap:8px;flex-wrap:wrap;border-radius:0;">
+    <select class="filter-select" id="filterStatus" onchange="applyFilter()">
+      <option value="">Semua Status</option>
+      <option value="tersedia">Tersedia</option>
+      <option value="proses">Proses</option>
+      <option value="terjual">Terjual</option>
+    </select>
+    <select class="filter-select" id="filterKategori" onchange="applyFilter()"><option value="">Semua Kategori</option></select>
+    <select class="filter-select" id="filterMerek" onchange="applyFilter()"><option value="">Semua Merek</option></select>
   </div>
 
   <div class="tbl-wrap">
@@ -640,7 +646,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
@@ -659,21 +665,47 @@
   let editId     = null;
   let detailData = null;
   let dynamicFields = [];
-  let visibleCols = ['foto','merek','tahun','warna','hargaBeli','hargaJual','status'];
+  let currentUserId = null;
+  const DEFAULT_COLS = ['foto','merek','tahun','warna','hargaBeli','hargaJual','status'];
+  let visibleCols = [...DEFAULT_COLS];
 
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    currentUserId = user.uid;
     const email = user.email || '';
     const inisial = email.substring(0, 2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
     ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadKolomPrefs();
     await loadMasterDropdowns();
     await loadDynamicFields();
     await loadData();
   });
+
+  // ── Load & Save preferensi kolom ──
+  async function loadKolomPrefs() {
+    try {
+      const snap = await getDoc(doc(db, 'preferensi_user', currentUserId));
+      if (snap.exists() && snap.data().kolom) {
+        visibleCols = snap.data().kolom;
+      }
+    } catch(e) { visibleCols = [...DEFAULT_COLS]; }
+    // Sync checkbox
+    document.querySelectorAll('[data-col]').forEach(cb => {
+      cb.checked = visibleCols.includes(cb.dataset.col);
+    });
+  }
+
+  async function saveKolomPrefs() {
+    try {
+      await setDoc(doc(db, 'preferensi_user', currentUserId), {
+        kolom: visibleCols
+      }, { merge: true });
+    } catch(e) { console.log('Gagal simpan preferensi kolom:', e); }
+  }
 
   // ── Kapital otomatis ──
   document.addEventListener('input', e => {
@@ -697,12 +729,22 @@
     document.getElementById('colPanel').classList.toggle('show');
   };
 
-  window.updateCols = function() {
+  window.updateCols = async function() {
     visibleCols = [];
     document.querySelectorAll('[data-col]').forEach(el => {
       if (el.checked) visibleCols.push(el.dataset.col);
     });
     applyFilter();
+    await saveKolomPrefs();
+  };
+
+  // ── Filter toggle ──
+  window.toggleFilter = function() {
+    const wrap = document.getElementById('filterWrap');
+    const btn  = document.getElementById('btnFilterToggle');
+    const show = wrap.style.display === 'none' || wrap.style.display === '';
+    wrap.style.display = show ? 'flex' : 'none';
+    btn.textContent = show ? '🔼 Filter' : '🔽 Filter';
   };
 
   // Tutup panel kolom kalau klik di luar
