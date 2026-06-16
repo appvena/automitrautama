@@ -305,6 +305,64 @@
       margin: 6px 14px;
     }
 
+    /* user info di sidebar */
+    .sidebar-user {
+      margin: 8px 10px 0;
+      padding: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .sidebar-user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .su-av {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.78em;
+      font-weight: 700;
+      color: #1a1000;
+      flex-shrink: 0;
+    }
+
+    .su-name {
+      font-size: 0.8em;
+      color: var(--silver2);
+      font-weight: 600;
+    }
+
+    .su-role {
+      font-size: 0.62em;
+      color: var(--gold);
+      letter-spacing: 0.3px;
+    }
+
+    .su-logout {
+      width: 100%;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 0.75em;
+      padding: 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      letter-spacing: 0.5px;
+    }
+
+    .su-logout:hover { border-color: var(--error); color: var(--error); }
+
     /* sidebar overlay mobile */
     .s-overlay {
       display: none;
@@ -611,6 +669,8 @@
       .navbar-brand-text { display: none; }
       .navbar-clock { display: none; }
       .navbar-sep { display: none; }
+      .btn-logout { display: none; }
+      .user-info { display: none; }
 
       .sidebar { transform: translateX(-100%); }
       .sidebar.open {
@@ -629,7 +689,6 @@
       .pg-header { flex-direction: column; align-items: flex-start; gap: 2px; }
       .pg-title { font-size: 1.2em; }
       .stat-val { font-size: 1.5em; }
-      .btn-logout { font-size: 0.65em; padding: 5px 8px; }
     }
 
     @media (max-width: 400px) {
@@ -687,7 +746,7 @@
     </div>
   </div>
 
-  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <button class="btn-logout" id="btnLogout" onclick="doLogout()">Keluar</button>
   <div class="navbar-goldline"></div>
 </nav>
 
@@ -746,6 +805,20 @@
   <div class="menu-item" onclick="goPage('pengaturan', this)">
     <span class="menu-icon">⚙</span>
     <span class="menu-label">Pengaturan</span>
+  </div>
+
+  <div class="sidebar-sep"></div>
+
+  <!-- User info + logout di sidebar (tampil di mobile) -->
+  <div class="sidebar-user" id="sidebarUser">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div>
+        <div class="su-name" id="suName">–</div>
+        <div class="su-role" id="suRole">–</div>
+      </div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
   </div>
 
 </aside>
@@ -913,12 +986,17 @@
       return;
     }
 
-    // User info
+    // User info navbar
     const email   = user.email || '';
     const inisial = email.substring(0, 2).toUpperCase();
     document.getElementById('uAv').textContent   = inisial;
     document.getElementById('uName').textContent = email.split('@')[0];
     document.getElementById('uRole').textContent = 'Administrator';
+
+    // User info sidebar
+    document.getElementById('suAv').textContent   = inisial;
+    document.getElementById('suName').textContent = email.split('@')[0];
+    document.getElementById('suRole').textContent = 'Administrator';
 
     // Hide overlay setelah animasi
     setTimeout(() => {
