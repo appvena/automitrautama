@@ -670,6 +670,42 @@
       color: var(--text3); text-transform: uppercase;
     }
 
+    /* ══ WIDGET TOGGLE (mobile) ══ */
+    .widget-toggle-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.72em;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 8px;
+    }
+    .widget-toggle-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    .widget-panel {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .widget-panel.show { display: flex; }
+    .widget-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.75em; color: var(--text2); cursor: pointer;
+      background: var(--content); padding: 4px 10px;
+      border-radius: 20px; border: 1px solid var(--border);
+    }
+    .widget-item input { accent-color: var(--gold); }
+
     /* ══ RESPONSIVE ══ */
     @media (max-width: 900px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -687,23 +723,39 @@
       .user-info { display: none; }
 
       .sidebar { transform: translateX(-100%); }
-      .sidebar.open {
-        transform: translateX(0);
-        box-shadow: 6px 0 24px rgba(0,0,0,0.5);
-      }
+      .sidebar.open { transform: translateX(0); box-shadow: 6px 0 24px rgba(0,0,0,0.5); }
       .s-overlay.show { display: block; }
 
-      .main { margin-left: 0; padding: 12px; }
-      .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
-      .stats-sm { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .main { margin-left: 0; padding: 10px; }
       .row2 { grid-template-columns: 1fr !important; }
-      .pg-header { flex-direction: column; align-items: flex-start; gap: 2px; }
-      .pg-title { font-size: 1.2em; }
-      .stat-val { font-size: 1.5em; }
+      .pg-header { flex-direction: column; align-items: flex-start; gap: 2px; margin-bottom: 8px; }
+      .pg-title { font-size: 1.1em; }
+      .pg-date { display: none; }
+
+      /* Stats compact — horizontal di mobile */
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 6px; }
+      .stats-sm { grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px; }
+
+      /* Kartu compact — icon + angka sejajar */
+      .stat {
+        padding: 8px 10px;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .stat::before, .stat::after { display: none; }
+      .stat-icon { font-size: 1.1em; margin-bottom: 0; flex-shrink: 0; }
+      .stat-val  { font-size: 1.2em; }
+      .stat-lbl  { font-size: 0.58em; margin-top: 1px; }
+      .stat-foot { display: none; }
+
+      .stats-sm .stat { padding: 6px 10px; }
+      .stats-sm .stat-val { font-size: 1em; }
+
+      /* Tampilkan widget toggle */
+      .widget-toggle-btn { display: flex; }
     }
 
     @media (max-width: 400px) {
-      .stats { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
       .stats-sm { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
@@ -847,49 +899,58 @@
     <div class="pg-date" id="pgDate">–</div>
   </div>
 
+  <!-- WIDGET TOGGLE (mobile only) -->
+  <button class="widget-toggle-btn" onclick="toggleWidgetPanel()">⚙ Pilih Widget</button>
+  <div class="widget-panel" id="widgetPanel">
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('kendaraan')"> 🚗 Stok</label>
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('pendapatan')"> 💰 Pendapatan</label>
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('terjual')"> 📈 Terjual</label>
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('pelanggan')"> 👥 Pelanggan</label>
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('servis')"> 🔧 Servis</label>
+    <label class="widget-item"><input type="checkbox" checked onchange="toggleWidget('sparepart')"> 🔩 Sparepart</label>
+  </div>
+
   <!-- STAT CARDS -->
   <div class="stats">
-    <div class="stat s-gold">
+    <div class="stat s-gold" id="widget-kendaraan">
       <span class="stat-icon">🚗</span>
-      <div class="stat-val" id="sKendaraan">—</div>
+      <div><div class="stat-val" id="sKendaraan">—</div>
       <div class="stat-lbl">Stok Kendaraan</div>
-      <div class="stat-foot">
-        <span id="sTersedia">—</span> tersedia &nbsp;·&nbsp; <span id="sTerjual">—</span> terjual
-      </div>
+      <div class="stat-foot"><span id="sTersedia">—</span> tersedia &nbsp;·&nbsp; <span id="sTerjual">—</span> terjual</div></div>
     </div>
-    <div class="stat s-green">
+    <div class="stat s-green" id="widget-pendapatan">
       <span class="stat-icon">💰</span>
-      <div class="stat-val" id="sPendapatan">—</div>
+      <div><div class="stat-val" id="sPendapatan">—</div>
       <div class="stat-lbl">Pendapatan</div>
-      <div class="stat-foot">Bulan ini (juta)</div>
+      <div class="stat-foot">Bulan ini (juta)</div></div>
     </div>
-    <div class="stat s-blue">
+    <div class="stat s-blue" id="widget-terjual">
       <span class="stat-icon">📈</span>
-      <div class="stat-val" id="sTerjualBulan">—</div>
+      <div><div class="stat-val" id="sTerjualBulan">—</div>
       <div class="stat-lbl">Terjual Bulan Ini</div>
-      <div class="stat-foot">Unit kendaraan</div>
+      <div class="stat-foot">Unit kendaraan</div></div>
     </div>
-    <div class="stat s-orange">
+    <div class="stat s-orange" id="widget-pelanggan">
       <span class="stat-icon">👥</span>
-      <div class="stat-val" id="sPelanggan">—</div>
+      <div><div class="stat-val" id="sPelanggan">—</div>
       <div class="stat-lbl">Pelanggan</div>
-      <div class="stat-foot">Terdaftar</div>
+      <div class="stat-foot">Terdaftar</div></div>
     </div>
   </div>
 
   <!-- STAT CARDS KECIL - Divisi Pendukung -->
   <div class="stats stats-sm">
-    <div class="stat s-blue">
+    <div class="stat s-blue" id="widget-servis">
       <span class="stat-icon">🔧</span>
-      <div class="stat-val" id="sServis">—</div>
+      <div><div class="stat-val" id="sServis">—</div>
       <div class="stat-lbl">Antrian Servis</div>
-      <div class="stat-foot">Hari ini</div>
+      <div class="stat-foot">Hari ini</div></div>
     </div>
-    <div class="stat s-orange">
+    <div class="stat s-orange" id="widget-sparepart">
       <span class="stat-icon">🔩</span>
-      <div class="stat-val" id="sSparepart">—</div>
+      <div><div class="stat-val" id="sSparepart">—</div>
       <div class="stat-lbl">Item Sparepart</div>
-      <div class="stat-foot">Stok aktif</div>
+      <div class="stat-foot">Stok aktif</div></div>
     </div>
   </div>
 
@@ -1125,6 +1186,16 @@
     } else {
       alert(`Halaman "${page}" akan segera dibuat! 🚀`);
     }
+  };
+
+  // ── Widget toggle (mobile) ──
+  window.toggleWidgetPanel = function() {
+    document.getElementById('widgetPanel').classList.toggle('show');
+  };
+
+  window.toggleWidget = function(id) {
+    const el = document.getElementById(`widget-${id}`);
+    if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
   };
 
   // ── Sidebar ──
