@@ -1188,6 +1188,32 @@
     }
   };
 
+  // ── Auto Logout 5 menit ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      alert('Sesi berakhir karena tidak aktif. Silakan login kembali.');
+      await signOut(auth);
+      window.location.href = '/automitrautama/index.html';
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','mousemove','touchstart'].forEach(e => {
+    document.addEventListener(e, resetTimer, { passive: true });
+  });
+  resetTimer();
+
+  // ── Back Button Handler ──
+  window.history.pushState(null, '', window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth);
+      window.location.href = '/automitrautama/index.html';
+    } else {
+      window.history.pushState(null, '', window.location.href);
+    }
+  });
+
   // ── Widget toggle (mobile) ──
   window.toggleWidgetPanel = function() {
     document.getElementById('widgetPanel').classList.toggle('show');
