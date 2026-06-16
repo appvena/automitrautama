@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:     #0a0a0a;
+      --dark:      #141414;
+      --silver-dk: #2e2e2e;
+      --silver-md: #5a5a5a;
+      --silver-lt: #c8c8c8;
+      --silver-bg: #e2e2e2;
+      --gold:      #c9a84c;
+      --gold2:     #f0d080;
+      --gold-dim:  #7a5c18;
+      --text-dk:   #1a1a1a;
+      --text-md:   #3a3a3a;
+      --muted:     #777;
+      --error:     #b83030;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      /* latar keseluruhan: gradient silver gelap ke hitam */
+      background: linear-gradient(135deg, var(--silver-dk) 0%, var(--black) 100%);
+    }
+
+    /* ── WRAPPER TENGAH ── */
+    .wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── CARD UTAMA ── */
+    .card {
+      display: flex;
+      width: 100%;
+      max-width: 860px;
+      min-height: 520px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(201,168,76,0.2),
+        0 24px 60px rgba(0,0,0,0.6),
+        0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    /* ── KIRI: HITAM ── */
+    .left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #1a1a1a 0%, #0d0d0d 100%);
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* grid texture gold samar */
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    /* glow tengah samar */
+    .left::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* sudut dekorasi */
+    .corner { position: absolute; width: 50px; height: 50px; }
+    .corner.tl { top: 16px; left: 16px; border-top: 1.5px solid var(--gold-dim); border-left: 1.5px solid var(--gold-dim); }
+    .corner.tr { top: 16px; right: 16px; border-top: 1.5px solid var(--gold-dim); border-right: 1.5px solid var(--gold-dim); }
+    .corner.bl { bottom: 16px; left: 16px; border-bottom: 1.5px solid var(--gold-dim); border-left: 1.5px solid var(--gold-dim); }
+    .corner.br { bottom: 16px; right: 16px; border-bottom: 1.5px solid var(--gold-dim); border-right: 1.5px solid var(--gold-dim); }
+
+    .logo-wrap {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .logo-wrap img {
+      width: 180px;
+      max-width: 65%;
+      filter: drop-shadow(0 0 24px rgba(201,168,76,0.3));
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-7px); }
+    }
+
+    .brand-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.4em;
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: var(--silver-lt);
+      margin-top: 18px;
+      text-transform: uppercase;
+    }
+
+    .tagline {
+      font-size: 0.68em;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      margin-top: 5px;
+      text-transform: uppercase;
+    }
+
+    .divider-gold {
+      width: 50px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 14px auto 0;
+    }
+
+    /* ── PEMISAH TENGAH ── */
+    .separator {
+      width: 1px;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--gold-dim) 20%,
+        var(--gold) 50%,
+        var(--gold-dim) 80%,
+        transparent 100%
+      );
+      flex-shrink: 0;
+    }
+
+    /* ── KANAN: SILVER ── */
+    .right {
+      width: 380px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 44px 36px;
+      background: linear-gradient(160deg, var(--silver-bg) 0%, #d0d0d0 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* pattern halus */
+    .right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    /* garis gold atas */
+    .right-topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold2), var(--gold), var(--gold-dim));
+    }
+
+    .version {
+      position: absolute;
+      top: 12px; right: 14px;
+      font-size: 0.58em;
+      color: var(--muted);
+      letter-spacing: 1px;
+      background: rgba(255,255,255,0.5);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid #bbb;
+    }
+
+    .form-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.9em;
+      font-weight: 700;
+      color: var(--text-dk);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .form-underline {
+      width: 36px;
+      height: 2.5px;
+      background: var(--gold);
+      border-radius: 2px;
+      margin: 7px 0 6px;
+    }
+
+    .form-sub {
+      font-size: 0.72em;
+      color: var(--muted);
+      margin-bottom: 28px;
+      letter-spacing: 0.3px;
+      position: relative;
+    }
+
+    /* FIELD */
+    .field { margin-bottom: 18px; position: relative; }
+
+    label {
+      display: block;
+      font-size: 0.66em;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-md);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.82em;
+      color: #aaa;
+      pointer-events: none;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 38px 12px 36px;
+      background: rgba(255,255,255,0.85);
+      border: 1.5px solid #bbb;
+      border-radius: 7px;
+      color: var(--text-dk);
+      font-size: 0.88em;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--gold);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    input::placeholder { color: #bbb; font-size: 0.95em; }
+
+    .toggle-pw {
+      position: absolute;
+      right: 11px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: #aaa; cursor: pointer;
+      font-size: 0.82em; padding: 0;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--gold-dim); }
+
+    .error-msg {
+      font-size: 0.68em;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+      letter-spacing: 0.2px;
+    }
+    .error-msg.show { display: block; }
+
+    /* TOMBOL */
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      margin-top: 6px;
+      background: linear-gradient(135deg, #1c1c1c, #2c2c2c);
+      border: 1.5px solid var(--gold-dim);
+      border-radius: 7px;
+      color: var(--gold2);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+      border-color: var(--gold);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      transform: translateY(-1px);
+    }
+    .btn-login:active { transform: translateY(0); }
+
+    .btn-login.loading { pointer-events: none; opacity: 0.7; }
+    .btn-login.loading::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      animation: shimmer 1s infinite;
+    }
+    @keyframes shimmer { to { left: 100%; } }
+
+    .forgot {
+      text-align: center;
+      margin-top: 16px;
+    }
+    .forgot a {
+      font-size: 0.7em;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+    .forgot a:hover { color: var(--gold-dim); }
+
+    .footer {
+      position: absolute;
+      bottom: 12px; left: 0; right: 0;
+      text-align: center;
+      font-size: 0.57em;
+      color: #999;
+      letter-spacing: 1px;
+    }
+
+    /* LOADING OVERLAY */
+    .overlay {
+      position: fixed; inset: 0;
+      background: #0a0a0a;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      transition: opacity 0.6s ease;
+    }
+    .overlay.hide { opacity: 0; pointer-events: none; }
+
+    .overlay img {
+      width: 90px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .overlay-fallback {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.4em;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: #c0c0c0;
+      display: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(0.96); }
+      50%       { opacity: 1;   transform: scale(1.04); }
+    }
+
+    .loading-bar {
+      width: 150px; height: 2px;
+      background: #1a1a1a;
+      border-radius: 2px; overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      animation: loadBar 1.8s ease-in-out forwards;
+    }
+    @keyframes loadBar {
+      0%   { width: 0%; }
+      60%  { width: 75%; }
+      100% { width: 100%; }
+    }
+
+    .loading-text {
+      font-size: 0.6em;
+      letter-spacing: 3px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 660px) {
+      .wrapper { padding: 0; align-items: stretch; }
+      .card {
+        flex-direction: column;
+        border-radius: 0;
+        min-height: 100vh;
+        box-shadow: none;
+      }
+      .left { padding: 40px 24px 28px; min-height: 260px; }
+      .logo-wrap img { width: 120px; }
+      .brand-name { font-size: 1.1em; }
+      .separator { width: 100%; height: 1px;
+        background: linear-gradient(to right, transparent, var(--gold), transparent);
+      }
+      .right { width: 100%; padding: 32px 24px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="overlay" id="overlay">
+  <img src="assets/logo.png" alt="AMU"
+       onerror="this.style.display='none';document.getElementById('ovFallback').style.display='block'"/>
+  <div class="overlay-fallback" id="ovFallback">AMU</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-text">Memuat sistem...</div>
+</div>
+
+<div class="wrapper">
+  <div class="card">
+
+    <!-- KIRI: HITAM + LOGO -->
+    <div class="left">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="logo-wrap">
+        <img src="assets/logo.png" alt="Auto Mitra Utama"
+             onerror="this.style.display='none';document.getElementById('fallbackName').style.display='block'"/>
+        <div id="fallbackName" style="font-family:'Rajdhani',sans-serif;font-size:3.5em;font-weight:700;color:#c0c0c0;letter-spacing:8px;display:none;">AMU</div>
+        <div class="brand-name">Auto Mitra Utama</div>
+        <div class="tagline">Start Here, Drive Next</div>
+        <div class="divider-gold"></div>
+      </div>
+    </div>
+
+    <!-- PEMISAH GOLD -->
+    <div class="separator"></div>
+
+    <!-- KANAN: SILVER + FORM -->
+    <div class="right">
+      <div class="right-topbar"></div>
+      <div class="version">v1.0.0</div>
+
+      <div class="form-title">Masuk</div>
+      <div class="form-underline"></div>
+      <div class="form-sub">Sistem Manajemen Internal AMU</div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="username" placeholder="Masukkan username" autocomplete="username"/>
+        </div>
+        <div class="error-msg" id="err-user">Username tidak boleh kosong.</div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password"/>
+          <button class="toggle-pw" type="button" onclick="togglePw()" id="toggleBtn">👁</button>
+        </div>
+        <div class="error-msg" id="err-pass">Password tidak boleh kosong.</div>
+      </div>
+
+      <div class="error-msg" id="err-general" style="margin-bottom:10px;font-size:0.76em;">
+        Username atau password salah. Coba lagi.
+      </div>
+
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">Masuk</button>
+
+      <div class="forgot">
+        <a href="#" onclick="forgotPassword()">Lupa password? Hubungi Admin</a>
+      </div>
+
+      <div class="footer">
+        © <span id="year"></span> SRISP &nbsp;|&nbsp; Auto Mitra Utama &nbsp;|&nbsp; v1.0.0
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+  // Firebase Config AMU
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ── Tahun otomatis ──
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Loading overlay ──
+  // Tunggu Firebase cek sesi + animasi selesai
+  let systemReady = false, animDone = false;
+
+  function tryHide() {
+    if (systemReady && animDone)
+      document.getElementById('overlay').classList.add('hide');
+  }
+
+  setTimeout(() => { animDone = true; tryHide(); }, 1800);
+
+  // Cek kalau sudah login sebelumnya → langsung ke dashboard
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Sudah login → langsung dashboard
+      window.location.href = '/automitrautama/admin/dashboard.html';
+    } else {
+      // Belum login → tampilkan form
+      systemReady = true;
+      tryHide();
+    }
+  });
+
+  // ── Toggle password ──
+  window.togglePw = function() {
+    const pw  = document.getElementById('password');
+    const btn = document.getElementById('toggleBtn');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+    btn.textContent = pw.type === 'password' ? '👁' : '🙈';
+  };
+
+  // ── Login dengan Firebase ──
+  window.doLogin = function() {
+    const email    = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errUser  = document.getElementById('err-user');
+    const errPass  = document.getElementById('err-pass');
+    const errGen   = document.getElementById('err-general');
+    const btn      = document.getElementById('btnLogin');
+
+    // Reset error
+    errUser.classList.remove('show');
+    errPass.classList.remove('show');
+    errGen.classList.remove('show');
+
+    // Validasi kosong
+    let valid = true;
+    if (!email)    { errUser.classList.add('show'); valid = false; }
+    if (!password) { errPass.classList.add('show'); valid = false; }
+    if (!valid) return;
+
+    // Loading
+    btn.classList.add('loading');
+    btn.textContent = 'Memverifikasi...';
+
+    // Firebase login
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        // Berhasil → ke dashboard
+        window.location.href = '/automitrautama/admin/dashboard.html';
+      })
+      .catch((error) => {
+        btn.classList.remove('loading');
+        btn.textContent = 'Masuk';
+
+        // Pesan error spesifik
+        if (error.code === 'auth/invalid-email') {
+          errUser.textContent = 'Format email tidak valid.';
+          errUser.classList.add('show');
+        } else if (error.code === 'auth/too-many-requests') {
+          errGen.textContent = 'Terlalu banyak percobaan. Coba lagi nanti.';
+          errGen.classList.add('show');
+        } else {
+          errGen.textContent = 'Email atau password salah. Coba lagi.';
+          errGen.classList.add('show');
+        }
+      });
+  };
+
+  // ── Enter key ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.doLogin();
+  });
+
+  // ── Lupa password ──
+  window.forgotPassword = function() {
+    alert('Silakan hubungi Owner atau Admin sistem.\n\nWA: 08116063012');
+  };
+</script>
+</body>
+</html>
