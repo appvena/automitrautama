@@ -36,34 +36,21 @@
     html, body { height: 100%; background: var(--content); color: var(--text2); font-family: 'Inter', sans-serif; font-size: 13px; }
 
     /* ══ NAVBAR ══ */
-    .navbar {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: var(--navbar-h); background: var(--navbar);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center;
-      padding: 0 16px 0 0; z-index: 100; gap: 10px;
-    }
-    .navbar-brand {
-      width: var(--sidebar-w); flex-shrink: 0;
-      display: flex; align-items: center; gap: 10px;
-      padding: 0 16px; border-right: 1px solid var(--border); height: 100%;
-    }
+    .navbar { position: fixed; top: 0; left: 0; right: 0; height: var(--navbar-h); background: var(--navbar); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px 0 0; z-index: 100; gap: 10px; }
+    .navbar-brand { width: var(--sidebar-w); flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-right: 1px solid var(--border); height: 100%; }
     .navbar-brand img { height: 32px; width: auto; filter: brightness(0.9); }
     .navbar-brand-text { font-family: 'Rajdhani', sans-serif; font-size: 0.9em; font-weight: 700; letter-spacing: 2px; color: var(--silver2); text-transform: uppercase; line-height: 1.2; }
     .navbar-brand-text span { display: block; font-size: 0.62em; color: var(--gold); letter-spacing: 1px; font-weight: 400; }
     .navbar-brand-fallback { font-family: 'Rajdhani', sans-serif; font-size: 1.3em; font-weight: 700; letter-spacing: 4px; color: var(--silver2); display: none; }
-    .hamburger { display: none; background: none; border: none; color: var(--text); font-size: 1.2em; cursor: pointer; padding: 6px 10px; border-radius: 4px; transition: background 0.15s; }
-    .hamburger:hover { background: var(--card); }
+    .hamburger { display: none; background: none; border: none; color: var(--text); font-size: 1.2em; cursor: pointer; padding: 6px 10px; border-radius: 4px; }
     .navbar-spacer { flex: 1; }
     .navbar-clock { text-align: right; line-height: 1.4; }
     .clock-time { font-family: 'Rajdhani', sans-serif; font-size: 1.05em; font-weight: 600; color: var(--silver2); letter-spacing: 1px; }
     .clock-date { font-size: 0.68em; color: var(--text3); }
     .navbar-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
-    .btn-notif { position: relative; background: none; border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.95em; transition: all 0.15s; }
-    .btn-notif:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .btn-notif { position: relative; background: none; border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.95em; }
     .notif-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; border: 1px solid var(--navbar); }
-    .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.15s; }
-    .user-chip:hover { border-color: var(--gold-dim); background: var(--card); }
+    .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
     .user-av { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-dim), var(--gold)); display: flex; align-items: center; justify-content: center; font-family: 'Rajdhani', sans-serif; font-size: 0.78em; font-weight: 700; color: #1a1000; flex-shrink: 0; }
     .user-info { line-height: 1.3; }
     .user-name { font-size: 0.78em; color: var(--silver2); font-weight: 600; }
@@ -77,13 +64,12 @@
     .sidebar::-webkit-scrollbar { width: 3px; }
     .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
     .sidebar-section { padding: 20px 14px 5px; font-size: 0.58em; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); font-weight: 600; }
-    .menu-item { display: flex; align-items: center; gap: 9px; padding: 9px 14px; color: var(--text); text-decoration: none; font-size: 0.84em; cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; user-select: none; }
+    .menu-item { display: flex; align-items: center; gap: 9px; padding: 9px 14px; color: var(--text); font-size: 0.84em; cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; user-select: none; }
     .menu-item:hover { background: rgba(255,255,255,0.04); color: var(--silver2); border-left-color: var(--border2); }
     .menu-item.active { background: var(--gold-bg); color: var(--gold2); border-left-color: var(--gold); font-weight: 500; }
     .menu-icon { width: 18px; text-align: center; font-size: 0.95em; flex-shrink: 0; opacity: 0.8; }
     .menu-item.active .menu-icon { opacity: 1; }
     .menu-label { flex: 1; }
-    .menu-badge { background: var(--gold-dim); color: var(--gold2); font-size: 0.65em; font-weight: 700; padding: 1px 6px; border-radius: 8px; min-width: 18px; text-align: center; }
     .sidebar-sep { height: 1px; background: var(--border); margin: 6px 14px; }
     .sidebar-user { margin: 8px 10px 0; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
     .sidebar-user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -101,149 +87,121 @@
     .pg-sub { font-size: 0.75em; color: var(--text3); margin-top: 2px; }
     .pg-line { width: 30px; height: 2px; background: var(--gold); margin-top: 6px; border-radius: 1px; }
 
-    /* stat mini */
+    /* mini stats */
     .mini-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-    .mini-stat {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 16px;
-      display: flex; align-items: center; gap: 10px;
-      flex: 1; min-width: 120px;
-    }
+    .mini-stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 120px; }
     .mini-stat-icon { font-size: 1.2em; }
     .mini-stat-val { font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700; color: var(--silver2); line-height: 1; }
     .mini-stat-lbl { font-size: 0.62em; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
 
-    /* ══ TOOLBAR ══ */
-    .toolbar {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px 10px 0 0; padding: 12px 16px;
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-
-    .filter-select {
-      padding: 8px 10px; background: var(--content);
-      border: 1px solid var(--border2); border-radius: 6px;
-      color: var(--text2); font-size: 0.82em;
-      font-family: 'Inter', sans-serif; outline: none;
-      cursor: pointer; transition: border-color 0.2s;
-    }
+    /* toolbar */
+    .toolbar { background: var(--card); border: 1px solid var(--border); border-radius: 10px 10px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 10px; background: var(--content); border: 1px solid var(--border2); border-radius: 6px; color: var(--text2); font-size: 0.82em; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
     .filter-select:focus { border-color: var(--gold); }
     .filter-select option { background: var(--card2); }
-
     .search-wrap { position: relative; flex: 1; min-width: 150px; }
-    .search-input {
-      width: 100%; padding: 8px 10px 8px 30px;
-      background: var(--content); border: 1px solid var(--border2);
-      border-radius: 6px; color: var(--silver2);
-      font-size: 0.82em; font-family: 'Inter', sans-serif;
-      outline: none; transition: border-color 0.2s;
-    }
+    .search-input { width: 100%; padding: 8px 10px 8px 30px; background: var(--content); border: 1px solid var(--border2); border-radius: 6px; color: var(--silver2); font-size: 0.82em; font-family: 'Inter', sans-serif; outline: none; }
     .search-input:focus { border-color: var(--gold); }
     .search-input::placeholder { color: var(--text3); }
     .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 0.78em; pointer-events: none; }
-
-    .btn-add {
-      padding: 8px 16px;
-      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
-      border: none; border-radius: 6px; color: #1a1000;
-      font-family: 'Rajdhani', sans-serif; font-size: 0.9em;
-      font-weight: 700; letter-spacing: 1px; cursor: pointer;
-      transition: all 0.15s; white-space: nowrap;
-    }
+    .btn-add { padding: 8px 16px; background: linear-gradient(135deg, var(--gold-dim), var(--gold)); border: none; border-radius: 6px; color: #1a1000; font-family: 'Rajdhani', sans-serif; font-size: 0.9em; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
     .btn-add:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-    /* ══ TABLE ══ */
+    /* table */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow-x: auto; }
     .tbl { width: 100%; border-collapse: collapse; min-width: 700px; }
     .tbl th { font-size: 0.62em; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 600; background: var(--card2); white-space: nowrap; }
     .tbl td { padding: 10px 14px; font-size: 0.82em; color: var(--text); border-bottom: 1px solid rgba(255,255,255,0.025); vertical-align: middle; }
     .tbl tr:last-child td { border-bottom: none; }
     .tbl tr:hover td { background: rgba(255,255,255,0.02); color: var(--silver2); }
-
-    /* foto thumbnail */
-    .foto-thumb {
-      width: 48px; height: 36px; object-fit: cover;
-      border-radius: 4px; border: 1px solid var(--border2);
-      background: var(--content);
-    }
-    .foto-placeholder {
-      width: 48px; height: 36px; background: var(--content);
-      border: 1px solid var(--border2); border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2em; color: var(--text3);
-    }
-
-    /* harga */
+    .foto-thumb { width: 48px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border2); }
+    .foto-placeholder { width: 48px; height: 36px; background: var(--content); border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; color: var(--text3); }
     .harga { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; color: var(--gold2); font-weight: 600; }
-
-    /* badge status */
-    .bs { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+    .bs { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; }
     .bs-tersedia { background: rgba(76,175,128,0.12); color: var(--success); border: 1px solid rgba(76,175,128,0.2); }
-    .bs-terjual  { background: rgba(224,88,88,0.12);  color: var(--error);   border: 1px solid rgba(224,88,88,0.2); }
+    .bs-terjual  { background: rgba(224,88,88,0.12); color: var(--error); border: 1px solid rgba(224,88,88,0.2); }
     .bs-proses   { background: rgba(232,160,48,0.12); color: var(--warning); border: 1px solid rgba(232,160,48,0.2); }
-
-    /* action */
     .btn-detail { background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--gold); font-size: 0.7em; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; margin-right: 3px; }
     .btn-detail:hover { background: rgba(201,168,76,0.2); }
-    .btn-edit { background: rgba(72,144,232,0.1); border: 1px solid rgba(72,144,232,0.2); color: var(--info); font-size: 0.7em; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; margin-right: 3px; }
+    .btn-edit { background: rgba(72,144,232,0.1); border: 1px solid rgba(72,144,232,0.2); color: var(--info); font-size: 0.7em; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; margin-right: 3px; }
     .btn-edit:hover { background: rgba(72,144,232,0.2); }
-    .btn-del { background: rgba(224,88,88,0.1); border: 1px solid rgba(224,88,88,0.2); color: var(--error); font-size: 0.7em; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+    .btn-del { background: rgba(224,88,88,0.1); border: 1px solid rgba(224,88,88,0.2); color: var(--error); font-size: 0.7em; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; }
     .btn-del:hover { background: rgba(224,88,88,0.2); }
-
-    /* empty */
     .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 0.82em; }
     .empty-icon { font-size: 2.5em; margin-bottom: 10px; opacity: 0.3; }
 
-    /* ══ MODAL ══ */
+    /* ══ MODAL FORM ══ */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; width: 100%; max-width: 600px; margin: auto; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalIn 0.2s ease; }
+    .modal { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; width: 100%; max-width: 620px; margin: auto; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalIn 0.2s ease; }
     @keyframes modalIn { from{opacity:0;transform:scale(0.96) translateY(-10px)} to{opacity:1;transform:scale(1) translateY(0)} }
-
     .modal-hd { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--card2); display: flex; align-items: center; justify-content: space-between; }
     .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 1em; font-weight: 700; color: var(--silver2); letter-spacing: 1.5px; text-transform: uppercase; }
     .modal-close { background: none; border: none; color: var(--text3); font-size: 1.1em; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; }
-    .modal-close:hover { background: var(--border); color: var(--error); }
-
-    .modal-body { padding: 18px 20px; }
-
-    /* form grid 2 kolom */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-grid.full { grid-template-columns: 1fr; }
-    .form-field { margin-bottom: 0; }
+    .modal-close:hover { color: var(--error); }
+    .modal-body { padding: 18px 20px; max-height: 70vh; overflow-y: auto; }
+    .modal-body::-webkit-scrollbar { width: 4px; }
+    .modal-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+    .form-field { }
     .form-field.span2 { grid-column: span 2; }
-
-    .form-label { display: block; font-size: 0.64em; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; font-weight: 600; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%; padding: 9px 10px;
-      background: var(--content); border: 1px solid var(--border2);
-      border-radius: 6px; color: var(--silver2);
-      font-size: 0.85em; font-family: 'Inter', sans-serif;
-      outline: none; transition: border-color 0.2s;
-    }
+    .form-label { display: block; font-size: 0.63em; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; font-weight: 600; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 8px 10px; background: var(--content); border: 1px solid var(--border2); border-radius: 6px; color: var(--silver2); font-size: 0.85em; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
     .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
     .form-select option { background: var(--card2); }
-    .form-textarea { resize: vertical; min-height: 70px; }
-
-    /* section divider dalam modal */
-    .modal-section { font-family: 'Rajdhani', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-
+    .form-textarea { resize: vertical; min-height: 60px; }
+    .modal-section { font-family: 'Rajdhani', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
     .modal-ft { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
-    .btn-cancel { padding: 8px 18px; background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 0.82em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
-    .btn-cancel:hover { border-color: var(--silver); color: var(--silver2); }
-    .btn-save { padding: 8px 22px; background: linear-gradient(135deg, var(--gold-dim), var(--gold)); border: none; border-radius: 6px; color: #1a1000; font-size: 0.82em; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
-    .btn-save:hover { filter: brightness(1.1); }
+    .btn-cancel { padding: 8px 18px; background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-size: 0.82em; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-save { padding: 8px 22px; background: linear-gradient(135deg, var(--gold-dim), var(--gold)); border: none; border-radius: 6px; color: #1a1000; font-size: 0.82em; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
     .btn-save:disabled { opacity: 0.6; pointer-events: none; }
 
+    /* ══ MODAL DETAIL ══ */
+    .detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+    .detail-overlay.show { display: flex; }
+    .detail-modal { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; width: 100%; max-width: 680px; margin: auto; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: modalIn 0.2s ease; }
+    .detail-hd { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--card2); display: flex; align-items: center; justify-content: space-between; }
+    .detail-hd-title { font-family: 'Rajdhani', sans-serif; font-size: 1.1em; font-weight: 700; color: var(--silver2); letter-spacing: 1.5px; text-transform: uppercase; }
+    .detail-body { padding: 0; max-height: 80vh; overflow-y: auto; }
+    .detail-body::-webkit-scrollbar { width: 4px; }
+    .detail-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* foto besar */
+    .detail-foto { width: 100%; height: 200px; object-fit: cover; background: var(--content); display: block; }
+    .detail-foto-placeholder { width: 100%; height: 200px; background: var(--content); display: flex; align-items: center; justify-content: center; font-size: 4em; color: var(--text3); }
+
+    /* info utama */
+    .detail-top { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .detail-nama { font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700; color: var(--silver2); letter-spacing: 1px; }
+    .detail-sub { font-size: 0.78em; color: var(--text3); margin-top: 3px; }
+
+    /* section detail */
+    .detail-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .detail-section-title { font-family: 'Rajdhani', sans-serif; font-size: 0.75em; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-item { }
+    .detail-item-label { font-size: 0.63em; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .detail-item-value { font-size: 0.85em; color: var(--silver2); font-weight: 500; }
+    .detail-item-value.gold { color: var(--gold2); font-family: 'Rajdhani', sans-serif; font-size: 1em; font-weight: 700; }
+    .detail-item-value.success { color: var(--success); font-weight: 700; }
+    .detail-item-value.error { color: var(--error); }
+
+    /* laba */
+    .detail-laba { padding: 14px 20px; background: var(--gold-bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-around; text-align: center; }
+    .laba-item-val { font-family: 'Rajdhani', sans-serif; font-size: 1.3em; font-weight: 700; }
+    .laba-item-lbl { font-size: 0.62em; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+    .detail-ft { padding: 12px 20px; display: flex; gap: 8px; justify-content: flex-end; background: var(--card2); }
+    .btn-edit-detail { padding: 8px 18px; background: rgba(72,144,232,0.1); border: 1px solid rgba(72,144,232,0.3); border-radius: 6px; color: var(--info); font-size: 0.82em; cursor: pointer; font-family: 'Inter', sans-serif; }
+
     /* toast */
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 0.82em; color: var(--silver2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 300; display: none; animation: toastIn 0.3s ease; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 0.82em; color: var(--silver2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 300; display: none; }
     .toast.show { display: block; }
     .toast.success { border-left: 3px solid var(--success); }
     .toast.error   { border-left: 3px solid var(--error); }
-    @keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-    /* overlay loading */
+    /* loading */
     .overlay { position: fixed; inset: 0; background: #141414; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; transition: opacity 0.5s; }
     .overlay.hide { opacity: 0; pointer-events: none; }
     .overlay img { width: 64px; animation: pulse 1.5s ease-in-out infinite; filter: brightness(0.85); }
@@ -254,7 +212,7 @@
     @keyframes ldfill { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
     .ld-text { font-size:0.58em; letter-spacing:3px; color:var(--text3); text-transform:uppercase; }
 
-    /* ══ RESPONSIVE ══ */
+    /* responsive */
     @media (max-width: 768px) {
       .hamburger { display: flex; align-items: center; }
       .navbar-brand { border-right: none; }
@@ -269,6 +227,7 @@
       .main { margin-left: 0; padding: 12px; }
       .form-grid { grid-template-columns: 1fr; }
       .form-field.span2 { grid-column: span 1; }
+      .detail-grid { grid-template-columns: 1fr; }
       .mini-stats { gap: 6px; }
       .mini-stat { min-width: 100px; padding: 8px 12px; }
     }
@@ -344,7 +303,6 @@
 
 <!-- MAIN -->
 <main class="main">
-
   <div class="pg-header">
     <div>
       <div class="pg-title">Kendaraan</div>
@@ -353,27 +311,13 @@
     </div>
   </div>
 
-  <!-- MINI STATS -->
   <div class="mini-stats">
-    <div class="mini-stat">
-      <div class="mini-stat-icon">🚗</div>
-      <div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Stok</div></div>
-    </div>
-    <div class="mini-stat">
-      <div class="mini-stat-icon">✅</div>
-      <div><div class="mini-stat-val" id="statTersedia">0</div><div class="mini-stat-lbl">Tersedia</div></div>
-    </div>
-    <div class="mini-stat">
-      <div class="mini-stat-icon">⏳</div>
-      <div><div class="mini-stat-val" id="statProses">0</div><div class="mini-stat-lbl">Proses</div></div>
-    </div>
-    <div class="mini-stat">
-      <div class="mini-stat-icon">🏷️</div>
-      <div><div class="mini-stat-val" id="statTerjual">0</div><div class="mini-stat-lbl">Terjual</div></div>
-    </div>
+    <div class="mini-stat"><div class="mini-stat-icon">🚗</div><div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Stok</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">✅</div><div><div class="mini-stat-val" id="statTersedia">0</div><div class="mini-stat-lbl">Tersedia</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">⏳</div><div><div class="mini-stat-val" id="statProses">0</div><div class="mini-stat-lbl">Proses</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🏷️</div><div><div class="mini-stat-val" id="statTerjual">0</div><div class="mini-stat-lbl">Terjual</div></div></div>
   </div>
 
-  <!-- TOOLBAR -->
   <div class="toolbar">
     <select class="filter-select" id="filterStatus" onchange="applyFilter()">
       <option value="">Semua Status</option>
@@ -381,12 +325,8 @@
       <option value="proses">Proses</option>
       <option value="terjual">Terjual</option>
     </select>
-    <select class="filter-select" id="filterKategori" onchange="applyFilter()">
-      <option value="">Semua Kategori</option>
-    </select>
-    <select class="filter-select" id="filterMerek" onchange="applyFilter()">
-      <option value="">Semua Merek</option>
-    </select>
+    <select class="filter-select" id="filterKategori" onchange="applyFilter()"><option value="">Semua Kategori</option></select>
+    <select class="filter-select" id="filterMerek" onchange="applyFilter()"><option value="">Semua Merek</option></select>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="Cari kendaraan..." oninput="applyFilter()"/>
@@ -394,7 +334,6 @@
     <button class="btn-add" onclick="openModal()">+ Tambah</button>
   </div>
 
-  <!-- TABLE -->
   <div class="tbl-wrap">
     <table class="tbl">
       <thead>
@@ -411,19 +350,13 @@
         </tr>
       </thead>
       <tbody id="tblBody">
-        <tr><td colspan="9">
-          <div class="empty">
-            <div class="empty-icon">🚗</div>
-            Memuat data...
-          </div>
-        </td></tr>
+        <tr><td colspan="9"><div class="empty"><div class="empty-icon">🚗</div>Memuat data...</div></td></tr>
       </tbody>
     </table>
   </div>
-
 </main>
 
-<!-- MODAL TAMBAH/EDIT -->
+<!-- MODAL FORM TAMBAH/EDIT -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-hd">
@@ -434,97 +367,45 @@
 
       <div class="modal-section">Identitas Kendaraan</div>
       <div class="form-grid">
-        <div class="form-field">
-          <label class="form-label">Kategori *</label>
-          <select class="form-select" id="fKategori"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Merek *</label>
-          <select class="form-select" id="fMerek"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Model / Tipe *</label>
-          <select class="form-select" id="fModel"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Tahun *</label>
-          <input type="number" class="form-input" id="fTahun" placeholder="2023" min="1990" max="2030"/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Warna</label>
-          <select class="form-select" id="fWarna"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Transmisi</label>
-          <select class="form-select" id="fTransmisi"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Bahan Bakar</label>
-          <select class="form-select" id="fBahanBakar"><option value="">— Pilih —</option></select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Kondisi</label>
-          <select class="form-select" id="fKondisi">
-            <option value="bekas">Bekas</option>
-            <option value="baru">Baru</option>
-          </select>
-        </div>
+        <div class="form-field"><label class="form-label">Kategori *</label><select class="form-select" id="fKategori"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Merek *</label><select class="form-select" id="fMerek"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Model / Tipe *</label><select class="form-select" id="fModel"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Tahun *</label><input type="number" class="form-input" id="fTahun" placeholder="2023" min="1990" max="2030"/></div>
+        <div class="form-field"><label class="form-label">Warna</label><select class="form-select" id="fWarna"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Transmisi</label><select class="form-select" id="fTransmisi"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Bahan Bakar</label><select class="form-select" id="fBahanBakar"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Kondisi</label><select class="form-select" id="fKondisi"><option value="bekas">Bekas</option><option value="baru">Baru</option></select></div>
+        <div class="form-field"><label class="form-label">Asal Kendaraan (Kota)</label><input type="text" class="form-input" id="fAsal" placeholder="Banda Aceh"/></div>
+        <div class="form-field"><label class="form-label">Kondisi Fisik</label><select class="form-select" id="fKondisiFisik"><option value="mulus">Mulus</option><option value="bekas_perbaikan">Bekas Perbaikan</option><option value="perlu_perbaikan">Perlu Perbaikan</option></select></div>
       </div>
 
       <div class="modal-section">Identitas Dokumen</div>
       <div class="form-grid">
-        <div class="form-field">
-          <label class="form-label">No. Polisi</label>
-          <input type="text" class="form-input" id="fNopol" placeholder="BL 1234 AB"/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">No. Rangka</label>
-          <input type="text" class="form-input" id="fNoRangka" placeholder="MHFXXX..."/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">No. Mesin</label>
-          <input type="text" class="form-input" id="fNoMesin" placeholder="DXXX..."/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">No. BPKB</label>
-          <input type="text" class="form-input" id="fNoBpkb" placeholder="BPKB..."/>
-        </div>
+        <div class="form-field"><label class="form-label">No. Polisi</label><input type="text" class="form-input" id="fNopol" placeholder="BL 1234 AB"/></div>
+        <div class="form-field"><label class="form-label">No. Rangka</label><input type="text" class="form-input" id="fNoRangka" placeholder="MHFXXX..."/></div>
+        <div class="form-field"><label class="form-label">No. Mesin</label><input type="text" class="form-input" id="fNoMesin" placeholder="DXXX..."/></div>
+        <div class="form-field"><label class="form-label">Nama di BPKB</label><input type="text" class="form-input" id="fNamaBpkb" placeholder="Nama pemilik BPKB"/></div>
+        <div class="form-field"><label class="form-label">No. BPKB</label><input type="text" class="form-input" id="fNoBpkb" placeholder="BPKB..."/></div>
+        <div class="form-field"><label class="form-label">No. STNK</label><input type="text" class="form-input" id="fNoStnk" placeholder="STNK..."/></div>
+        <div class="form-field"><label class="form-label">Expired STNK</label><input type="date" class="form-input" id="fExpiredStnk"/></div>
+        <div class="form-field"><label class="form-label">Pajak Terakhir</label><input type="date" class="form-input" id="fPajakTerakhir"/></div>
+        <div class="form-field"><label class="form-label">Jatuh Tempo Pajak</label><input type="date" class="form-input" id="fJatuhTempoPajak"/></div>
       </div>
 
-      <div class="modal-section">Harga & Status</div>
+      <div class="modal-section">Pembelian & Harga</div>
       <div class="form-grid">
-        <div class="form-field">
-          <label class="form-label">Harga Beli (Rp) *</label>
-          <input type="number" class="form-input" id="fHargaBeli" placeholder="150000000"/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Harga Jual (Rp) *</label>
-          <input type="number" class="form-input" id="fHargaJual" placeholder="165000000"/>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Status</label>
-          <select class="form-select" id="fStatus">
-            <option value="tersedia">Tersedia</option>
-            <option value="proses">Proses</option>
-            <option value="terjual">Terjual</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Tanggal Masuk</label>
-          <input type="date" class="form-input" id="fTglMasuk"/>
-        </div>
+        <div class="form-field"><label class="form-label">Nama Penjual / Pemasok</label><input type="text" class="form-input" id="fNamaPenjual" placeholder="Nama penjual"/></div>
+        <div class="form-field"><label class="form-label">Tanggal Beli</label><input type="date" class="form-input" id="fTglBeli"/></div>
+        <div class="form-field"><label class="form-label">Harga Beli (Rp) *</label><input type="number" class="form-input" id="fHargaBeli" placeholder="150000000"/></div>
+        <div class="form-field"><label class="form-label">Harga Jual (Rp) *</label><input type="number" class="form-input" id="fHargaJual" placeholder="165000000"/></div>
+        <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="tersedia">Tersedia</option><option value="proses">Proses</option><option value="terjual">Terjual</option></select></div>
+        <div class="form-field"><label class="form-label">Tanggal Masuk</label><input type="date" class="form-input" id="fTglMasuk"/></div>
       </div>
 
       <div class="modal-section">Foto & Catatan</div>
       <div class="form-grid">
-        <div class="form-field span2">
-          <label class="form-label">URL Foto (dari wallspic.com dll)</label>
-          <input type="text" class="form-input" id="fFoto" placeholder="https://wallspic.com/..."/>
-        </div>
-        <div class="form-field span2">
-          <label class="form-label">Catatan</label>
-          <textarea class="form-textarea" id="fCatatan" placeholder="Catatan kondisi, kelengkapan, dll..."></textarea>
-        </div>
+        <div class="form-field span2"><label class="form-label">URL Foto</label><input type="text" class="form-input" id="fFoto" placeholder="https://wallspic.com/..."/></div>
+        <div class="form-field span2"><label class="form-label">Catatan</label><textarea class="form-textarea" id="fCatatan" placeholder="Catatan kondisi, kelengkapan, dll..."></textarea></div>
       </div>
 
     </div>
@@ -535,14 +416,95 @@
   </div>
 </div>
 
+<!-- MODAL DETAIL -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-modal">
+    <div class="detail-hd">
+      <div class="detail-hd-title" id="dTitle">Detail Kendaraan</div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+
+      <!-- Foto -->
+      <div id="dFotoWrap"></div>
+
+      <!-- Nama & Status -->
+      <div class="detail-top">
+        <div>
+          <div class="detail-nama" id="dNama">–</div>
+          <div class="detail-sub" id="dSub">–</div>
+        </div>
+        <div id="dStatus"></div>
+      </div>
+
+      <!-- Laba -->
+      <div class="detail-laba">
+        <div><div class="laba-item-val" id="dHargaBeli" style="color:var(--error)">–</div><div class="laba-item-lbl">Harga Beli</div></div>
+        <div><div class="laba-item-val" id="dHargaJual" style="color:var(--gold2)">–</div><div class="laba-item-lbl">Harga Jual</div></div>
+        <div><div class="laba-item-val" id="dLaba" style="color:var(--success)">–</div><div class="laba-item-lbl">Estimasi Laba</div></div>
+      </div>
+
+      <!-- Spesifikasi -->
+      <div class="detail-section">
+        <div class="detail-section-title">Spesifikasi</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Kategori</div><div class="detail-item-value" id="dKategori">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Merek</div><div class="detail-item-value" id="dMerek">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Model</div><div class="detail-item-value" id="dModel">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Tahun</div><div class="detail-item-value" id="dTahun">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Warna</div><div class="detail-item-value" id="dWarna">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Transmisi</div><div class="detail-item-value" id="dTransmisi">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Bahan Bakar</div><div class="detail-item-value" id="dBahanBakar">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Kondisi</div><div class="detail-item-value" id="dKondisi">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Kondisi Fisik</div><div class="detail-item-value" id="dKondisiFisik">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Asal Kendaraan</div><div class="detail-item-value" id="dAsal">–</div></div>
+        </div>
+      </div>
+
+      <!-- Dokumen -->
+      <div class="detail-section">
+        <div class="detail-section-title">Identitas Dokumen</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">No. Polisi</div><div class="detail-item-value" id="dNopol">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">No. Rangka</div><div class="detail-item-value" id="dNoRangka">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">No. Mesin</div><div class="detail-item-value" id="dNoMesin">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Nama di BPKB</div><div class="detail-item-value" id="dNamaBpkb">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">No. BPKB</div><div class="detail-item-value" id="dNoBpkb">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">No. STNK</div><div class="detail-item-value" id="dNoStnk">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Expired STNK</div><div class="detail-item-value" id="dExpiredStnk">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Pajak Terakhir</div><div class="detail-item-value" id="dPajakTerakhir">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Jatuh Tempo Pajak</div><div class="detail-item-value" id="dJatuhTempoPajak">–</div></div>
+        </div>
+      </div>
+
+      <!-- Pembelian -->
+      <div class="detail-section">
+        <div class="detail-section-title">Pembelian</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Nama Penjual</div><div class="detail-item-value" id="dNamaPenjual">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Tanggal Beli</div><div class="detail-item-value" id="dTglBeli">–</div></div>
+          <div class="detail-item"><div class="detail-item-label">Tanggal Masuk</div><div class="detail-item-value" id="dTglMasuk">–</div></div>
+        </div>
+      </div>
+
+      <!-- Catatan -->
+      <div class="detail-section" id="dCatatanWrap" style="display:none">
+        <div class="detail-section-title">Catatan</div>
+        <div class="detail-item-value" id="dCatatan" style="font-size:0.85em;color:var(--text);line-height:1.6">–</div>
+      </div>
+
+    </div>
+    <div class="detail-ft">
+      <button class="modal-close btn-cancel" onclick="closeDetail()">Tutup</button>
+      <button class="btn-edit-detail" onclick="editFromDetail()">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut }
-    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import {
-    getFirestore, collection, getDocs, addDoc,
-    updateDoc, deleteDoc, doc, query, orderBy
-  } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
@@ -557,8 +519,9 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  let allData = [];
-  let editId  = null;
+  let allData    = [];
+  let editId     = null;
+  let detailData = null;
 
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
@@ -568,34 +531,27 @@
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
     ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
-
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
-
     await loadMasterDropdowns();
     await loadData();
   });
 
-  // ── Load master data untuk dropdown ──
+  // ── Load master dropdowns ──
   async function loadMasterDropdowns() {
     const masters = ['kategori_kendaraan','merek','model','warna','transmisi','bahan_bakar'];
     const results = {};
-
     for (const m of masters) {
       try {
         const snap = await getDocs(query(collection(db, `master_${m}`), orderBy('nama')));
-        results[m] = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => d.status === 'aktif');
+        results[m] = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => d.status === 'aktif');
       } catch(e) { results[m] = []; }
     }
-
-    // Isi dropdown form
     fillSelect('fKategori',   results['kategori_kendaraan'], 'Pilih Kategori');
     fillSelect('fMerek',      results['merek'],              'Pilih Merek');
     fillSelect('fModel',      results['model'],              'Pilih Model');
     fillSelect('fWarna',      results['warna'],              'Pilih Warna');
     fillSelect('fTransmisi',  results['transmisi'],          'Pilih Transmisi');
     fillSelect('fBahanBakar', results['bahan_bakar'],        'Pilih Bahan Bakar');
-
-    // Isi filter
     fillSelect('filterKategori', results['kategori_kendaraan'], 'Semua Kategori', true);
     fillSelect('filterMerek',    results['merek'],              'Semua Merek', true);
   }
@@ -603,18 +559,16 @@
   function fillSelect(id, data, placeholder, isFilter = false) {
     const el = document.getElementById(id);
     if (!el) return;
-    const first = isFilter ? `<option value="">${placeholder}</option>` : `<option value="">— ${placeholder} —</option>`;
-    el.innerHTML = first + data.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
+    el.innerHTML = (isFilter ? `<option value="">${placeholder}</option>` : `<option value="">— ${placeholder} —</option>`)
+      + data.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
   }
 
-  // ── Load data kendaraan ──
+  // ── Load data ──
   async function loadData() {
     try {
       const snap = await getDocs(query(collection(db, 'kendaraan'), orderBy('tglMasuk', 'desc')));
-      allData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch(e) {
-      allData = [];
-    }
+      allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    } catch(e) { allData = []; }
     updateStats();
     renderTable(allData);
   }
@@ -632,17 +586,11 @@
     const kategori = document.getElementById('filterKategori').value;
     const merek    = document.getElementById('filterMerek').value;
     const search   = document.getElementById('searchInput').value.toLowerCase();
-
     const filtered = allData.filter(d => {
       if (status   && d.status   !== status)   return false;
       if (kategori && d.kategori !== kategori) return false;
       if (merek    && d.merek    !== merek)    return false;
-      if (search && !(
-        (d.merek  || '').toLowerCase().includes(search) ||
-        (d.model  || '').toLowerCase().includes(search) ||
-        (d.warna  || '').toLowerCase().includes(search) ||
-        (d.nopol  || '').toLowerCase().includes(search)
-      )) return false;
+      if (search && ![(d.merek||''),(d.model||''),(d.warna||''),(d.nopol||''),(d.noRangka||'')].some(v => v.toLowerCase().includes(search))) return false;
       return true;
     });
     renderTable(filtered);
@@ -651,57 +599,122 @@
   // ── Render tabel ──
   function renderTable(data) {
     if (data.length === 0) {
-      document.getElementById('tblBody').innerHTML = `
-        <tr><td colspan="9">
-          <div class="empty">
-            <div class="empty-icon">🚗</div>
-            Belum ada data kendaraan
-          </div>
-        </td></tr>`;
+      document.getElementById('tblBody').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🚗</div>Belum ada data kendaraan</div></td></tr>`;
       return;
     }
-
     document.getElementById('tblBody').innerHTML = data.map((d, i) => `
       <tr>
-        <td style="color:var(--text3)">${i + 1}</td>
+        <td style="color:var(--text3)">${i+1}</td>
+        <td>${d.foto ? `<img src="${d.foto}" class="foto-thumb" onerror="this.style.display='none'">` : `<div class="foto-placeholder">🚗</div>`}</td>
         <td>
-          ${d.foto
-            ? `<img src="${d.foto}" class="foto-thumb" onerror="this.style.display='none'">`
-            : `<div class="foto-placeholder">🚗</div>`}
+          <div style="font-weight:600;color:var(--silver2)">${d.merek||'-'} ${d.model||''}</div>
+          <div style="font-size:0.75em;color:var(--text3)">${d.kategori||''} · ${d.kondisi||''}</div>
         </td>
+        <td>${d.tahun||'-'}</td>
+        <td>${d.warna||'-'}</td>
+        <td><span class="harga">${d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>
+        <td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>
+        <td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>
         <td>
-          <div style="font-weight:600;color:var(--silver2)">${d.merek || '-'} ${d.model || ''}</div>
-          <div style="font-size:0.75em;color:var(--text3)">${d.kategori || ''} · ${d.kondisi || ''}</div>
-        </td>
-        <td>${d.tahun || '-'}</td>
-        <td>${d.warna || '-'}</td>
-        <td><span class="harga">${d.hargaBeli ? 'Rp ' + parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>
-        <td><span class="harga">${d.hargaJual ? 'Rp ' + parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>
-        <td><span class="bs bs-${d.status || 'tersedia'}">${d.status || 'tersedia'}</span></td>
-        <td>
+          <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
           <button class="btn-edit"   onclick="editData('${d.id}')">Edit</button>
-          <button class="btn-del"    onclick="hapusData('${d.id}', '${d.merek} ${d.model}')">Hapus</button>
+          <button class="btn-del"    onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>
         </td>
       </tr>
     `).join('');
   }
 
+  // ── Detail ──
+  window.showDetail = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    detailData = d;
+
+    // Foto
+    document.getElementById('dFotoWrap').innerHTML = d.foto
+      ? `<img src="${d.foto}" class="detail-foto" onerror="this.outerHTML='<div class=detail-foto-placeholder>🚗</div>'">`
+      : `<div class="detail-foto-placeholder">🚗</div>`;
+
+    // Header
+    document.getElementById('dTitle').textContent = `${d.merek||''} ${d.model||''} ${d.tahun||''}`;
+    document.getElementById('dNama').textContent  = `${d.merek||'-'} ${d.model||''} ${d.tahun||''}`;
+    document.getElementById('dSub').textContent   = `${d.kategori||''} · ${d.kondisi||''} · ${d.warna||''}`;
+    document.getElementById('dStatus').innerHTML  = `<span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span>`;
+
+    // Laba
+    const beli = parseInt(d.hargaBeli||0);
+    const jual = parseInt(d.hargaJual||0);
+    const laba = jual - beli;
+    const fmt  = v => 'Rp ' + v.toLocaleString('id-ID');
+    document.getElementById('dHargaBeli').textContent = beli ? fmt(beli) : '-';
+    document.getElementById('dHargaJual').textContent = jual ? fmt(jual) : '-';
+    document.getElementById('dLaba').textContent      = laba ? fmt(laba) : '-';
+    document.getElementById('dLaba').style.color      = laba >= 0 ? 'var(--success)' : 'var(--error)';
+
+    // Spesifikasi
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val||'-'; };
+    set('dKategori',    d.kategori);
+    set('dMerek',       d.merek);
+    set('dModel',       d.model);
+    set('dTahun',       d.tahun);
+    set('dWarna',       d.warna);
+    set('dTransmisi',   d.transmisi);
+    set('dBahanBakar',  d.bahanBakar);
+    set('dKondisi',     d.kondisi);
+    set('dKondisiFisik',d.kondisiFisik);
+    set('dAsal',        d.asal);
+
+    // Dokumen
+    set('dNopol',          d.nopol);
+    set('dNoRangka',       d.noRangka);
+    set('dNoMesin',        d.noMesin);
+    set('dNamaBpkb',       d.namaBpkb);
+    set('dNoBpkb',         d.noBpkb);
+    set('dNoStnk',         d.noStnk);
+    set('dExpiredStnk',    d.expiredStnk);
+    set('dPajakTerakhir',  d.pajakTerakhir);
+    set('dJatuhTempoPajak',d.jatuhTempoPajak);
+
+    // Pembelian
+    set('dNamaPenjual', d.namaPenjual);
+    set('dTglBeli',     d.tglBeli);
+    set('dTglMasuk',    d.tglMasuk);
+
+    // Catatan
+    if (d.catatan) {
+      document.getElementById('dCatatanWrap').style.display = 'block';
+      document.getElementById('dCatatan').textContent = d.catatan;
+    } else {
+      document.getElementById('dCatatanWrap').style.display = 'none';
+    }
+
+    document.getElementById('detailOverlay').classList.add('show');
+  };
+
+  window.closeDetail = function() {
+    document.getElementById('detailOverlay').classList.remove('show');
+    detailData = null;
+  };
+
+  window.editFromDetail = function() {
+    if (!detailData) return;
+    closeDetail();
+    editData(detailData.id);
+  };
+
   // ── Modal tambah ──
   window.openModal = function() {
     editId = null;
     document.getElementById('modalTitle').textContent = 'Tambah Kendaraan';
-    // Reset form
-    ['fKategori','fMerek','fModel','fWarna','fTransmisi','fBahanBakar'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    ['fTahun','fNopol','fNoRangka','fNoMesin','fNoBpkb','fHargaBeli','fHargaJual','fFoto','fCatatan'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    document.getElementById('fKondisi').value = 'bekas';
-    document.getElementById('fStatus').value  = 'tersedia';
-    document.getElementById('fTglMasuk').value = new Date().toISOString().split('T')[0];
+    const fields = ['fKategori','fMerek','fModel','fWarna','fTransmisi','fBahanBakar',
+      'fTahun','fNopol','fNoRangka','fNoMesin','fNamaBpkb','fNoBpkb','fNoStnk',
+      'fExpiredStnk','fPajakTerakhir','fJatuhTempoPajak','fNamaPenjual','fTglBeli',
+      'fHargaBeli','fHargaJual','fFoto','fCatatan','fAsal'];
+    fields.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    document.getElementById('fKondisi').value      = 'bekas';
+    document.getElementById('fKondisiFisik').value = 'mulus';
+    document.getElementById('fStatus').value       = 'tersedia';
+    document.getElementById('fTglMasuk').value     = new Date().toISOString().split('T')[0];
     document.getElementById('modalOverlay').classList.add('show');
   };
 
@@ -711,24 +724,21 @@
     if (!d) return;
     editId = id;
     document.getElementById('modalTitle').textContent = 'Edit Kendaraan';
-    document.getElementById('fKategori').value   = d.kategori   || '';
-    document.getElementById('fMerek').value      = d.merek      || '';
-    document.getElementById('fModel').value      = d.model      || '';
-    document.getElementById('fTahun').value      = d.tahun      || '';
-    document.getElementById('fWarna').value      = d.warna      || '';
-    document.getElementById('fTransmisi').value  = d.transmisi  || '';
-    document.getElementById('fBahanBakar').value = d.bahanBakar || '';
-    document.getElementById('fKondisi').value    = d.kondisi    || 'bekas';
-    document.getElementById('fNopol').value      = d.nopol      || '';
-    document.getElementById('fNoRangka').value   = d.noRangka   || '';
-    document.getElementById('fNoMesin').value    = d.noMesin    || '';
-    document.getElementById('fNoBpkb').value     = d.noBpkb     || '';
-    document.getElementById('fHargaBeli').value  = d.hargaBeli  || '';
-    document.getElementById('fHargaJual').value  = d.hargaJual  || '';
-    document.getElementById('fStatus').value     = d.status     || 'tersedia';
-    document.getElementById('fTglMasuk').value   = d.tglMasuk   || '';
-    document.getElementById('fFoto').value       = d.foto       || '';
-    document.getElementById('fCatatan').value    = d.catatan    || '';
+    const map = {
+      fKategori:'kategori', fMerek:'merek', fModel:'model', fTahun:'tahun',
+      fWarna:'warna', fTransmisi:'transmisi', fBahanBakar:'bahanBakar',
+      fKondisi:'kondisi', fKondisiFisik:'kondisiFisik', fAsal:'asal',
+      fNopol:'nopol', fNoRangka:'noRangka', fNoMesin:'noMesin',
+      fNamaBpkb:'namaBpkb', fNoBpkb:'noBpkb', fNoStnk:'noStnk',
+      fExpiredStnk:'expiredStnk', fPajakTerakhir:'pajakTerakhir',
+      fJatuhTempoPajak:'jatuhTempoPajak', fNamaPenjual:'namaPenjual',
+      fTglBeli:'tglBeli', fHargaBeli:'hargaBeli', fHargaJual:'hargaJual',
+      fStatus:'status', fTglMasuk:'tglMasuk', fFoto:'foto', fCatatan:'catatan'
+    };
+    Object.entries(map).forEach(([elId, key]) => {
+      const el = document.getElementById(elId);
+      if (el) el.value = d[key] || '';
+    });
     document.getElementById('modalOverlay').classList.add('show');
   };
 
@@ -751,24 +761,33 @@
     btn.disabled = true; btn.textContent = 'Menyimpan...';
 
     const payload = {
-      kategori:   document.getElementById('fKategori').value,
+      kategori:        document.getElementById('fKategori').value,
       merek,
-      model:      document.getElementById('fModel').value,
-      tahun:      document.getElementById('fTahun').value,
-      warna:      document.getElementById('fWarna').value,
-      transmisi:  document.getElementById('fTransmisi').value,
-      bahanBakar: document.getElementById('fBahanBakar').value,
-      kondisi:    document.getElementById('fKondisi').value,
-      nopol:      document.getElementById('fNopol').value,
-      noRangka:   document.getElementById('fNoRangka').value,
-      noMesin:    document.getElementById('fNoMesin').value,
-      noBpkb:     document.getElementById('fNoBpkb').value,
-      hargaBeli:  parseInt(hargaBeli),
-      hargaJual:  parseInt(hargaJual),
-      status:     document.getElementById('fStatus').value,
-      tglMasuk:   document.getElementById('fTglMasuk').value,
-      foto:       document.getElementById('fFoto').value,
-      catatan:    document.getElementById('fCatatan').value,
+      model:           document.getElementById('fModel').value,
+      tahun:           document.getElementById('fTahun').value,
+      warna:           document.getElementById('fWarna').value,
+      transmisi:       document.getElementById('fTransmisi').value,
+      bahanBakar:      document.getElementById('fBahanBakar').value,
+      kondisi:         document.getElementById('fKondisi').value,
+      kondisiFisik:    document.getElementById('fKondisiFisik').value,
+      asal:            document.getElementById('fAsal').value,
+      nopol:           document.getElementById('fNopol').value,
+      noRangka:        document.getElementById('fNoRangka').value,
+      noMesin:         document.getElementById('fNoMesin').value,
+      namaBpkb:        document.getElementById('fNamaBpkb').value,
+      noBpkb:          document.getElementById('fNoBpkb').value,
+      noStnk:          document.getElementById('fNoStnk').value,
+      expiredStnk:     document.getElementById('fExpiredStnk').value,
+      pajakTerakhir:   document.getElementById('fPajakTerakhir').value,
+      jatuhTempoPajak: document.getElementById('fJatuhTempoPajak').value,
+      namaPenjual:     document.getElementById('fNamaPenjual').value,
+      tglBeli:         document.getElementById('fTglBeli').value,
+      hargaBeli:       parseInt(hargaBeli),
+      hargaJual:       parseInt(hargaJual),
+      status:          document.getElementById('fStatus').value,
+      tglMasuk:        document.getElementById('fTglMasuk').value,
+      foto:            document.getElementById('fFoto').value,
+      catatan:         document.getElementById('fCatatan').value,
     };
 
     try {
@@ -785,7 +804,6 @@
     } catch(e) {
       showToast('Gagal menyimpan: ' + e.message, 'error');
     }
-
     btn.disabled = false; btn.textContent = 'Simpan';
   };
 
@@ -796,16 +814,13 @@
       await deleteDoc(doc(db, 'kendaraan', id));
       showToast('Kendaraan berhasil dihapus ✓', 'success');
       await loadData();
-    } catch(e) {
-      showToast('Gagal menghapus: ' + e.message, 'error');
-    }
+    } catch(e) { showToast('Gagal menghapus: ' + e.message, 'error'); }
   };
 
   // ── Toast ──
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
+    t.textContent = msg; t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
@@ -849,8 +864,7 @@
   window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
   window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
 
-  // Escape tutup modal
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDetail(); } });
 </script>
 </body>
 </html>
