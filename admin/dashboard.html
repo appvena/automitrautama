@@ -1103,11 +1103,20 @@
   };
 
   // ── Navigasi ──
+  const pages = {
+    'dashboard':   '/automitrautama/admin/dashboard.html',
+    'master-data': '/automitrautama/admin/master-data.html',
+  };
+
   window.goPage = (page, el) => {
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
     if (el) el.classList.add('active');
     closeSidebar();
-    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+    if (pages[page]) {
+      window.location.href = pages[page];
+    } else {
+      alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+    }
   };
 
   // ── Sidebar ──
