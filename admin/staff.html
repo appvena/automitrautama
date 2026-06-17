@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Staff — Auto Mitra Utama</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -382,9 +383,10 @@
     </div>
     <div class="modal-body">
       <div class="form-grid">
+        <div class="form-field"><label class="form-label">NIK / ID Staff *</label><input type="text" class="form-input caps" id="fNik" placeholder="AMU-001"/></div>
+        <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
         <div class="form-field span2"><label class="form-label">Nama Lengkap *</label><input type="text" class="form-input caps" id="fNama" placeholder="Nama staff..."/></div>
         <div class="form-field"><label class="form-label">Jabatan *</label><select class="form-select" id="fJabatan"><option value="">— Pilih —</option></select></div>
-        <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
         <div class="form-field"><label class="form-label">No. WA / HP</label><input type="text" class="form-input" id="fWa" placeholder="08xx / 62xx" oninput="formatWA(this)"/></div>
         <div class="form-field"><label class="form-label">Tanggal Bergabung</label><input type="date" class="form-input" id="fTglGabung"/></div>
         <div class="form-field span2"><label class="form-label">Alamat</label><input type="text" class="form-input caps" id="fAlamat" placeholder="Alamat staff..."/></div>
@@ -422,11 +424,16 @@
         <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);opacity:0.05;pointer-events:none;z-index:0;">
           <img src="../assets/logo.png" style="width:200px;" onerror="this.outerHTML='<div style=\'font-family:Rajdhani,sans-serif;font-size:5em;font-weight:700;letter-spacing:8px;color:#fff\'>AMU</div>'"/>
         </div>
-        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;">
           <div id="idcFotoWrap"></div>
           <div class="idcard-nama" id="idcNama">–</div>
           <div class="idcard-jabatan" id="idcJabatan">–</div>
           <div class="idcard-divider"></div>
+          <!-- NIK -->
+          <div style="font-family:'Rajdhani',sans-serif;font-size:0.8em;color:#686868;letter-spacing:2px;margin-top:10px;" id="idcNik">AMU-000</div>
+          <!-- QR Code -->
+          <div id="idcQr" style="margin-top:10px;padding:6px;background:#fff;border-radius:6px;"></div>
+          <div style="font-size:0.58em;color:#686868;letter-spacing:1px;margin-top:4px;">SCAN UNTUK INFO</div>
         </div>
       </div>
       <div class="idcard-footer">
@@ -531,6 +538,7 @@
           <div class="staff-card-body">
             <div class="staff-card-nama">${d.nama||'-'}</div>
             <div class="staff-card-jabatan">${d.jabatan||'-'}</div>
+            <div style="font-size:0.65em;color:var(--text3);margin-top:3px;letter-spacing:1px">${d.nik||''}</div>
             <div class="staff-card-ft">
               <span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>
               <div style="display:flex;gap:4px">
@@ -544,7 +552,7 @@
   }
 
   // ── Modal ──
-  window.openModal = function() {
+  window.openModal = async function() {
     editId = null;
     document.getElementById('modalTitle').textContent = 'Tambah Staff';
     ['fNama','fJabatan','fWa','fAlamat','fFoto','fCatatan'].forEach(id => {
@@ -552,15 +560,24 @@
     });
     document.getElementById('fStatus').value    = 'aktif';
     document.getElementById('fTglGabung').value = new Date().toISOString().split('T')[0];
+    // Auto generate NIK
+    const nik = await generateNik();
+    document.getElementById('fNik').value = nik;
     document.getElementById('modalOverlay').classList.add('show');
   };
+
+  async function generateNik() {
+    const total = allData.length + 1;
+    const no    = String(total).padStart(3, '0');
+    return `AMU-${no}`;
+  }
 
   window.editData = function(id) {
     const d = allData.find(x => x.id === id);
     if (!d) return;
     editId = id;
     document.getElementById('modalTitle').textContent = 'Edit Staff';
-    const map = {fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan'};
+    const map = {fNik:'nik',fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan'};
     Object.entries(map).forEach(([elId,key]) => { const el = document.getElementById(elId); if(el) el.value = d[key]||''; });
     document.getElementById('modalOverlay').classList.add('show');
   };
@@ -568,20 +585,23 @@
   window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('show'); editId = null; };
 
   window.saveData = async function() {
-    const nama = document.getElementById('fNama').value.trim().toUpperCase();
+    const nik     = document.getElementById('fNik').value.trim().toUpperCase();
+    const nama    = document.getElementById('fNama').value.trim().toUpperCase();
     const jabatan = document.getElementById('fJabatan').value;
-    const btn = document.getElementById('btnSave');
+    const btn     = document.getElementById('btnSave');
+    if (!nik)     { showToast('NIK tidak boleh kosong!','error'); return; }
     if (!nama)    { showToast('Nama tidak boleh kosong!','error'); return; }
     if (!jabatan) { showToast('Pilih jabatan!','error'); return; }
     btn.disabled = true; btn.textContent = 'Menyimpan...';
     const payload = {
-      nama, jabatan,
+      nik, nama, jabatan,
       status:    document.getElementById('fStatus').value,
       wa:        document.getElementById('fWa').value,
       tglGabung: document.getElementById('fTglGabung').value,
       alamat:    document.getElementById('fAlamat').value.toUpperCase(),
       foto:      document.getElementById('fFoto').value,
       catatan:   document.getElementById('fCatatan').value,
+      profileUrl:`https://appvena.github.io/automitrautama/staff-profile.html?id=${nik}`,
     };
     try {
       if (editId) {
@@ -628,6 +648,29 @@
 
     document.getElementById('idcNama').textContent    = d.nama||'-';
     document.getElementById('idcJabatan').textContent = d.jabatan||'-';
+    document.getElementById('idcNik').textContent     = d.nik||'AMU-000';
+
+    // Generate QR Code pakai QRCode.js global
+    const qrEl = document.getElementById('idcQr');
+    qrEl.innerHTML = '';
+    const profileUrl = `https://appvena.github.io/automitrautama/staff-profile.html?id=${encodeURIComponent(d.nik||'')}`;
+
+    // Cek apakah QRCode library sudah load
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrEl, {
+        text: profileUrl,
+        width: 90, height: 90,
+        colorDark: '#1a1a1a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } else {
+      // Fallback: tampilkan URL sebagai teks kecil
+      qrEl.innerHTML = `<div style="width:90px;height:90px;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:4px;padding:4px;">
+        <div style="font-size:0.45em;color:#1a1a1a;word-break:break-all;text-align:center;line-height:1.3">${profileUrl}</div>
+      </div>`;
+    }
+
     document.getElementById('idCardPrint').classList.add('show');
   };
 
