@@ -199,6 +199,19 @@
       /* Sembunyikan tombol saat print */
       .inv-close-btn  { display: none !important; }
       .inv-action-bar { display: none !important; }
+      /* Paksa logo muncul di PDF */
+      .inv-logo-img {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        display: block !important;
+        visibility: visible !important;
+      }
+      .inv-watermark img {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        display: block !important;
+        visibility: visible !important;
+      }
       @page { margin: 15mm; size: A4; }
     }
 
@@ -705,7 +718,7 @@
   <button class="inv-close-btn" onclick="tutupInvoice()">✕ Tutup</button>
   <div class="inv-action-bar">
     <button class="inv-action-btn inv-btn-wa" id="invBtnWa" onclick="kirimWaTagihan()">💬 Kirim via WA</button>
-    <button class="inv-action-btn inv-btn-print" onclick="window.print()">🖨️ Print / Save PDF</button>
+    <button class="inv-action-btn inv-btn-print" onclick="printInvoice()">🖨️ Print / Save PDF</button>
   </div>
   <div class="inv-page">
 
@@ -1539,7 +1552,21 @@
   };
 
   // ── Print Invoice ──
-  window.printInvoice = function() { window.print(); };
+  window.printInvoice = function() {
+    // Preload semua gambar dulu baru print
+    const images = document.querySelectorAll('#invoicePrint img');
+    let loaded = 0;
+    if (images.length === 0) { window.print(); return; }
+    images.forEach(img => {
+      if (img.complete) {
+        loaded++;
+        if (loaded === images.length) window.print();
+      } else {
+        img.onload  = () => { loaded++; if (loaded === images.length) window.print(); };
+        img.onerror = () => { loaded++; if (loaded === images.length) window.print(); };
+      }
+    });
+  };
 
   // ── Cari Kendaraan dari Database ──
   let cariTimeout = null;
