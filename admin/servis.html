@@ -196,7 +196,10 @@
         z-index: 9999 !important;
         padding: 0 !important;
       }
-      @page { margin: 0; size: A4; }
+      /* Sembunyikan tombol saat print */
+      .inv-close-btn  { display: none !important; }
+      .inv-action-bar { display: none !important; }
+      @page { margin: 15mm; size: A4; }
     }
 
     /* ══ INVOICE PROFESIONAL ══ */
@@ -708,13 +711,15 @@
 
     <!-- Watermark -->
     <div class="inv-watermark">
-      <img src="../assets/logo.png" onerror="this.parentElement.innerHTML='<div class=inv-watermark-text>AMU</div>'"/>
+      <img src="../assets/logo.png" onerror="this.style.display='none'"/>
+      <div class="inv-watermark-text" style="display:none" id="wmText">AMU</div>
     </div>
 
     <!-- Header -->
     <div class="inv-header">
       <div class="inv-logo-wrap">
-        <img src="../assets/logo.png" class="inv-logo-img" onerror="this.style.display='none'"/>
+        <img src="../assets/logo.png" class="inv-logo-img"
+             onerror="this.outerHTML='<div style=\'font-family:Rajdhani,sans-serif;font-size:2em;font-weight:700;letter-spacing:4px;color:#c9a84c;margin-right:4px\'>AMU</div>'"/>
         <div>
           <div class="inv-company-name">Auto Mitra Utama</div>
           <div class="inv-company-tagline">Start Here, Drive Next</div>
@@ -818,24 +823,64 @@
       <button class="modal-close" onclick="closePekerjaanModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-field" style="margin-bottom:12px">
-        <label class="form-label">Pilih dari Master Data</label>
-        <select class="form-select" id="pPilihJenis" onchange="isiDariMaster()">
-          <option value="">— Pilih atau ketik manual —</option>
-        </select>
+
+      <!-- Tipe -->
+      <div class="form-field" style="margin-bottom:14px">
+        <label class="form-label">Tipe Pekerjaan</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button id="btnTipeJasa" onclick="setTipePekerjaan('jasa')"
+            style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--gold);background:var(--gold-bg);color:var(--gold2);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">
+            🔧 Jasa
+          </button>
+          <button id="btnTipeSP" onclick="setTipePekerjaan('sparepart')"
+            style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif">
+            🔩 Sparepart
+          </button>
+        </div>
       </div>
-      <div class="form-field" style="margin-bottom:12px">
-        <label class="form-label">Nama Pekerjaan *</label>
-        <input type="text" class="form-input caps" id="pNama" placeholder="Nama pekerjaan..."/>
+
+      <!-- Form JASA -->
+      <div id="formJasa">
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Pilih dari Master Data</label>
+          <select class="form-select" id="pPilihJenis" onchange="isiDariMaster()">
+            <option value="">— Pilih atau ketik manual —</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Nama Pekerjaan *</label>
+          <input type="text" class="form-input caps" id="pNama" placeholder="Nama pekerjaan..."/>
+        </div>
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Keterangan</label>
+          <input type="text" class="form-input" id="pKeterangan" placeholder="Keterangan tambahan..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Harga Jasa (Rp) *</label>
+          <input type="number" class="form-input" id="pHarga" placeholder="50000"/>
+        </div>
       </div>
-      <div class="form-field" style="margin-bottom:12px">
-        <label class="form-label">Keterangan</label>
-        <input type="text" class="form-input" id="pKeterangan" placeholder="Keterangan tambahan..."/>
+
+      <!-- Form SPAREPART -->
+      <div id="formSparepart" style="display:none">
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Pilih Sparepart *</label>
+          <select class="form-select" id="pSparepart" onchange="isiDariStok()">
+            <option value="">— Pilih Sparepart —</option>
+          </select>
+        </div>
+        <div id="pStokInfo" style="display:none;margin-bottom:12px;padding:8px 12px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px;font-size:0.78em;color:var(--gold2)"></div>
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Qty *</label>
+          <input type="number" class="form-input" id="pQty" placeholder="1" min="1" oninput="hitungSubtotal()"/>
+        </div>
+        <div class="form-field" style="margin-bottom:12px">
+          <label class="form-label">Harga / Unit (Rp)</label>
+          <input type="number" class="form-input" id="pHargaSP" placeholder="0" oninput="hitungSubtotal()"/>
+        </div>
+        <div id="pSubtotalInfo" style="display:none;padding:8px 12px;background:var(--content);border:1px solid var(--border2);border-radius:6px;font-size:0.82em;color:var(--silver2);font-family:'Rajdhani',sans-serif;font-weight:700"></div>
       </div>
-      <div class="form-field">
-        <label class="form-label">Harga (Rp) *</label>
-        <input type="number" class="form-input" id="pHarga" placeholder="50000"/>
-      </div>
+
     </div>
     <div class="modal-ft">
       <button class="btn-cancel" onclick="closePekerjaanModal()">Batal</button>
@@ -866,6 +911,8 @@
   let editId  = null;
   let currentServisId = null;
   let masterJenisServis = [];
+  let dbSparepart = [];
+  let tipePekerjaan = 'jasa';
 
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
@@ -877,33 +924,58 @@
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadMaster();
+    await loadSparepart();
     await loadKendaraanDB();
     await loadData();
   });
 
+  // ── Load Sparepart dari DB ──
+  async function loadSparepart() {
+    try {
+      const snap = await getDocs(collection(db, 'sparepart'));
+      dbSparepart = snap.docs.map(d => ({id: d.id, ...d.data()}))
+        .filter(d => parseInt(d.stok||0) > 0)
+        .sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+    } catch(e) { dbSparepart = []; }
+    // Isi dropdown sparepart di modal pekerjaan
+    const spEl = document.getElementById('pSparepart');
+    if (spEl) {
+      spEl.innerHTML = `<option value="">— Pilih Sparepart —</option>` +
+        dbSparepart.map(s => `<option value="${s.id}"
+          data-nama="${s.nama}"
+          data-satuan="${s.satuan||''}"
+          data-stok="${s.stok||0}"
+          data-harga="${s.hargaJual||0}"
+        >${s.nama} (Stok: ${s.stok||0} ${s.satuan||''})</option>`).join('');
+    }
+  }
+
   // ── Load Master Data ──
   async function loadMaster() {
     try {
-      // Jenis Servis
       const jsSnap = await getDocs(query(collection(db, 'master_jenis_servis'), orderBy('nama')));
       masterJenisServis = jsSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => d.status === 'aktif');
       const jsEl = document.getElementById('fJenisServis');
       jsEl.innerHTML = `<option value="">— Pilih —</option>` +
         masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||0}">${j.nama}</option>`).join('');
-
-      // Mekanik (dari master jabatan/staff)
       const mSnap = await getDocs(query(collection(db, 'master_jabatan'), orderBy('nama')));
       const mekanik = mSnap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
-      const mEl = document.getElementById('fMekanik');
-      mEl.innerHTML = `<option value="">— Pilih —</option>` +
+      document.getElementById('fMekanik').innerHTML = `<option value="">— Pilih —</option>` +
         mekanik.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('');
-
-      // Untuk modal pekerjaan
       const ppEl = document.getElementById('pPilihJenis');
       ppEl.innerHTML = `<option value="">— Pilih atau ketik manual —</option>` +
         masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||''}">${j.nama}</option>`).join('');
     } catch(e) { console.log('Master data:', e); }
   }
+
+  // ── Auto Caps ──
+  document.addEventListener('input', e => {
+    if (e.target.classList.contains('caps')) {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos, pos);
+    }
+  });
 
   // ── Load Data Servis ──
   async function loadData() {
@@ -1001,24 +1073,27 @@
 
     btn.disabled = true; btn.textContent = 'Menyimpan...';
 
+    const up = id => (document.getElementById(id)?.value||'').toUpperCase().trim();
+    const val = id => (document.getElementById(id)?.value||'').trim();
+
     const payload = {
-      namaPelanggan:      nama,
-      waPelanggan:        document.getElementById('fWaPelanggan').value,
-      alamat:             document.getElementById('fAlamat').value,
-      merekKendaraan:     merek,
-      nopolServis:        document.getElementById('fNopolServis').value,
-      tahunKendaraan:     document.getElementById('fTahunKendaraan').value,
-      warnaKendaraan:     document.getElementById('fWarnaKendaraan').value,
-      transmisiKendaraan: document.getElementById('fTransmisiKendaraan').value,
-      bahanBakarKendaraan:document.getElementById('fBahanBakarKendaraan').value,
-      noRangkaServis:     document.getElementById('fNoRangkaServis').value,
-      noMesinServis:      document.getElementById('fNoMesinServis').value,
-      namaBpkbServis:     document.getElementById('fNamaBpkbServis').value,
+      namaPelanggan:      up('fNamaPelanggan'),
+      waPelanggan:        val('fWaPelanggan'),
+      alamat:             up('fAlamat'),
+      merekKendaraan:     up('fMerekKendaraan'),
+      nopolServis:        up('fNopolServis'),
+      tahunKendaraan:     val('fTahunKendaraan'),
+      warnaKendaraan:     up('fWarnaKendaraan'),
+      transmisiKendaraan: up('fTransmisiKendaraan'),
+      bahanBakarKendaraan:up('fBahanBakarKendaraan'),
+      noRangkaServis:     up('fNoRangkaServis'),
+      noMesinServis:      up('fNoMesinServis'),
+      namaBpkbServis:     up('fNamaBpkbServis'),
       jenisServis:        jenis,
-      mekanik:            document.getElementById('fMekanik').value,
+      mekanik:            val('fMekanik'),
       tglMasukServis:     tgl,
       estimasi:           parseInt(document.getElementById('fEstimasi').value||0),
-      keluhan:            document.getElementById('fKeluhan').value,
+      keluhan:            val('fKeluhan'),
       totalBiaya:         0,
     };
     if (editId) delete payload.status;
@@ -1136,22 +1211,32 @@
       document.getElementById('totalBar').style.display = 'none';
       return;
     }
-    const total = data.reduce((s, p) => s + parseInt(p.harga||0), 0);
-    document.getElementById('pekerjaanList').innerHTML = data.map(p => `
-      <div class="pekerjaan-item">
+    const total = data.reduce((s, p) => {
+      const harga = parseInt(p.harga||0);
+      const qty   = parseInt(p.qty||1);
+      return s + (p.tipe === 'sparepart' ? harga * qty : harga);
+    }, 0);
+
+    document.getElementById('pekerjaanList').innerHTML = data.map(p => {
+      const isSP     = p.tipe === 'sparepart';
+      const subtotal = isSP ? parseInt(p.harga||0) * parseInt(p.qty||1) : parseInt(p.harga||0);
+      const badge    = isSP
+        ? `<span style="font-size:0.65em;background:rgba(72,144,232,0.12);color:var(--info);border:1px solid rgba(72,144,232,0.2);padding:1px 5px;border-radius:3px;margin-left:5px">🔩 SP</span>`
+        : `<span style="font-size:0.65em;background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2);padding:1px 5px;border-radius:3px;margin-left:5px">🔧 Jasa</span>`;
+      const ket = isSP ? `${p.qty} ${p.satuan||''} × ${fmt(p.harga)}` : (p.keterangan||'');
+      return `<div class="pekerjaan-item">
         <div style="flex:1">
-          <div class="pekerjaan-nama">${p.nama||'-'}</div>
-          ${p.keterangan ? `<div class="pekerjaan-ket">${p.keterangan}</div>` : ''}
+          <div class="pekerjaan-nama">${p.nama||'-'}${badge}</div>
+          ${ket ? `<div class="pekerjaan-ket">${ket}</div>` : ''}
         </div>
-        <div class="pekerjaan-harga">${fmt(p.harga)}</div>
-        <button class="pekerjaan-del" onclick="hapusPekerjaan('${servisId}','${p.id}','${p.nama}')">✕</button>
-      </div>`).join('');
+        <div class="pekerjaan-harga">${fmt(subtotal)}</div>
+        <button class="pekerjaan-del" onclick="hapusPekerjaan('${servisId}','${p.id}','${p.nama}','${p.tipe||'jasa'}','${p.sparepartId||''}',${p.qty||0})">✕</button>
+      </div>`;
+    }).join('');
+
     document.getElementById('totalBar').style.display = 'flex';
     document.getElementById('totalBiaya').textContent = fmt(total);
-
-    // Update total di Firebase
     updateDoc(doc(db, 'servis', servisId), { totalBiaya: total }).catch(()=>{});
-    // Update allData lokal
     const idx = allData.findIndex(d => d.id === servisId);
     if (idx >= 0) allData[idx].totalBiaya = total;
   }
@@ -1161,6 +1246,12 @@
     document.getElementById('pNama').value        = '';
     document.getElementById('pKeterangan').value  = '';
     document.getElementById('pHarga').value       = '';
+    document.getElementById('pSparepart').value   = '';
+    document.getElementById('pQty').value         = '';
+    document.getElementById('pHargaSP').value     = '';
+    document.getElementById('pStokInfo').style.display    = 'none';
+    document.getElementById('pSubtotalInfo').style.display = 'none';
+    setTipePekerjaan('jasa');
     document.getElementById('pekerjaanModalOverlay').classList.add('show');
   };
 
@@ -1168,36 +1259,121 @@
     document.getElementById('pekerjaanModalOverlay').classList.remove('show');
   };
 
-  window.isiDariMaster = function() {
-    const sel = document.getElementById('pPilihJenis');
+  // ── Toggle tipe pekerjaan ──
+  window.setTipePekerjaan = function(tipe) {
+    tipePekerjaan = tipe;
+    const btnJasa = document.getElementById('btnTipeJasa');
+    const btnSP   = document.getElementById('btnTipeSP');
+    const fJasa   = document.getElementById('formJasa');
+    const fSP     = document.getElementById('formSparepart');
+
+    if (tipe === 'jasa') {
+      btnJasa.style.cssText = 'flex:1;padding:8px;border-radius:6px;border:1px solid var(--gold);background:var(--gold-bg);color:var(--gold2);font-size:0.82em;cursor:pointer;font-family:Inter,sans-serif;font-weight:600';
+      btnSP.style.cssText   = 'flex:1;padding:8px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text);font-size:0.82em;cursor:pointer;font-family:Inter,sans-serif';
+      fJasa.style.display = 'block';
+      fSP.style.display   = 'none';
+    } else {
+      btnSP.style.cssText   = 'flex:1;padding:8px;border-radius:6px;border:1px solid var(--gold);background:var(--gold-bg);color:var(--gold2);font-size:0.82em;cursor:pointer;font-family:Inter,sans-serif;font-weight:600';
+      btnJasa.style.cssText = 'flex:1;padding:8px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text);font-size:0.82em;cursor:pointer;font-family:Inter,sans-serif';
+      fJasa.style.display = 'none';
+      fSP.style.display   = 'block';
+    }
+  };
+
+  // ── Isi dari stok sparepart ──
+  window.isiDariStok = function() {
+    const sel = document.getElementById('pSparepart');
     const opt = sel.options[sel.selectedIndex];
-    if (!opt.value) return;
-    document.getElementById('pNama').value  = opt.value;
-    const harga = opt.dataset.harga;
-    if (harga && parseInt(harga) > 0) document.getElementById('pHarga').value = harga;
+    if (!opt.value) { document.getElementById('pStokInfo').style.display = 'none'; return; }
+    const stok   = opt.dataset.stok;
+    const satuan = opt.dataset.satuan;
+    const harga  = opt.dataset.harga;
+    document.getElementById('pStokInfo').style.display = 'block';
+    document.getElementById('pStokInfo').textContent   = `Stok tersedia: ${stok} ${satuan}`;
+    document.getElementById('pHargaSP').value = harga;
+    document.getElementById('pQty').value     = 1;
+    hitungSubtotal();
+  };
+
+  // ── Hitung subtotal ──
+  window.hitungSubtotal = function() {
+    const qty   = parseInt(document.getElementById('pQty').value||0);
+    const harga = parseInt(document.getElementById('pHargaSP').value||0);
+    const sub   = document.getElementById('pSubtotalInfo');
+    if (qty > 0 && harga > 0) {
+      sub.style.display  = 'block';
+      sub.textContent    = `Subtotal: Rp ${(qty*harga).toLocaleString('id-ID')}`;
+    } else {
+      sub.style.display  = 'none';
+    }
   };
 
   window.savePekerjaan = async function() {
-    const nama  = document.getElementById('pNama').value.trim();
-    const harga = document.getElementById('pHarga').value;
-    const ket   = document.getElementById('pKeterangan').value;
-    if (!nama)  { showToast('Nama pekerjaan tidak boleh kosong!', 'error'); return; }
-    if (!harga) { showToast('Harga tidak boleh kosong!', 'error'); return; }
-    try {
-      await addDoc(collection(db, `servis/${currentServisId}/pekerjaan`), {
-        nama, harga: parseInt(harga), keterangan: ket,
-        createdAt: new Date().toISOString()
-      });
-      showToast('Pekerjaan berhasil ditambahkan ✓', 'success');
-      closePekerjaanModal();
-      await loadPekerjaan(currentServisId);
-    } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
+    if (tipePekerjaan === 'jasa') {
+      // Simpan jasa
+      const nama  = document.getElementById('pNama').value.trim().toUpperCase();
+      const harga = document.getElementById('pHarga').value;
+      const ket   = document.getElementById('pKeterangan').value.trim();
+      if (!nama)  { showToast('Nama pekerjaan tidak boleh kosong!', 'error'); return; }
+      if (!harga) { showToast('Harga tidak boleh kosong!', 'error'); return; }
+      try {
+        await addDoc(collection(db, `servis/${currentServisId}/pekerjaan`), {
+          tipe: 'jasa', nama, harga: parseInt(harga), keterangan: ket,
+          createdAt: new Date().toISOString()
+        });
+        showToast('Pekerjaan berhasil ditambahkan ✓', 'success');
+        closePekerjaanModal();
+        await loadPekerjaan(currentServisId);
+      } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
+
+    } else {
+      // Simpan sparepart
+      const sel    = document.getElementById('pSparepart');
+      const opt    = sel.options[sel.selectedIndex];
+      const spId   = sel.value;
+      const qty    = parseInt(document.getElementById('pQty').value||0);
+      const harga  = parseInt(document.getElementById('pHargaSP').value||0);
+      if (!spId)       { showToast('Pilih sparepart!', 'error'); return; }
+      if (!qty || qty < 1) { showToast('Qty tidak valid!', 'error'); return; }
+      const stokSaatIni = parseInt(opt.dataset.stok||0);
+      if (qty > stokSaatIni) {
+        showToast(`Stok tidak cukup! Tersedia: ${stokSaatIni} ${opt.dataset.satuan}`, 'error'); return;
+      }
+      try {
+        // Simpan ke pekerjaan servis
+        await addDoc(collection(db, `servis/${currentServisId}/pekerjaan`), {
+          tipe: 'sparepart',
+          nama: opt.dataset.nama,
+          sparepartId: spId,
+          satuan: opt.dataset.satuan,
+          qty, harga, keterangan: `${qty} ${opt.dataset.satuan}`,
+          createdAt: new Date().toISOString()
+        });
+        // Kurangi stok sparepart
+        const stokBaru = stokSaatIni - qty;
+        await updateDoc(doc(db, 'sparepart', spId), { stok: stokBaru });
+        showToast('Sparepart berhasil ditambahkan & stok berkurang ✓', 'success');
+        closePekerjaanModal();
+        await loadPekerjaan(currentServisId);
+        await loadSparepart(); // refresh dropdown stok
+      } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
+    }
   };
 
-  window.hapusPekerjaan = async function(servisId, pekerjaanId, nama) {
-    if (!confirm(`Hapus pekerjaan "${nama}"?`)) return;
+  window.hapusPekerjaan = async function(servisId, pekerjaanId, nama, tipe, spId, qty) {
+    if (!confirm(`Hapus "${nama}"?`)) return;
     try {
       await deleteDoc(doc(db, `servis/${servisId}/pekerjaan`, pekerjaanId));
+      // Kalau sparepart, kembalikan stok
+      if (tipe === 'sparepart' && spId && parseInt(qty) > 0) {
+        const spSnap = await getDocs(collection(db, 'sparepart'));
+        const sp = spSnap.docs.find(d => d.id === spId);
+        if (sp) {
+          const stokLama = parseInt(sp.data().stok||0);
+          await updateDoc(doc(db, 'sparepart', spId), { stok: stokLama + parseInt(qty) });
+          await loadSparepart();
+        }
+      }
       showToast('Pekerjaan dihapus ✓', 'success');
       await loadPekerjaan(servisId);
     } catch(e) { showToast('Gagal menghapus', 'error'); }
@@ -1294,15 +1470,23 @@
     }
 
     // Tabel pekerjaan
-    const total = pekerjaan.reduce((s, p) => s + parseInt(p.harga||0), 0);
+    const total = pekerjaan.reduce((s, p) => {
+      const harga = parseInt(p.harga||0);
+      const qty   = parseInt(p.qty||1);
+      return s + (p.tipe === 'sparepart' ? harga * qty : harga);
+    }, 0);
     if (pekerjaan.length > 0) {
-      document.getElementById('invTabelPekerjaan').innerHTML = pekerjaan.map((p,i) => `
-        <tr>
+      document.getElementById('invTabelPekerjaan').innerHTML = pekerjaan.map((p,i) => {
+        const isSP     = p.tipe === 'sparepart';
+        const subtotal = isSP ? parseInt(p.harga||0) * parseInt(p.qty||1) : parseInt(p.harga||0);
+        const ket      = isSP ? `${p.qty} ${p.satuan||''} × ${fmt(p.harga)}` : (p.keterangan||'-');
+        return `<tr>
           <td>${i+1}</td>
           <td>${p.nama||'-'}</td>
-          <td style="color:#888">${p.keterangan||'-'}</td>
-          <td>${fmt(p.harga)}</td>
-        </tr>`).join('');
+          <td style="color:#888">${ket}</td>
+          <td>${fmt(subtotal)}</td>
+        </tr>`;
+      }).join('');
     } else {
       document.getElementById('invTabelPekerjaan').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">Belum ada pekerjaan</td></tr>';
     }
