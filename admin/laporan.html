@@ -207,9 +207,7 @@
   <!-- FILTER -->
   <div class="filter-bar">
     <select class="filter-select" id="filterTahun" onchange="loadData()">
-      <option value="2026">2026</option>
-      <option value="2025">2025</option>
-      <option value="2024">2024</option>
+      <!-- Diisi otomatis oleh JS -->
     </select>
     <button class="btn-refresh" onclick="loadData()">🔄 Refresh</button>
   </div>
@@ -353,8 +351,15 @@
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
     ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
-    // Set tahun filter ke tahun sekarang
-    document.getElementById('filterTahun').value = new Date().getFullYear();
+    // Set tahun filter dinamis
+    const tahunSekarang = new Date().getFullYear();
+    const selTahun = document.getElementById('filterTahun');
+    for (let t = tahunSekarang; t >= tahunSekarang - 3; t--) {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      if (t === tahunSekarang) opt.selected = true;
+      selTahun.appendChild(opt);
+    }
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadData();
   });
@@ -389,7 +394,7 @@
         }
       });
 
-      // Sparepart transaksi
+      // Sparepart transaksi manual
       const spSnap = await getDocs(query(collection(db,'trx_sparepart'), orderBy('tanggal','desc')));
       dataSPTrx = spSnap.docs.map(d => ({id:d.id,...d.data()}));
       dataSPTrx.forEach(d => {
@@ -401,6 +406,31 @@
           if (d.tipe === 'masuk')  bulanData[m].spBeli    += total;
         }
       });
+
+      // Sparepart dari pekerjaan servis (subcollection)
+      for (const servis of dataServis) {
+        try {
+          const pkSnap = await getDocs(collection(db, `servis/${servis.id}/pekerjaan`));
+          const pkList = pkSnap.docs.map(d => ({id:d.id,...d.data()}))
+            .filter(p => p.tipe === 'sparepart');
+          pkList.forEach(p => {
+            const tgl = new Date(servis.tglMasukServis||'');
+            if (tgl.getFullYear() === tahun) {
+              const m     = tgl.getMonth();
+              const total = parseInt(p.harga||0) * parseInt(p.qty||1);
+              bulanData[m].sparepart += total;
+              // Tambah ke dataSPTrx untuk tabel terlaris
+              dataSPTrx.push({
+                id: p.id, tipe: 'keluar',
+                namaSP: p.nama, qty: p.qty||1,
+                satuan: p.satuan||'pcs',
+                harga: p.harga||0,
+                tanggal: servis.tglMasukServis||''
+              });
+            }
+          });
+        } catch(e) {}
+      }
 
       // Pengeluaran umum
       const pSnap = await getDocs(query(collection(db,'pengeluaran_umum'), orderBy('tanggal','desc')));
