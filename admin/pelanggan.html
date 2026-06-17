@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pelanggan — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navbar:#1a1a1a; --sidebar:#222222; --content:#1e1e1e; --card:#272727; --card2:#2d2d2d;
+      --border:#333333; --border2:#3a3a3a; --gold:#c9a84c; --gold2:#e8c96a; --gold-dim:#7a5c18;
+      --gold-bg:rgba(201,168,76,0.07); --silver:#b0b0b0; --silver2:#d0d0d0;
+      --text:#a8a8a8; --text2:#c8c8c8; --text3:#686868;
+      --success:#4caf80; --warning:#e8a030; --error:#e05858; --info:#4890e8;
+      --sidebar-w:230px; --navbar-h:56px;
+    }
+    html,body{height:100%;background:var(--content);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;}
+    .navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);background:var(--navbar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px 0 0;z-index:100;gap:10px;}
+    .navbar-brand{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+    .navbar-brand img{height:32px;width:auto;filter:brightness(0.9);}
+    .navbar-brand-text{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;line-height:1.2;}
+    .navbar-brand-text span{display:block;font-size:0.62em;color:var(--gold);letter-spacing:1px;font-weight:400;}
+    .navbar-brand-fallback{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;letter-spacing:4px;color:var(--silver2);display:none;}
+    .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2em;cursor:pointer;padding:6px 10px;border-radius:4px;}
+    .navbar-spacer{flex:1;}
+    .navbar-clock{text-align:right;line-height:1.4;}
+    .clock-time{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:600;color:var(--silver2);letter-spacing:1px;}
+    .clock-date{font-size:0.68em;color:var(--text3);}
+    .navbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+    .btn-notif{position:relative;background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95em;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1px solid var(--navbar);}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;}
+    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .user-info{line-height:1.3;}
+    .user-name{font-size:0.78em;color:var(--silver2);font-weight:600;}
+    .user-role{font-size:0.62em;color:var(--gold);}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);font-size:0.7em;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .navbar-goldline{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 30%,var(--gold) 50%,var(--gold-dim) 70%,transparent 100%);opacity:0.6;}
+    .sidebar{position:fixed;top:var(--navbar-h);left:0;width:var(--sidebar-w);height:calc(100vh - var(--navbar-h));background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:90;transition:transform 0.25s ease;padding-bottom:24px;}
+    .sidebar::-webkit-scrollbar{width:3px;}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .sidebar-section{padding:20px 14px 5px;font-size:0.58em;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;}
+    .menu-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--text);font-size:0.84em;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .menu-item:hover{background:rgba(255,255,255,0.04);color:var(--silver2);border-left-color:var(--border2);}
+    .menu-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold);font-weight:500;}
+    .menu-icon{width:18px;text-align:center;font-size:0.95em;flex-shrink:0;opacity:0.8;}
+    .menu-item.active .menu-icon{opacity:1;}
+    .menu-label{flex:1;}
+    .sidebar-sep{height:1px;background:var(--border);margin:6px 14px;}
+    .sidebar-user{margin:8px 10px 0;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+    .sidebar-user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .su-name{font-size:0.8em;color:var(--silver2);font-weight:600;}
+    .su-role{font-size:0.62em;color:var(--gold);}
+    .su-logout{width:100%;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.75em;padding:7px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .su-logout:hover{border-color:var(--error);color:var(--error);}
+    .s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:89;}
+    .main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:20px;min-height:calc(100vh - var(--navbar-h));}
+    .pg-header{margin-bottom:16px;}
+    .pg-title{font-family:'Rajdhani',sans-serif;font-size:1.5em;font-weight:700;color:var(--silver2);letter-spacing:2px;text-transform:uppercase;}
+    .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
+
+    /* ══ MINI STATS ══ */
+    .mini-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .mini-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;}
+    .mini-stat-icon{font-size:1.2em;}
+    .mini-stat-val{font-family:'Rajdhani',sans-serif;font-size:1.4em;font-weight:700;color:var(--silver2);line-height:1;}
+    .mini-stat-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+
+    /* ══ TOOLBAR ══ */
+    .toolbar{background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .filter-select{padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .filter-select option{background:var(--card2);}
+    .search-wrap{position:relative;flex:1;min-width:150px;}
+    .search-input{width:100%;padding:8px 10px 8px 30px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;}
+    .search-input:focus{border-color:var(--gold);}
+    .search-input::placeholder{color:var(--text3);}
+    .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.78em;pointer-events:none;}
+
+    /* ══ PELANGGAN CARDS ══ */
+    .tbl-wrap{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
+    .plg-list{padding:8px;}
+    .plg-card{background:var(--content);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.15s;}
+    .plg-card:hover{border-color:var(--border2);background:var(--card2);}
+    .plg-card:last-child{margin-bottom:0;}
+    .plg-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .plg-info{flex:1;min-width:0;}
+    .plg-nama{font-size:0.9em;font-weight:600;color:var(--silver2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .plg-wa{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .plg-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+    .plg-badge{font-size:0.68em;padding:2px 8px;border-radius:3px;font-weight:600;}
+    .plg-badge-beli{background:rgba(201,168,76,0.12);color:var(--gold2);border:1px solid rgba(201,168,76,0.2);}
+    .plg-badge-servis{background:rgba(72,144,232,0.12);color:var(--info);border:1px solid rgba(72,144,232,0.2);}
+    .plg-trx{text-align:right;flex-shrink:0;}
+    .plg-trx-val{font-family:'Rajdhani',sans-serif;font-size:0.95em;font-weight:700;color:var(--gold2);}
+    .plg-trx-lbl{font-size:0.65em;color:var(--text3);margin-top:2px;}
+    .plg-wa-btn{background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.2);color:#25d366;font-size:0.7em;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px;}
+    .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.82em;}
+    .empty-icon{font-size:2.5em;margin-bottom:10px;opacity:0.3;}
+
+    /* ══ MODAL DETAIL PELANGGAN ══ */
+    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+    .detail-overlay.show{display:flex;}
+    .detail-modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:580px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalIn 0.2s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .detail-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:12px;}
+    .detail-hd-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .detail-hd-info{flex:1;}
+    .detail-hd-nama{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:700;color:var(--silver2);letter-spacing:1px;}
+    .detail-hd-wa{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .modal-close{background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer;padding:2px 6px;border-radius:4px;}
+    .modal-close:hover{color:var(--error);}
+    .detail-body{max-height:75vh;overflow-y:auto;}
+    .detail-body::-webkit-scrollbar{width:4px;}
+    .detail-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+    /* summary bar */
+    .plg-summary{display:flex;justify-content:space-around;padding:14px 20px;background:var(--gold-bg);border-bottom:1px solid var(--border);}
+    .plg-sum-item{text-align:center;}
+    .plg-sum-val{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;color:var(--silver2);}
+    .plg-sum-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+
+    .detail-section{padding:14px 20px;border-bottom:1px solid var(--border);}
+    .detail-section-title{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .detail-item-label{font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+    .detail-item-value{font-size:0.85em;color:var(--silver2);font-weight:500;}
+
+    /* riwayat items */
+    .riwayat-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.82em;}
+    .riwayat-item:last-child{border-bottom:none;}
+    .riwayat-icon{font-size:1.1em;flex-shrink:0;}
+    .riwayat-info{flex:1;}
+    .riwayat-nama{color:var(--text2);font-weight:500;}
+    .riwayat-tgl{font-size:0.75em;color:var(--text3);margin-top:1px;}
+    .riwayat-val{font-family:'Rajdhani',sans-serif;font-size:0.9em;color:var(--gold2);font-weight:600;white-space:nowrap;}
+
+    .detail-ft{padding:12px 20px;display:flex;gap:8px;justify-content:flex-end;background:var(--card2);}
+    .btn-cancel{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-wa{padding:8px 18px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:6px;color:#25d366;font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;display:flex;align-items:center;gap:6px;}
+
+    /* toast & loading */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:400;display:none;}
+    .toast.show{display:block;}
+    .toast.success{border-left:3px solid var(--success);}
+    .toast.error{border-left:3px solid var(--error);}
+    .overlay{position:fixed;inset:0;background:#141414;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
+    .overlay.hide{opacity:0;pointer-events:none;}
+    .overlay img{width:64px;animation:pulse 1.5s ease-in-out infinite;filter:brightness(0.85);}
+    .ov-fallback{font-family:'Rajdhani',sans-serif;font-size:2em;font-weight:700;letter-spacing:6px;color:var(--silver);display:none;}
+    @keyframes pulse{0%,100%{opacity:0.5;transform:scale(0.96)}50%{opacity:1;transform:scale(1.03)}}
+    .ld-bar{width:120px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
+    .ld-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:ldfill 1.8s ease-in-out forwards;}
+    @keyframes ldfill{0%{width:0%}60%{width:75%}100%{width:100%}}
+    .ld-text{font-size:0.58em;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+
+    @media(max-width:768px){
+      .hamburger{display:flex;align-items:center;}
+      .navbar-brand{border-right:none;}
+      .navbar-brand-text,.navbar-clock,.navbar-sep{display:none;}
+      .btn-logout,.user-info{display:none;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,0.5);}
+      .s-overlay.show{display:block;}
+      .main{margin-left:0;padding:12px;}
+      .detail-grid{grid-template-columns:1fr;}
+      .mini-stats{gap:6px;}
+      .plg-trx{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('ovF').style.display='block'"/>
+  <div class="ov-fallback" id="ovF">AMU</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-text">Memuat data pelanggan...</div>
+</div>
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('bF').style.display='block'"/>
+    <div class="navbar-brand-fallback" id="bF">AMU</div>
+    <div class="navbar-brand-text">Auto Mitra Utama<span>Start Here, Drive Next</span></div>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
+  <div class="navbar-sep"></div>
+  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <div class="navbar-sep"></div>
+  <div class="user-chip">
+    <div class="user-av" id="uAv">--</div>
+    <div class="user-info"><div class="user-name" id="uName">–</div><div class="user-role" id="uRole">–</div></div>
+  </div>
+  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <div class="navbar-goldline"></div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Utama</div>
+  <div class="menu-item" onclick="goTo('dashboard')"><span class="menu-icon">⊞</span><span class="menu-label">Dashboard</span></div>
+  <div class="sidebar-section">Operasional</div>
+  <div class="menu-item" onclick="goTo('kendaraan')"><span class="menu-icon">🚗</span><span class="menu-label">Kendaraan</span></div>
+  <div class="menu-item" onclick="goTo('servis')"><span class="menu-icon">🔧</span><span class="menu-label">Servis</span></div>
+  <div class="menu-item" onclick="goTo('sparepart')"><span class="menu-icon">🔩</span><span class="menu-label">Sparepart</span></div>
+  <div class="sidebar-section">Keuangan</div>
+  <div class="menu-item" onclick="goTo('keuangan')"><span class="menu-icon">💰</span><span class="menu-label">Keuangan</span></div>
+  <div class="menu-item" onclick="goTo('laporan')"><span class="menu-icon">📊</span><span class="menu-label">Laporan</span></div>
+  <div class="sidebar-section">Manajemen</div>
+  <div class="menu-item active"><span class="menu-icon">👥</span><span class="menu-label">Pelanggan</span></div>
+  <div class="menu-item" onclick="goTo('staff')"><span class="menu-icon">👤</span><span class="menu-label">Staff</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">Sistem</div>
+  <div class="menu-item" onclick="goTo('master-data')"><span class="menu-icon">📋</span><span class="menu-label">Master Data</span></div>
+  <div class="menu-item" onclick="goTo('pengaturan')"><span class="menu-icon">⚙</span><span class="menu-label">Pengaturan</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div><div class="su-name" id="suName">–</div><div class="su-role" id="suRole">–</div></div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-header">
+    <div class="pg-title">Pelanggan</div>
+    <div class="pg-sub">Data pelanggan dari transaksi kendaraan & servis</div>
+    <div class="pg-line"></div>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-stat"><div class="mini-stat-icon">👥</div><div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Pelanggan</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🚗</div><div><div class="mini-stat-val" id="statBeli">0</div><div class="mini-stat-lbl">Pembeli Kendaraan</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🔧</div><div><div class="mini-stat-val" id="statServis">0</div><div class="mini-stat-lbl">Pelanggan Servis</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">⭐</div><div><div class="mini-stat-val" id="statLoyal">0</div><div class="mini-stat-lbl">Loyal (Beli+Servis)</div></div></div>
+  </div>
+
+  <div class="toolbar">
+    <select class="filter-select" id="filterTipe" onchange="applyFilter()">
+      <option value="">Semua Pelanggan</option>
+      <option value="beli">Pembeli Kendaraan</option>
+      <option value="servis">Pelanggan Servis</option>
+      <option value="loyal">Loyal (Beli+Servis)</option>
+    </select>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari nama / WA..." oninput="applyFilter()"/>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="plg-list" id="plgList">
+      <div class="empty"><div class="empty-icon">👥</div>Memuat data pelanggan...</div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL DETAIL PELANGGAN -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-modal">
+    <div class="detail-hd">
+      <div class="detail-hd-av" id="dAv">–</div>
+      <div class="detail-hd-info">
+        <div class="detail-hd-nama" id="dNama">–</div>
+        <div class="detail-hd-wa" id="dWa">–</div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+
+      <!-- Summary -->
+      <div class="plg-summary">
+        <div class="plg-sum-item"><div class="plg-sum-val" id="dTotalBeli">0</div><div class="plg-sum-lbl">Kendaraan Dibeli</div></div>
+        <div class="plg-sum-item"><div class="plg-sum-val" id="dTotalServis">0</div><div class="plg-sum-lbl">Total Servis</div></div>
+        <div class="plg-sum-item"><div class="plg-sum-val" id="dTotalTrx" style="color:var(--gold2)">Rp 0</div><div class="plg-sum-lbl">Total Transaksi</div></div>
+      </div>
+
+      <!-- Info -->
+      <div class="detail-section">
+        <div class="detail-section-title">Info Pelanggan</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">Nama</div><div class="detail-item-value" id="dNamaFull">–</div></div>
+          <div><div class="detail-item-label">WA / HP</div><div class="detail-item-value" id="dWaFull">–</div></div>
+          <div class="span2"><div class="detail-item-label">Alamat</div><div class="detail-item-value" id="dAlamat">–</div></div>
+        </div>
+      </div>
+
+      <!-- Riwayat Kendaraan -->
+      <div class="detail-section" id="riwayatBeliWrap" style="display:none">
+        <div class="detail-section-title">🚗 Riwayat Beli Kendaraan</div>
+        <div id="riwayatBeli"></div>
+      </div>
+
+      <!-- Riwayat Servis -->
+      <div class="detail-section" id="riwayatServisWrap" style="display:none">
+        <div class="detail-section-title">🔧 Riwayat Servis</div>
+        <div id="riwayatServis"></div>
+      </div>
+
+    </div>
+    <div class="detail-ft">
+      <button class="btn-cancel" onclick="closeDetail()">Tutup</button>
+      <a class="btn-wa" id="dWaBtn" href="#" target="_blank" style="display:none">💬 Hubungi WA</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let allPelanggan = [];
+
+  const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+
+  // ── Cek login ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    const email = user.email||'';
+    const inisial = email.substring(0,2).toUpperCase();
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadData();
+  });
+
+  // ── Load & Agregasi Data Pelanggan ──
+  async function loadData() {
+    const pelangganMap = {};
+
+    // Normalisasi nama untuk penggabungan
+    const normKey = (nama, wa) => {
+      const n = (nama||'').toUpperCase().trim();
+      const w = (wa||'').replace(/\D/g,'');
+      return w.length > 6 ? w : n; // prioritas WA sebagai key unik
+    };
+
+    // 1. Ambil dari kendaraan yang sudah terjual
+    try {
+      const kSnap = await getDocs(collection(db, 'kendaraan'));
+      kSnap.docs.forEach(d => {
+        const k = d.data();
+        if (k.status !== 'terjual' || !k.penjualan) return;
+        const p = k.penjualan;
+        const nama = (p.namaPembeli||'').toUpperCase().trim();
+        if (!nama) return;
+        const key = normKey(nama, p.waPembeli);
+        if (!pelangganMap[key]) {
+          pelangganMap[key] = {
+            nama, wa: p.waPembeli||'', alamat: p.alamatPembeli||'',
+            beli: [], servis: [], totalTrx: 0
+          };
+        }
+        pelangganMap[key].beli.push({
+          unit: `${k.merek||''} ${k.model||''} ${k.tahun||''}`.trim(),
+          nopol: k.nopol||'',
+          harga: parseInt(p.hargaJualFinal||k.hargaJual||0),
+          tgl: p.tanggalJual||k.tglTerjual||''
+        });
+        pelangganMap[key].totalTrx += parseInt(p.hargaJualFinal||k.hargaJual||0);
+        // Update alamat kalau belum ada
+        if (!pelangganMap[key].alamat && p.alamatPembeli) pelangganMap[key].alamat = p.alamatPembeli;
+        if (!pelangganMap[key].wa && p.waPembeli) pelangganMap[key].wa = p.waPembeli;
+      });
+    } catch(e) {}
+
+    // 2. Ambil dari servis
+    try {
+      const sSnap = await getDocs(collection(db, 'servis'));
+      sSnap.docs.forEach(d => {
+        const s = d.data();
+        const nama = (s.namaPelanggan||'').toUpperCase().trim();
+        if (!nama) return;
+        const key = normKey(nama, s.waPelanggan);
+        if (!pelangganMap[key]) {
+          pelangganMap[key] = {
+            nama, wa: s.waPelanggan||'', alamat: s.alamat||'',
+            beli: [], servis: [], totalTrx: 0
+          };
+        }
+        pelangganMap[key].servis.push({
+          jenis: s.jenisServis||'-',
+          kendaraan: `${s.merekKendaraan||''} ${s.nopolServis||''}`.trim(),
+          total: parseInt(s.totalBiaya||0),
+          tgl: s.tglMasukServis||'',
+          status: s.status||'antri'
+        });
+        pelangganMap[key].totalTrx += parseInt(s.totalBiaya||0);
+        if (!pelangganMap[key].alamat && s.alamat) pelangganMap[key].alamat = s.alamat;
+        if (!pelangganMap[key].wa && s.waPelanggan) pelangganMap[key].wa = s.waPelanggan;
+      });
+    } catch(e) {}
+
+    // Convert map ke array, sort by totalTrx
+    allPelanggan = Object.values(pelangganMap)
+      .sort((a,b) => b.totalTrx - a.totalTrx);
+
+    updateStats();
+    renderList(allPelanggan);
+  }
+
+  function updateStats() {
+    const beli   = allPelanggan.filter(p => p.beli.length > 0);
+    const servis = allPelanggan.filter(p => p.servis.length > 0);
+    const loyal  = allPelanggan.filter(p => p.beli.length > 0 && p.servis.length > 0);
+    document.getElementById('statTotal').textContent  = allPelanggan.length;
+    document.getElementById('statBeli').textContent   = beli.length;
+    document.getElementById('statServis').textContent = servis.length;
+    document.getElementById('statLoyal').textContent  = loyal.length;
+  }
+
+  // ── Filter ──
+  window.applyFilter = function() {
+    const tipe   = document.getElementById('filterTipe').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allPelanggan.filter(p => {
+      if (tipe === 'beli'  && p.beli.length === 0) return false;
+      if (tipe === 'servis'&& p.servis.length === 0) return false;
+      if (tipe === 'loyal' && !(p.beli.length > 0 && p.servis.length > 0)) return false;
+      if (search && ![(p.nama||''),(p.wa||''),(p.alamat||'')].some(v => v.toLowerCase().includes(search))) return false;
+      return true;
+    });
+    renderList(filtered);
+  };
+
+  // ── Render List ──
+  function renderList(data) {
+    if (data.length === 0) {
+      document.getElementById('plgList').innerHTML = `<div class="empty"><div class="empty-icon">👥</div>Belum ada data pelanggan</div>`;
+      return;
+    }
+    document.getElementById('plgList').innerHTML = data.map(p => {
+      const inisial = (p.nama||'?').substring(0,2);
+      const loyal   = p.beli.length > 0 && p.servis.length > 0;
+      return `
+        <div class="plg-card" onclick="showDetail('${encodeURIComponent(p.nama)}')">
+          <div class="plg-av">${inisial}</div>
+          <div class="plg-info">
+            <div class="plg-nama">${p.nama||'-'} ${loyal ? '⭐' : ''}</div>
+            <div class="plg-wa">${p.wa ? `+${p.wa}` : p.alamat||'-'}</div>
+            <div class="plg-badges">
+              ${p.beli.length   > 0 ? `<span class="plg-badge plg-badge-beli">🚗 ${p.beli.length} Kendaraan</span>` : ''}
+              ${p.servis.length > 0 ? `<span class="plg-badge plg-badge-servis">🔧 ${p.servis.length} Servis</span>` : ''}
+            </div>
+            ${p.wa ? `<a class="plg-wa-btn" href="https://wa.me/${p.wa}" target="_blank" onclick="event.stopPropagation()">💬 WA</a>` : ''}
+          </div>
+          <div class="plg-trx">
+            <div class="plg-trx-val">${p.totalTrx > 0 ? fmt(p.totalTrx) : '-'}</div>
+            <div class="plg-trx-lbl">Total Transaksi</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Detail Pelanggan ──
+  window.showDetail = function(namaEncoded) {
+    const nama = decodeURIComponent(namaEncoded);
+    const p = allPelanggan.find(x => x.nama === nama);
+    if (!p) return;
+
+    const inisial = (p.nama||'?').substring(0,2);
+    document.getElementById('dAv').textContent      = inisial;
+    document.getElementById('dNama').textContent    = p.nama||'-';
+    document.getElementById('dWa').textContent      = p.wa ? `+${p.wa}` : 'Tidak ada WA';
+    document.getElementById('dNamaFull').textContent= p.nama||'-';
+    document.getElementById('dWaFull').textContent  = p.wa ? `+${p.wa}` : '-';
+    document.getElementById('dAlamat').textContent  = p.alamat||'-';
+    document.getElementById('dTotalBeli').textContent  = p.beli.length;
+    document.getElementById('dTotalServis').textContent= p.servis.length;
+    document.getElementById('dTotalTrx').textContent   = p.totalTrx > 0 ? fmt(p.totalTrx) : '-';
+
+    // WA button
+    const waBtn = document.getElementById('dWaBtn');
+    if (p.wa) { waBtn.href = `https://wa.me/${p.wa}`; waBtn.style.display = 'flex'; }
+    else { waBtn.style.display = 'none'; }
+
+    // Riwayat Beli
+    if (p.beli.length > 0) {
+      document.getElementById('riwayatBeliWrap').style.display = 'block';
+      document.getElementById('riwayatBeli').innerHTML = p.beli.map(b => `
+        <div class="riwayat-item">
+          <div class="riwayat-icon">🚗</div>
+          <div class="riwayat-info">
+            <div class="riwayat-nama">${b.unit||'-'} ${b.nopol ? `(${b.nopol})` : ''}</div>
+            <div class="riwayat-tgl">${b.tgl||'-'}</div>
+          </div>
+          <div class="riwayat-val">${b.harga > 0 ? fmt(b.harga) : '-'}</div>
+        </div>`).join('');
+    } else {
+      document.getElementById('riwayatBeliWrap').style.display = 'none';
+    }
+
+    // Riwayat Servis
+    if (p.servis.length > 0) {
+      document.getElementById('riwayatServisWrap').style.display = 'block';
+      document.getElementById('riwayatServis').innerHTML = p.servis.map(s => `
+        <div class="riwayat-item">
+          <div class="riwayat-icon">🔧</div>
+          <div class="riwayat-info">
+            <div class="riwayat-nama">${s.jenis||'-'} — ${s.kendaraan||'-'}</div>
+            <div class="riwayat-tgl">${s.tgl||'-'} · <span class="bs bs-${s.status}">${s.status}</span></div>
+          </div>
+          <div class="riwayat-val">${s.total > 0 ? fmt(s.total) : '-'}</div>
+        </div>`).join('');
+    } else {
+      document.getElementById('riwayatServisWrap').style.display = 'none';
+    }
+
+    document.getElementById('detailOverlay').classList.add('show');
+  };
+
+  window.closeDetail = function() {
+    document.getElementById('detailOverlay').classList.remove('show');
+  };
+
+  // ── Toast ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Clock ──
+  function tick() {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Auto Logout 5 Menit ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      showToast('Sesi berakhir karena tidak aktif.','error');
+      setTimeout(async () => { await signOut(auth); window.location.href = '/automitrautama/index.html'; }, 2000);
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','touchstart'].forEach(e => document.addEventListener(e, resetTimer, {passive:true}));
+  resetTimer();
+
+  // ── Back Button ──
+  window.history.pushState(null,'',window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    } else { window.history.pushState(null,'',window.location.href); }
+  });
+
+  // ── Logout ──
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar?')) { await signOut(auth); window.location.href = '/automitrautama/index.html'; }
+  };
+
+  // ── Navigasi ──
+  const pages = {
+    'dashboard':'/automitrautama/admin/dashboard.html','kendaraan':'/automitrautama/admin/kendaraan.html',
+    'servis':'/automitrautama/admin/servis.html','sparepart':'/automitrautama/admin/sparepart.html',
+    'keuangan':'/automitrautama/admin/keuangan.html','laporan':'/automitrautama/admin/laporan.html',
+    'pelanggan':'/automitrautama/admin/pelanggan.html','staff':'/automitrautama/admin/staff.html',
+    'master-data':'/automitrautama/admin/master-data.html','pengaturan':'/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => {
+    if (pages[page]) { window.location.href = pages[page]; return; }
+    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+  };
+
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeDetail(); });
+</script>
+</body>
+</html>
