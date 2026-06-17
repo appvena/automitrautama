@@ -249,6 +249,7 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('referensi')">📋 Data Referensi</div>
     <div class="tab" onclick="switchTab('field-kendaraan')">🚗 Field Kendaraan</div>
+    <div class="tab" onclick="switchTab('field-staff')">👤 Field Staff</div>
   </div>
 
   <!-- TAB: DATA REFERENSI -->
@@ -308,10 +309,23 @@
     <div class="df-panel">
       <div class="df-header">
         <div class="df-title">Field Form Kendaraan</div>
-        <button class="btn-add" onclick="openFieldModal()">+ Tambah Field</button>
+        <button class="btn-add" onclick="openFieldModal('kendaraan')">+ Tambah Field</button>
       </div>
       <div class="df-sections" id="dfSections">
         <div class="empty"><div class="empty-icon">⚙️</div>Memuat field...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: FIELD STAFF -->
+  <div class="tab-content" id="tab-field-staff">
+    <div class="df-panel">
+      <div class="df-header">
+        <div class="df-title">Field Form Staff</div>
+        <button class="btn-add" onclick="openFieldModal('staff')">+ Tambah Field</button>
+      </div>
+      <div class="df-sections" id="dfStaffSections">
+        <div class="empty"><div class="empty-icon">⚙️</div>Memuat field staff...</div>
       </div>
     </div>
   </div>
@@ -510,12 +524,15 @@
   });
 
   // ── Tab switch ──
+  let currentFieldType = 'kendaraan'; // track kendaraan atau staff
+
   window.switchTab = function(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     event.currentTarget.classList.add('active');
     document.getElementById(`tab-${tab}`).classList.add('active');
-    if (tab === 'field-kendaraan') loadDynamicFields();
+    if (tab === 'field-kendaraan') { currentFieldType = 'kendaraan'; loadDynamicFields(); }
+    if (tab === 'field-staff')     { currentFieldType = 'staff'; loadDynamicFieldsStaff(); }
   };
 
   // ══════════════════════════════════
@@ -721,21 +738,38 @@
     }).join('');
   }
 
-  window.openFieldModal = function() {
+  window.openFieldModal = function(type) {
+    if (type) currentFieldType = type;
     editFieldId = null;
-    document.getElementById('fieldModalTitle').textContent = 'Tambah Field Kendaraan';
+    const title = currentFieldType === 'staff' ? 'Tambah Field Staff' : 'Tambah Field Kendaraan';
+    document.getElementById('fieldModalTitle').textContent = title;
     document.getElementById('fNamaField').value = '';
     document.getElementById('fTipeField').value = 'text';
-    document.getElementById('fSection').value = 'identitas';
-    document.getElementById('fUrutan').value = '';
-    document.getElementById('fWajib').checked = false;
+    document.getElementById('fSection').value   = currentFieldType === 'staff' ? 'info' : 'identitas';
+    document.getElementById('fUrutan').value    = '';
+    document.getElementById('fWajib').checked   = false;
     document.getElementById('fStatusField').value = 'aktif';
     document.getElementById('fDropdownSourceWrap').style.display = 'none';
+
+    // Update section options sesuai type
+    const sectionEl = document.getElementById('fSection');
+    if (currentFieldType === 'staff') {
+      sectionEl.innerHTML = `
+        <option value="info">Info Tambahan</option>
+        <option value="pendidikan">Pendidikan & Sertifikasi</option>
+        <option value="lainnya">Lainnya</option>`;
+    } else {
+      sectionEl.innerHTML = `
+        <option value="identitas">Identitas Kendaraan</option>
+        <option value="dokumen">Identitas Dokumen</option>
+        <option value="pembelian">Pembelian & Harga</option>
+        <option value="lainnya">Lainnya</option>`;
+    }
     document.getElementById('fieldModalOverlay').classList.add('show');
   };
 
   window.openFieldModalSection = function(section) {
-    openFieldModal();
+    openFieldModal(currentFieldType);
     document.getElementById('fSection').value = section;
   };
 
@@ -772,6 +806,7 @@
     const status  = document.getElementById('fStatusField').value;
     const dropdownSource = document.getElementById('fDropdownSource').value;
     const btn    = document.getElementById('btnSaveField');
+    const colName = currentFieldType === 'staff' ? 'field_staff' : 'field_kendaraan';
 
     if (!nama) { showToast('Nama field tidak boleh kosong!', 'error'); return; }
 
@@ -782,22 +817,27 @@
 
     try {
       if (editFieldId) {
-        await updateDoc(doc(db, 'field_kendaraan', editFieldId), payload);
+        await updateDoc(doc(db, colName, editFieldId), payload);
         showToast('Field berhasil diperbarui ✓', 'success');
       } else {
         payload.createdAt = new Date().toISOString();
-        await addDoc(collection(db, 'field_kendaraan'), payload);
+        await addDoc(collection(db, colName), payload);
         showToast('Field berhasil ditambahkan ✓', 'success');
       }
       closeFieldModal();
-      await loadDynamicFields();
+      if (currentFieldType === 'staff') await loadDynamicFieldsStaff();
+      else await loadDynamicFields();
     } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
 
     btn.disabled = false; btn.textContent = 'Simpan';
   };
 
   window.hapusField = async function(id, nama) {
-    if (!confirm(`Yakin hapus field "${nama}"?\nData kendaraan yang sudah ada tidak akan terpengaruh.`)) return;
+    const colName = currentFieldType === 'staff' ? 'field_staff' : 'field_kendaraan';
+    const konfirmMsg = currentFieldType === 'staff'
+      ? `Yakin hapus field "${nama}"?\nData staff yang sudah ada tidak akan terpengaruh.`
+      : `Yakin hapus field "${nama}"?\nData kendaraan yang sudah ada tidak akan terpengaruh.`;
+    if (!confirm(konfirmMsg)) return;
     const pw = prompt('Masukkan password untuk konfirmasi:');
     if (!pw) return;
     try {
@@ -805,9 +845,10 @@
       const { EmailAuthProvider, reauthenticateWithCredential } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
       const credential = EmailAuthProvider.credential(user.email, pw);
       await reauthenticateWithCredential(user, credential);
-      await deleteDoc(doc(db, 'field_kendaraan', id));
+      await deleteDoc(doc(db, colName, id));
       showToast('Field berhasil dihapus ✓', 'success');
-      await loadDynamicFields();
+      if (currentFieldType === 'staff') await loadDynamicFieldsStaff();
+      else await loadDynamicFields();
     } catch(e) {
       if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
         showToast('Password salah!', 'error');
@@ -815,6 +856,91 @@
         showToast('Gagal: ' + e.message, 'error');
       }
     }
+  };
+
+  // ── Field Default Staff ──
+  const DEFAULT_FIELDS_STAFF = {
+    info: [
+      {nama:'NIK / ID Staff', tipe:'text', wajib:true, locked:true},
+      {nama:'Nama Lengkap', tipe:'text', wajib:true, locked:true},
+      {nama:'Jabatan', tipe:'dropdown', source:'jabatan', wajib:true, locked:true},
+      {nama:'Status', tipe:'dropdown_static', wajib:true, locked:true},
+      {nama:'No. WA / HP', tipe:'text', wajib:false, locked:true},
+      {nama:'Tanggal Bergabung', tipe:'date', wajib:false, locked:true},
+      {nama:'Alamat', tipe:'text', wajib:false, locked:true},
+      {nama:'Foto (URL)', tipe:'text', wajib:false, locked:true},
+    ],
+    pendidikan: [],
+    lainnya: []
+  };
+
+  const sectionNamaStaff = {
+    info: 'Info Utama',
+    pendidikan: 'Pendidikan & Sertifikasi',
+    lainnya: 'Lainnya'
+  };
+
+  async function loadDynamicFieldsStaff() {
+    const container = document.getElementById('dfStaffSections');
+    container.innerHTML = '<div class="empty"><div class="empty-icon">⚙️</div>Memuat field staff...</div>';
+    let customFields = [];
+    try {
+      const snap = await getDocs(query(collection(db, 'field_staff'), orderBy('urutan')));
+      customFields = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    } catch(e) { customFields = []; }
+
+    const sections = ['info','pendidikan','lainnya'];
+    container.innerHTML = sections.map(sec => {
+      const defaultF = DEFAULT_FIELDS_STAFF[sec] || [];
+      const customF  = customFields.filter(f => f.section === sec);
+      return `
+        <div class="df-section">
+          <div class="df-section-hd">
+            <div class="df-section-name">${sectionNamaStaff[sec]}</div>
+            <div class="df-section-locked">Field default terkunci 🔒</div>
+          </div>
+          <div class="df-fields">
+            ${defaultF.map(f => `
+              <div class="df-field-item">
+                <div class="df-field-name">${f.nama} ${f.wajib?'<span style="color:var(--error)">*</span>':''}</div>
+                <div class="df-field-type">${tipeNama[f.tipe]||f.tipe}</div>
+                <span class="badge-kunci">🔒 Default</span>
+              </div>`).join('')}
+            ${customF.map(f => `
+              <div class="df-field-item">
+                <div class="df-field-name">${f.nama} ${f.wajib?'<span style="color:var(--error)">*</span>':''}</div>
+                <div class="df-field-type">${tipeNama[f.tipe]||f.tipe}</div>
+                <span class="badge-${f.status||'aktif'}">${f.status||'aktif'}</span>
+                <div class="df-field-actions">
+                  <button class="btn-sm btn-sm-edit" onclick="editFieldStaff('${f.id}')">Edit</button>
+                  <button class="btn-sm btn-sm-del"  onclick="hapusField('${f.id}','${f.nama}')">Hapus</button>
+                </div>
+              </div>`).join('')}
+            <div class="btn-add-field" onclick="openFieldModalSection('${sec}')">
+              <span>+</span> Tambah field di ${sectionNamaStaff[sec]}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.editFieldStaff = async function(id) {
+    currentFieldType = 'staff';
+    try {
+      const snap = await getDocs(collection(db, 'field_staff'));
+      const d = snap.docs.map(x => ({id:x.id,...x.data()})).find(x => x.id === id);
+      if (!d) return;
+      editFieldId = id;
+      openFieldModal('staff');
+      document.getElementById('fieldModalTitle').textContent = 'Edit Field Staff';
+      document.getElementById('fNamaField').value   = d.nama||'';
+      document.getElementById('fTipeField').value   = d.tipe||'text';
+      document.getElementById('fSection').value     = d.section||'info';
+      document.getElementById('fUrutan').value      = d.urutan||'';
+      document.getElementById('fWajib').checked     = d.wajib||false;
+      document.getElementById('fStatusField').value = d.status||'aktif';
+      document.getElementById('fDropdownSourceWrap').style.display = d.tipe==='dropdown'?'block':'none';
+    } catch(e) { showToast('Gagal memuat field','error'); }
   };
 
   // Toggle dropdown source

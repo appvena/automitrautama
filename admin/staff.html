@@ -392,11 +392,51 @@
         <div class="form-field span2"><label class="form-label">Alamat</label><input type="text" class="form-input caps" id="fAlamat" placeholder="Alamat staff..."/></div>
         <div class="form-field span2"><label class="form-label">URL Foto</label><input type="text" class="form-input" id="fFoto" placeholder="https://..."/></div>
         <div class="form-field span2"><label class="form-label">Catatan</label><input type="text" class="form-input" id="fCatatan" placeholder="Catatan tambahan..."/></div>
+        <!-- Dynamic Fields Staff -->
+        <div id="dynamicFieldsStaffWrap" style="grid-column:span 2"></div>
       </div>
     </div>
     <div class="modal-ft">
       <button class="btn-cancel" onclick="closeModal()">Batal</button>
       <button class="btn-save" id="btnSave" onclick="saveData()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL STAFF -->
+<div class="modal-overlay" id="detailModalOverlay" style="z-index:190">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-hd">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="detailAv" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0">–</div>
+        <div>
+          <div class="modal-title" id="detailNama">Detail Staff</div>
+          <div style="font-size:0.72em;color:var(--gold);margin-top:1px" id="detailJabatan">–</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:75vh">
+
+      <!-- Info Utama -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">NIK</div><div style="font-size:0.85em;color:var(--silver2);font-weight:600" id="detailNik">–</div></div>
+        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Status</div><div id="detailStatus">–</div></div>
+        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">No. WA / HP</div>
+          <div style="font-size:0.85em;color:var(--silver2)" id="detailWa">–</div></div>
+        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Tgl Bergabung</div><div style="font-size:0.85em;color:var(--silver2)" id="detailTglGabung">–</div></div>
+        <div style="grid-column:span 2"><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Alamat</div><div style="font-size:0.85em;color:var(--silver2)" id="detailAlamat">–</div></div>
+        <div style="grid-column:span 2" id="detailCatatanWrap"><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Catatan</div><div style="font-size:0.85em;color:var(--text)" id="detailCatatan">–</div></div>
+      </div>
+
+      <!-- Dynamic Fields -->
+      <div id="detailDynamicFields"></div>
+
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeDetailModal()">Tutup</button>
+      <button class="btn-cancel" onclick="editFromDetail()" style="border-color:var(--info);color:var(--info)">✏️ Edit</button>
+      <button class="btn-save" onclick="cetakDariDetail()" style="background:linear-gradient(135deg,#1a3a1a,var(--success));color:#fff">🪪 Cetak ID Card</button>
     </div>
   </div>
 </div>
@@ -465,6 +505,8 @@
 
   let allData = [];
   let editId  = null;
+  let dynamicFieldsStaff = [];
+  let currentStaffId = null;
 
   // ── Cek login ──
   onAuthStateChanged(auth, async (user) => {
@@ -476,8 +518,53 @@
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadJabatan();
+    await loadDynamicFieldsStaff();
     await loadData();
   });
+
+  // ── Load Dynamic Fields Staff ──
+  async function loadDynamicFieldsStaff() {
+    try {
+      const snap = await getDocs(query(collection(db,'field_staff'), orderBy('urutan')));
+      dynamicFieldsStaff = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(f => f.status === 'aktif');
+    } catch(e) { dynamicFieldsStaff = []; }
+    renderDynamicFieldsForm();
+  }
+
+  function renderDynamicFieldsForm() {
+    const wrap = document.getElementById('dynamicFieldsStaffWrap');
+    if (!wrap || dynamicFieldsStaff.length === 0) { if(wrap) wrap.innerHTML=''; return; }
+
+    const sections = {};
+    dynamicFieldsStaff.forEach(f => {
+      if (!sections[f.section]) sections[f.section] = [];
+      sections[f.section].push(f);
+    });
+
+    const sectionNama = {info:'Info Tambahan', pendidikan:'Pendidikan & Sertifikasi', lainnya:'Lainnya'};
+
+    wrap.innerHTML = Object.entries(sections).map(([sec, fields]) => `
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)">${sectionNama[sec]||sec}</div>
+      <div class="form-grid">
+        ${fields.map(f => `
+          <div class="form-field ${f.tipe==='textarea'?'span2':''}">
+            <label class="form-label">${f.nama}${f.wajib?' *':''}</label>
+            ${renderFieldInput(f)}
+          </div>`).join('')}
+      </div>`).join('');
+  }
+
+  function renderFieldInput(f) {
+    const id = `df_${f.id}`;
+    switch(f.tipe) {
+      case 'text':     return `<input type="text" class="form-input" id="${id}" placeholder="${f.nama}..."/>`;
+      case 'number':   return `<input type="number" class="form-input" id="${id}" placeholder="0"/>`;
+      case 'date':     return `<input type="date" class="form-input" id="${id}"/>`;
+      case 'textarea': return `<textarea class="form-input" id="${id}" placeholder="${f.nama}..." style="min-height:60px;resize:vertical"></textarea>`;
+      case 'boolean':  return `<select class="form-select" id="${id}"><option value="">— Pilih —</option><option value="ya">Ya</option><option value="tidak">Tidak</option></select>`;
+      default:         return `<input type="text" class="form-input" id="${id}"/>`;
+    }
+  }
 
   // ── Load Jabatan ──
   async function loadJabatan() {
@@ -530,7 +617,7 @@
     document.getElementById('staffGrid').innerHTML = data.map(d => {
       const inisial = (d.nama||'?').substring(0,2);
       return `
-        <div class="staff-card" onclick="bukaIdCard('${d.id}')">
+        <div class="staff-card" onclick="showDetail('${d.id}')">
           ${d.foto
             ? `<img src="${d.foto}" class="staff-card-foto" onerror="this.outerHTML='<div class=staff-card-av>${inisial}</div>'">`
             : `<div class="staff-card-av">${inisial}</div>`
@@ -551,6 +638,63 @@
     }).join('');
   }
 
+  // ── Show Detail ──
+  window.showDetail = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    currentStaffId = id;
+    const inisial = (d.nama||'?').substring(0,2);
+
+    document.getElementById('detailAv').textContent       = inisial;
+    document.getElementById('detailNama').textContent     = d.nama||'-';
+    document.getElementById('detailJabatan').textContent  = d.jabatan||'-';
+    document.getElementById('detailNik').textContent      = d.nik||'-';
+    document.getElementById('detailStatus').innerHTML     = `<span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>`;
+    document.getElementById('detailTglGabung').textContent= d.tglGabung||'-';
+    document.getElementById('detailAlamat').textContent   = d.alamat||'-';
+    document.getElementById('detailCatatan').textContent  = d.catatan||'-';
+
+    // WA link
+    const waEl = document.getElementById('detailWa');
+    waEl.innerHTML = d.wa
+      ? `<a href="https://wa.me/${d.wa}" target="_blank" style="color:#25d366">💬 +${d.wa}</a>`
+      : '-';
+
+    // Dynamic fields
+    const dfWrap = document.getElementById('detailDynamicFields');
+    if (dynamicFieldsStaff.length > 0) {
+      dfWrap.innerHTML = dynamicFieldsStaff.map(f => {
+        const val = d[`df_${f.id}`];
+        return val ? `
+          <div style="margin-bottom:8px">
+            <div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">${f.nama}</div>
+            <div style="font-size:0.85em;color:var(--silver2)">${val}</div>
+          </div>` : '';
+      }).join('');
+    } else {
+      dfWrap.innerHTML = '';
+    }
+
+    document.getElementById('detailModalOverlay').classList.add('show');
+  };
+
+  window.closeDetailModal = function() {
+    document.getElementById('detailModalOverlay').classList.remove('show');
+    currentStaffId = null;
+  };
+
+  window.editFromDetail = function() {
+    const id = currentStaffId;
+    closeDetailModal();
+    editData(id);
+  };
+
+  window.cetakDariDetail = function() {
+    const id = currentStaffId;
+    closeDetailModal();
+    bukaIdCard(id);
+  };
+
   // ── Modal ──
   window.openModal = async function() {
     editId = null;
@@ -560,9 +704,12 @@
     });
     document.getElementById('fStatus').value    = 'aktif';
     document.getElementById('fTglGabung').value = new Date().toISOString().split('T')[0];
-    // Auto generate NIK
     const nik = await generateNik();
     document.getElementById('fNik').value = nik;
+    // Reset dynamic fields
+    dynamicFieldsStaff.forEach(f => {
+      const el = document.getElementById(`df_${f.id}`); if(el) el.value = '';
+    });
     document.getElementById('modalOverlay').classList.add('show');
   };
 
@@ -579,6 +726,11 @@
     document.getElementById('modalTitle').textContent = 'Edit Staff';
     const map = {fNik:'nik',fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan'};
     Object.entries(map).forEach(([elId,key]) => { const el = document.getElementById(elId); if(el) el.value = d[key]||''; });
+    // Isi dynamic fields
+    dynamicFieldsStaff.forEach(f => {
+      const el = document.getElementById(`df_${f.id}`);
+      if (el) el.value = d[`df_${f.id}`]||'';
+    });
     document.getElementById('modalOverlay').classList.add('show');
   };
 
@@ -603,6 +755,11 @@
       catatan:   document.getElementById('fCatatan').value,
       profileUrl:`https://appvena.github.io/automitrautama/staff-profile.html?id=${nik}`,
     };
+    // Simpan dynamic fields
+    dynamicFieldsStaff.forEach(f => {
+      const el = document.getElementById(`df_${f.id}`);
+      if (el) payload[`df_${f.id}`] = el.value;
+    });
     try {
       if (editId) {
         await updateDoc(doc(db,'staff',editId), payload);
@@ -765,7 +922,7 @@
 
   window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
   window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
-  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); tutupIdCard(); } });
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); tutupIdCard(); closeDetailModal(); } });
 </script>
 </body>
 </html>
