@@ -478,7 +478,7 @@
 </main>
 
 <!-- MODAL AKUN STAFF -->
-<div class="modal-overlay" id="modalAkun" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+<div id="modalAkun" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:440px;margin:auto;overflow:hidden;animation:modalIn 0.2s ease">
     <div style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between">
       <div style="font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase" id="modalAkunTitle">Tambah Akun Staff</div>
@@ -828,14 +828,14 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   window.openModalAkun = function() {
     editAkunId = null;
     document.getElementById('modalAkunTitle').textContent = 'Tambah Akun Staff';
-    document.getElementById('aNama').value     = '';
-    document.getElementById('aEmail').value   = '';
+    document.getElementById('aNama').value      = '';
+    document.getElementById('aEmail').value    = '';
     document.getElementById('aPassword').value = '';
-    document.getElementById('aRole').value    = 'mekanik';
-    document.getElementById('aNik').value     = '';
+    document.getElementById('aRole').value     = 'mekanik';
+    document.getElementById('aNik').value      = '';
     document.getElementById('aPasswordWrap').style.display = 'block';
-    document.getElementById('btnSimpanAkun').textContent = 'Buat Akun';
-    document.getElementById('modalAkun').style.display = 'flex';
+    document.getElementById('btnSimpanAkun').textContent   = 'Buat Akun';
+    document.getElementById('modalAkun').style.cssText     = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
   };
 
   window.editAkun = function(id) {
@@ -847,9 +847,9 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     document.getElementById('aEmail').value  = a.email||'';
     document.getElementById('aRole').value   = a.role||'staff';
     document.getElementById('aNik').value    = a.nik||'';
-    document.getElementById('aPasswordWrap').style.display = 'none'; // Edit tidak ubah password
-    document.getElementById('btnSimpanAkun').textContent = 'Simpan';
-    document.getElementById('modalAkun').style.display = 'flex';
+    document.getElementById('aPasswordWrap').style.display = 'none';
+    document.getElementById('btnSimpanAkun').textContent   = 'Simpan';
+    document.getElementById('modalAkun').style.cssText     = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
   };
 
   window.closeModalAkun = function() {
