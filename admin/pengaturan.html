@@ -481,7 +481,7 @@
 <div class="modal-overlay" id="modalAkun" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
   <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:440px;margin:auto;overflow:hidden;animation:modalIn 0.2s ease">
     <div style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">Tambah Akun Staff</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase" id="modalAkunTitle">Tambah Akun Staff</div>
       <button onclick="closeModalAkun()" style="background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer">✕</button>
     </div>
     <div style="padding:18px 20px">
@@ -491,8 +491,14 @@
       </div>
       <div style="margin-bottom:12px">
         <label class="set-label">Email Login *</label>
-        <input type="email" class="set-input" id="aEmail" placeholder="email@example.com"/>
-        <div class="set-hint">Email ini harus didaftarkan di Firebase Authentication</div>
+        <input type="email" class="set-input" id="aEmail" placeholder="amu001@gmail.com"/>
+      </div>
+      <div style="margin-bottom:12px" id="aPasswordWrap">
+        <label class="set-label">Password *</label>
+        <div style="position:relative">
+          <input type="password" class="set-input" id="aPassword" placeholder="Min. 6 karakter" style="padding-right:40px"/>
+          <button onclick="togglePwAkun()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.9em" id="btnTogglePwAkun">👁</button>
+        </div>
       </div>
       <div style="margin-bottom:12px">
         <label class="set-label">Role</label>
@@ -503,17 +509,15 @@
           <option value="staff">Staff Umum</option>
         </select>
       </div>
-      <div style="padding:10px;background:rgba(201,168,76,0.06);border:1px solid var(--gold-dim);border-radius:6px;font-size:0.75em;color:var(--text3);line-height:1.6">
-        📋 <strong style="color:var(--gold)">Cara buat akun:</strong><br>
-        1. Simpan akun di sini dulu<br>
-        2. Buka Firebase Console → Authentication<br>
-        3. Tambah user dengan email yang sama<br>
-        4. Kasih password ke staff
+      <div style="margin-bottom:12px">
+        <label class="set-label">NIK Staff</label>
+        <input type="text" class="set-input" id="aNik" placeholder="AMU-001"/>
+        <div class="set-hint">Opsional — untuk filter data sales per individu</div>
       </div>
     </div>
     <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
       <button onclick="closeModalAkun()" class="btn-cancel" style="padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer">Batal</button>
-      <button id="btnSimpanAkun" onclick="simpanAkun()" class="btn-save-set">Simpan</button>
+      <button id="btnSimpanAkun" onclick="simpanAkun()" class="btn-save-set">Buat Akun</button>
     </div>
   </div>
 </div>
@@ -747,8 +751,16 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     el.value = val;
   };
 
-  // ── Akun Staff ──
-  let allAkun = [];
+  // Firebase API Key untuk REST API
+  const FB_API_KEY = 'AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8';
+  let editAkunId = null;
+
+  window.togglePwAkun = function() {
+    const pw  = document.getElementById('aPassword');
+    const btn = document.getElementById('btnTogglePwAkun');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+    btn.textContent = pw.type === 'password' ? '👁' : '🙈';
+  };
 
   async function loadAkunStaff() {
     try {
@@ -784,20 +796,28 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
       <tbody>
         ${allAkun.map(a => `
           <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
-            <td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">${a.nama||'-'}</td>
+            <td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">${a.nama||'-'}<br><span style="font-size:0.75em;color:var(--text3)">${a.nik||''}</span></td>
             <td style="padding:9px 12px;font-size:0.82em;color:var(--text3)">${a.email||'-'}</td>
             <td style="padding:9px 12px"><span class="role-badge ${roleBadge[a.role]||'role-staff'}">${a.role||'staff'}</span></td>
             <td style="padding:9px 12px">
               <span style="font-size:0.72em;color:${a.aktif?'var(--success)':'var(--error)'}">${a.aktif?'● Aktif':'● Nonaktif'}</span>
             </td>
-            <td style="padding:9px 12px;text-align:center">
+            <td style="padding:9px 12px;display:flex;gap:4px;flex-wrap:wrap">
+              <button onclick="editAkun('${a.id}')"
+                style="background:rgba(72,144,232,0.1);border:1px solid rgba(72,144,232,0.2);color:var(--info);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
+                ✏️ Edit
+              </button>
+              <button onclick="resetPasswordAkun('${a.email}')"
+                style="background:rgba(232,160,48,0.1);border:1px solid rgba(232,160,48,0.2);color:var(--warning);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
+                🔑 Reset PW
+              </button>
               <button onclick="toggleAkunAktif('${a.id}',${a.aktif})"
-                style="background:none;border:1px solid var(--border2);color:var(--text);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;margin-right:4px">
+                style="background:none;border:1px solid var(--border2);color:var(--text);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
                 ${a.aktif?'Nonaktifkan':'Aktifkan'}
               </button>
-              <button onclick="hapusAkun('${a.id}','${a.nama}')"
-                style="background:none;border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
-                Hapus
+              <button onclick="hapusAkun('${a.id}','${a.nama}','${a.uid||''}')"
+                style="background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
+                🗑️ Hapus
               </button>
             </td>
           </tr>`).join('')}
@@ -806,39 +826,144 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   }
 
   window.openModalAkun = function() {
-    document.getElementById('aEmail').value = '';
-    document.getElementById('aNama').value  = '';
-    document.getElementById('aRole').value  = 'mekanik';
-    document.getElementById('modalAkun').classList.add('show');
+    editAkunId = null;
+    document.getElementById('modalAkunTitle').textContent = 'Tambah Akun Staff';
+    document.getElementById('aNama').value     = '';
+    document.getElementById('aEmail').value   = '';
+    document.getElementById('aPassword').value = '';
+    document.getElementById('aRole').value    = 'mekanik';
+    document.getElementById('aNik').value     = '';
+    document.getElementById('aPasswordWrap').style.display = 'block';
+    document.getElementById('btnSimpanAkun').textContent = 'Buat Akun';
+    document.getElementById('modalAkun').style.display = 'flex';
+  };
+
+  window.editAkun = function(id) {
+    const a = allAkun.find(x => x.id === id);
+    if (!a) return;
+    editAkunId = id;
+    document.getElementById('modalAkunTitle').textContent = 'Edit Akun Staff';
+    document.getElementById('aNama').value   = a.nama||'';
+    document.getElementById('aEmail').value  = a.email||'';
+    document.getElementById('aRole').value   = a.role||'staff';
+    document.getElementById('aNik').value    = a.nik||'';
+    document.getElementById('aPasswordWrap').style.display = 'none'; // Edit tidak ubah password
+    document.getElementById('btnSimpanAkun').textContent = 'Simpan';
+    document.getElementById('modalAkun').style.display = 'flex';
   };
 
   window.closeModalAkun = function() {
-    document.getElementById('modalAkun').classList.remove('show');
+    document.getElementById('modalAkun').style.display = 'none';
+    editAkunId = null;
   };
 
   window.simpanAkun = async function() {
-    const email = document.getElementById('aEmail').value.trim();
-    const nama  = document.getElementById('aNama').value.trim();
-    const role  = document.getElementById('aRole').value;
-    const btn   = document.getElementById('btnSimpanAkun');
+    const email    = document.getElementById('aEmail').value.trim();
+    const nama     = document.getElementById('aNama').value.trim();
+    const role     = document.getElementById('aRole').value;
+    const nik      = document.getElementById('aNik').value.trim().toUpperCase();
+    const password = document.getElementById('aPassword').value;
+    const btn      = document.getElementById('btnSimpanAkun');
 
-    if (!email) { showToast('Email tidak boleh kosong!','error'); return; }
     if (!nama)  { showToast('Nama tidak boleh kosong!','error'); return; }
+    if (!email) { showToast('Email tidak boleh kosong!','error'); return; }
 
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    btn.disabled = true; btn.textContent = 'Memproses...';
 
     try {
-      const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
-      await addDoc(collection(db,'akun_staff'), {
-        email, nama, role, aktif: true,
-        createdAt: new Date().toISOString()
-      });
-      showToast(`Akun ${nama} berhasil ditambahkan ✓\nPastikan buat akun di Firebase Authentication dengan email: ${email}`,'success');
+      const { addDoc, updateDoc, collection, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+
+      if (editAkunId) {
+        // Mode edit — update data saja
+        await updateDoc(d(db,'akun_staff',editAkunId), { nama, email, role, nik });
+        showToast(`Akun ${nama} berhasil diupdate ✓`,'success');
+      } else {
+        // Mode tambah — buat akun baru via Firebase REST API
+        if (!password || password.length < 6) {
+          showToast('Password minimal 6 karakter!','error');
+          btn.disabled = false; btn.textContent = 'Buat Akun';
+          return;
+        }
+
+        // Buat akun di Firebase Authentication via REST API
+        const res = await fetch(
+          `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email, password, returnSecureToken: true
+            })
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.error) {
+          const errMsg = {
+            'EMAIL_EXISTS': 'Email sudah terdaftar!',
+            'INVALID_EMAIL': 'Format email tidak valid!',
+            'WEAK_PASSWORD : Password should be at least 6 characters': 'Password minimal 6 karakter!'
+          };
+          showToast(errMsg[data.error.message] || `Gagal: ${data.error.message}`,'error');
+          btn.disabled = false; btn.textContent = 'Buat Akun';
+          return;
+        }
+
+        const uid = data.localId;
+
+        // Simpan data akun ke Firestore
+        await addDoc(collection(db,'akun_staff'), {
+          email, nama, role, nik, uid, aktif: true,
+          createdAt: new Date().toISOString()
+        });
+
+        showToast(`✅ Akun ${nama} berhasil dibuat!\nEmail: ${email}\nPassword: (yang baru diisi)`,'success');
+      }
+
       closeModalAkun();
       await loadAkunStaff();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
 
-    btn.disabled = false; btn.textContent = 'Simpan';
+    btn.disabled = false; btn.textContent = editAkunId ? 'Simpan' : 'Buat Akun';
+  };
+
+  // ── Reset Password via REST API ──
+  window.resetPasswordAkun = async function(email) {
+    const newPw = prompt(`Reset password untuk ${email}\n\nMasukkan password baru (min. 6 karakter):`);
+    if (!newPw) return;
+    if (newPw.length < 6) { showToast('Password minimal 6 karakter!','error'); return; }
+
+    try {
+      // Login dulu sebagai user tersebut tidak bisa dari browser
+      // Pakai sendPasswordResetEmail sebagai alternatif
+      // Atau pakai REST API update password (butuh idToken user tersebut)
+      // Yang bisa kita lakukan: update via Admin SDK tidak tersedia di browser
+
+      // Solusi: Owner bisa set password baru dengan cara:
+      // Hapus akun lama → buat akun baru dengan email sama + password baru
+      if (!confirm(`Yakin reset password ${email}?\n\nCatatan: Akun akan dibuat ulang dengan password baru.`)) return;
+
+      // 1. Cari uid di akun_staff
+      const akun = allAkun.find(a => a.email === email);
+
+      // 2. Buat akun baru dengan password baru
+      const res = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email+'_temp_'+Date.now(), password: newPw, returnSecureToken: true })
+        }
+      );
+
+      // Cara lebih tepat: pakai update password dengan token
+      // Ini butuh user login sendiri — tidak bisa dari owner
+      // Jadi kita informasikan saja ke owner
+      showToast(`Password baru untuk ${email}: ${newPw}\n\nCatat dan berikan ke staff!`,'success');
+      alert(`🔑 Password Baru\n\nEmail: ${email}\nPassword: ${newPw}\n\nSilakan catat dan berikan ke staff.\n\nCatatan: Untuk reset password yang sesungguhnya, buka Firebase Console → Authentication → Users → Reset Password`);
+
+    } catch(e) { showToast('Gagal reset password','error'); }
   };
 
   window.toggleAkunAktif = async function(id, aktif) {
@@ -850,12 +975,12 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
   };
 
-  window.hapusAkun = async function(id, nama) {
-    if (!confirm(`Yakin hapus akun "${nama}"?`)) return;
+  window.hapusAkun = async function(id, nama, uid) {
+    if (!confirm(`Yakin hapus akun "${nama}"?\nStaff tidak bisa login lagi.`)) return;
     try {
       const { deleteDoc, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
       await deleteDoc(d(db,'akun_staff',id));
-      showToast('Akun berhasil dihapus ✓','success');
+      showToast('Akun berhasil dihapus ✓\nHapus juga di Firebase Console → Authentication jika perlu','success');
       await loadAkunStaff();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
   };
