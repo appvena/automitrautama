@@ -406,12 +406,8 @@
         <button class="btn-save-set" onclick="openModalAkun()">+ Tambah Akun</button>
       </div>
       <div class="set-panel-body">
-        <div style="font-size:0.78em;color:var(--text3);margin-bottom:14px;padding:10px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px">
-          💡 Setiap staff bisa punya akun login sendiri. Akun dibuat di Firebase Authentication secara terpisah.
-          Hubungi admin Firebase atau gunakan tombol di bawah untuk buat akun baru.
-        </div>
         <div id="akunList">
-          <div class="empty">Memuat data akun...</div>
+          <div class="empty">Belum ada akun staff. Klik "+ Tambah Akun" untuk mulai.</div>
         </div>
       </div>
     </div>
@@ -525,7 +521,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
     authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
@@ -754,6 +750,7 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   // Firebase API Key untuk REST API
   const FB_API_KEY = 'AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8';
   let editAkunId = null;
+  let allAkun = [];
 
   window.togglePwAkun = function() {
     const pw  = document.getElementById('aPassword');
@@ -763,9 +760,9 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   };
 
   async function loadAkunStaff() {
+    document.getElementById('akunList').innerHTML = '<div class="empty">Memuat...</div>';
     try {
-      const { getDocs, collection, query: q, orderBy: ob } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
-      const snap = await getDocs(q(collection(db,'akun_staff'), ob('nama')));
+      const snap = await getDocs(query(collection(db,'akun_staff'), orderBy('nama')));
       allAkun = snap.docs.map(d => ({id:d.id,...d.data()}));
     } catch(e) { allAkun = []; }
     renderAkunList();
@@ -871,11 +868,8 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     btn.disabled = true; btn.textContent = 'Memproses...';
 
     try {
-      const { addDoc, updateDoc, collection, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
-
       if (editAkunId) {
-        // Mode edit — update data saja
-        await updateDoc(d(db,'akun_staff',editAkunId), { nama, email, role, nik });
+        await updateDoc(doc(db,'akun_staff',editAkunId), { nama, email, role, nik });
         showToast(`Akun ${nama} berhasil diupdate ✓`,'success');
       } else {
         // Mode tambah — buat akun baru via Firebase REST API
@@ -912,7 +906,6 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
         const uid = data.localId;
 
-        // Simpan data akun ke Firestore
         await addDoc(collection(db,'akun_staff'), {
           email, nama, role, nik, uid, aktif: true,
           createdAt: new Date().toISOString()
@@ -968,19 +961,17 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
   window.toggleAkunAktif = async function(id, aktif) {
     try {
-      const { updateDoc, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
-      await updateDoc(d(db,'akun_staff',id), { aktif: !aktif });
+      await updateDoc(doc(db,'akun_staff',id), { aktif: !aktif });
       showToast(`Akun berhasil ${!aktif?'diaktifkan':'dinonaktifkan'} ✓`,'success');
       await loadAkunStaff();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
   };
 
-  window.hapusAkun = async function(id, nama, uid) {
+  window.hapusAkun = async function(id, nama) {
     if (!confirm(`Yakin hapus akun "${nama}"?\nStaff tidak bisa login lagi.`)) return;
     try {
-      const { deleteDoc, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
-      await deleteDoc(d(db,'akun_staff',id));
-      showToast('Akun berhasil dihapus ✓\nHapus juga di Firebase Console → Authentication jika perlu','success');
+      await deleteDoc(doc(db,'akun_staff',id));
+      showToast('Akun berhasil dihapus ✓','success');
       await loadAkunStaff();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
   };
