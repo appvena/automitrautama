@@ -86,6 +86,7 @@
     .set-textarea{resize:vertical;min-height:80px;line-height:1.6;}
     .set-select option{background:var(--card2);}
     .set-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .set-group.span2{grid-column:span 2;}
     .preview-box{padding:10px 14px;background:var(--content);border:1px solid var(--border2);border-radius:6px;font-size:0.82em;color:var(--gold2);font-family:'Rajdhani',sans-serif;letter-spacing:1px;margin-top:6px;}
 
     /* TOMBOL */
@@ -95,6 +96,30 @@
     .btn-danger{padding:9px 20px;background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.3);border-radius:6px;color:var(--error);font-family:'Inter',sans-serif;font-size:0.82em;cursor:pointer;transition:all 0.15s;}
     .btn-danger:hover{background:rgba(224,88,88,0.2);}
     .btn-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+
+    /* ROLE PERMISSION */
+    .role-card{background:var(--content);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+    .role-card-hd{padding:10px 14px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .role-badge{padding:3px 10px;border-radius:4px;font-size:0.72em;font-weight:700;letter-spacing:1px;}
+    .role-owner{background:rgba(201,168,76,0.2);color:var(--gold2);border:1px solid rgba(201,168,76,0.3);}
+    .role-mekanik{background:rgba(72,144,232,0.15);color:var(--info);border:1px solid rgba(72,144,232,0.25);}
+    .role-sales{background:rgba(76,175,128,0.15);color:var(--success);border:1px solid rgba(76,175,128,0.25);}
+    .role-kasir{background:rgba(232,160,48,0.15);color:var(--warning);border:1px solid rgba(232,160,48,0.25);}
+    .role-staff{background:rgba(168,168,168,0.15);color:var(--text2);border:1px solid rgba(168,168,168,0.2);}
+    .role-desc{font-size:0.72em;color:var(--text3);margin-left:auto;}
+    .role-table{width:100%;border-collapse:collapse;}
+    .role-table th{font-size:0.6em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:center;border-bottom:1px solid var(--border);font-weight:600;}
+    .role-table th:first-child{text-align:left;}
+    .role-table td{padding:8px 12px;font-size:0.8em;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.03);text-align:center;}
+    .role-table td:first-child{text-align:left;color:var(--text2);}
+    .role-table tr:last-child td{border-bottom:none;}
+    .role-check{width:16px;height:16px;cursor:pointer;accent-color:var(--gold);}
+    .role-locked{color:var(--text3);font-size:0.8em;}
+
+    @keyframes modalIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+    .modal-overlay.show{display:flex!important;}
+    .btn-cancel{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;}
+    .empty{text-align:center;padding:20px;color:var(--text3);font-size:0.82em;}
 
     /* SISTEM INFO */
     .sys-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -203,6 +228,8 @@
     <div class="tab active" onclick="switchTab('perusahaan',this)">🏢 Perusahaan</div>
     <div class="tab" onclick="switchTab('invoice',this)">📄 Invoice</div>
     <div class="tab" onclick="switchTab('staff',this)">👤 Staff & ID Card</div>
+    <div class="tab" onclick="switchTab('akun',this)">👥 Akun Login</div>
+    <div class="tab" onclick="switchTab('role',this)">🔐 Role & Akses</div>
     <div class="tab" onclick="switchTab('sistem',this)">⚙️ Sistem</div>
   </div>
 
@@ -371,6 +398,45 @@
     </div>
   </div>
 
+  <!-- TAB: AKUN LOGIN -->
+  <div class="tab-content" id="tab-akun">
+    <div class="set-panel">
+      <div class="set-panel-hd">
+        <div class="set-panel-title">👥 Akun Login Staff</div>
+        <button class="btn-save-set" onclick="openModalAkun()">+ Tambah Akun</button>
+      </div>
+      <div class="set-panel-body">
+        <div style="font-size:0.78em;color:var(--text3);margin-bottom:14px;padding:10px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px">
+          💡 Setiap staff bisa punya akun login sendiri. Akun dibuat di Firebase Authentication secara terpisah.
+          Hubungi admin Firebase atau gunakan tombol di bawah untuk buat akun baru.
+        </div>
+        <div id="akunList">
+          <div class="empty">Memuat data akun...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ROLE & AKSES -->
+  <div class="tab-content" id="tab-role">
+    <div class="set-panel">
+      <div class="set-panel-hd">
+        <div class="set-panel-title">🔐 Pengaturan Role & Hak Akses</div>
+        <button class="btn-save-set" onclick="simpanRolePermission()">💾 Simpan Semua</button>
+      </div>
+      <div class="set-panel-body">
+        <div style="font-size:0.78em;color:var(--text3);margin-bottom:14px;padding:10px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px">
+          ⚠️ Perubahan akan langsung berlaku saat staff login berikutnya.
+        </div>
+
+        <!-- Role Cards -->
+        <div id="rolePermissionWrap">
+          <!-- Dirender oleh JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TAB: SISTEM -->
   <div class="tab-content" id="tab-sistem">
     <div class="set-panel">
@@ -411,11 +477,51 @@
 
 </main>
 
+<!-- MODAL AKUN STAFF -->
+<div class="modal-overlay" id="modalAkun" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:440px;margin:auto;overflow:hidden;animation:modalIn 0.2s ease">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">Tambah Akun Staff</div>
+      <button onclick="closeModalAkun()" style="background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:18px 20px">
+      <div style="margin-bottom:12px">
+        <label class="set-label">Nama Staff *</label>
+        <input type="text" class="set-input" id="aNama" placeholder="Nama lengkap staff..."/>
+      </div>
+      <div style="margin-bottom:12px">
+        <label class="set-label">Email Login *</label>
+        <input type="email" class="set-input" id="aEmail" placeholder="email@example.com"/>
+        <div class="set-hint">Email ini harus didaftarkan di Firebase Authentication</div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label class="set-label">Role</label>
+        <select class="set-select" id="aRole">
+          <option value="mekanik">Mekanik</option>
+          <option value="sales">Sales</option>
+          <option value="kasir">Kasir</option>
+          <option value="staff">Staff Umum</option>
+        </select>
+      </div>
+      <div style="padding:10px;background:rgba(201,168,76,0.06);border:1px solid var(--gold-dim);border-radius:6px;font-size:0.75em;color:var(--text3);line-height:1.6">
+        📋 <strong style="color:var(--gold)">Cara buat akun:</strong><br>
+        1. Simpan akun di sini dulu<br>
+        2. Buka Firebase Console → Authentication<br>
+        3. Tambah user dengan email yang sama<br>
+        4. Kasih password ke staff
+      </div>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeModalAkun()" class="btn-cancel" style="padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer">Batal</button>
+      <button id="btnSimpanAkun" onclick="simpanAkun()" class="btn-save-set">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
     authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
@@ -641,12 +747,231 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     el.value = val;
   };
 
+  // ── Akun Staff ──
+  let allAkun = [];
+
+  async function loadAkunStaff() {
+    try {
+      const { getDocs, collection, query: q, orderBy: ob } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+      const snap = await getDocs(q(collection(db,'akun_staff'), ob('nama')));
+      allAkun = snap.docs.map(d => ({id:d.id,...d.data()}));
+    } catch(e) { allAkun = []; }
+    renderAkunList();
+  }
+
+  function renderAkunList() {
+    const wrap = document.getElementById('akunList');
+    if (allAkun.length === 0) {
+      wrap.innerHTML = `<div class="empty" style="padding:20px;text-align:center;color:var(--text3)">
+        Belum ada akun staff. Klik "+ Tambah Akun" untuk menambah.
+      </div>`;
+      return;
+    }
+    const roleBadge = {
+      owner:'role-owner', mekanik:'role-mekanik',
+      sales:'role-sales', kasir:'role-kasir', staff:'role-staff'
+    };
+    wrap.innerHTML = `<table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Nama</th>
+          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Email</th>
+          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Role</th>
+          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Status</th>
+          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allAkun.map(a => `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+            <td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">${a.nama||'-'}</td>
+            <td style="padding:9px 12px;font-size:0.82em;color:var(--text3)">${a.email||'-'}</td>
+            <td style="padding:9px 12px"><span class="role-badge ${roleBadge[a.role]||'role-staff'}">${a.role||'staff'}</span></td>
+            <td style="padding:9px 12px">
+              <span style="font-size:0.72em;color:${a.aktif?'var(--success)':'var(--error)'}">${a.aktif?'● Aktif':'● Nonaktif'}</span>
+            </td>
+            <td style="padding:9px 12px;text-align:center">
+              <button onclick="toggleAkunAktif('${a.id}',${a.aktif})"
+                style="background:none;border:1px solid var(--border2);color:var(--text);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;margin-right:4px">
+                ${a.aktif?'Nonaktifkan':'Aktifkan'}
+              </button>
+              <button onclick="hapusAkun('${a.id}','${a.nama}')"
+                style="background:none;border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
+                Hapus
+              </button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  window.openModalAkun = function() {
+    document.getElementById('aEmail').value = '';
+    document.getElementById('aNama').value  = '';
+    document.getElementById('aRole').value  = 'mekanik';
+    document.getElementById('modalAkun').classList.add('show');
+  };
+
+  window.closeModalAkun = function() {
+    document.getElementById('modalAkun').classList.remove('show');
+  };
+
+  window.simpanAkun = async function() {
+    const email = document.getElementById('aEmail').value.trim();
+    const nama  = document.getElementById('aNama').value.trim();
+    const role  = document.getElementById('aRole').value;
+    const btn   = document.getElementById('btnSimpanAkun');
+
+    if (!email) { showToast('Email tidak boleh kosong!','error'); return; }
+    if (!nama)  { showToast('Nama tidak boleh kosong!','error'); return; }
+
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+    try {
+      const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+      await addDoc(collection(db,'akun_staff'), {
+        email, nama, role, aktif: true,
+        createdAt: new Date().toISOString()
+      });
+      showToast(`Akun ${nama} berhasil ditambahkan ✓\nPastikan buat akun di Firebase Authentication dengan email: ${email}`,'success');
+      closeModalAkun();
+      await loadAkunStaff();
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+
+    btn.disabled = false; btn.textContent = 'Simpan';
+  };
+
+  window.toggleAkunAktif = async function(id, aktif) {
+    try {
+      const { updateDoc, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+      await updateDoc(d(db,'akun_staff',id), { aktif: !aktif });
+      showToast(`Akun berhasil ${!aktif?'diaktifkan':'dinonaktifkan'} ✓`,'success');
+      await loadAkunStaff();
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+  };
+
+  window.hapusAkun = async function(id, nama) {
+    if (!confirm(`Yakin hapus akun "${nama}"?`)) return;
+    try {
+      const { deleteDoc, doc: d } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+      await deleteDoc(d(db,'akun_staff',id));
+      showToast('Akun berhasil dihapus ✓','success');
+      await loadAkunStaff();
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+  };
+
+  // Update switchTab
+  // ── Role & Permission ──
+  const PAGES = [
+    { id:'dashboard',   label:'Dashboard' },
+    { id:'kendaraan',   label:'Kendaraan' },
+    { id:'servis',      label:'Servis' },
+    { id:'sparepart',   label:'Sparepart' },
+    { id:'keuangan',    label:'Keuangan' },
+    { id:'laporan',     label:'Laporan' },
+    { id:'pelanggan',   label:'Pelanggan' },
+    { id:'staff',       label:'Staff' },
+    { id:'master-data', label:'Master Data' },
+    { id:'pengaturan',  label:'Pengaturan' },
+  ];
+
+  const ROLES = [
+    { id:'owner',   label:'Owner / Admin', badge:'role-owner',   desc:'Akses penuh ke semua fitur', locked:true },
+    { id:'mekanik', label:'Mekanik',        badge:'role-mekanik', desc:'Akses servis & sparepart' },
+    { id:'sales',   label:'Sales',          badge:'role-sales',   desc:'Akses kendaraan & pelanggan' },
+    { id:'kasir',   label:'Kasir',          badge:'role-kasir',   desc:'Akses keuangan' },
+    { id:'staff',   label:'Staff Umum',     badge:'role-staff',   desc:'Lihat saja, tidak bisa edit' },
+  ];
+
+  // Default permission
+  const DEFAULT_PERMISSIONS = {
+    owner:   { dashboard:{v:1,e:1,d:1}, kendaraan:{v:1,e:1,d:1}, servis:{v:1,e:1,d:1}, sparepart:{v:1,e:1,d:1}, keuangan:{v:1,e:1,d:1}, laporan:{v:1,e:1,d:1}, pelanggan:{v:1,e:1,d:1}, staff:{v:1,e:1,d:1}, 'master-data':{v:1,e:1,d:1}, pengaturan:{v:1,e:1,d:1} },
+    mekanik: { dashboard:{v:1,e:0,d:0}, kendaraan:{v:0,e:0,d:0}, servis:{v:1,e:1,d:0}, sparepart:{v:1,e:1,d:0}, keuangan:{v:0,e:0,d:0}, laporan:{v:0,e:0,d:0}, pelanggan:{v:0,e:0,d:0}, staff:{v:0,e:0,d:0}, 'master-data':{v:0,e:0,d:0}, pengaturan:{v:0,e:0,d:0} },
+    sales:   { dashboard:{v:1,e:0,d:0}, kendaraan:{v:1,e:1,d:0}, servis:{v:0,e:0,d:0}, sparepart:{v:0,e:0,d:0}, keuangan:{v:0,e:0,d:0}, laporan:{v:0,e:0,d:0}, pelanggan:{v:1,e:0,d:0}, staff:{v:0,e:0,d:0}, 'master-data':{v:0,e:0,d:0}, pengaturan:{v:0,e:0,d:0} },
+    kasir:   { dashboard:{v:1,e:0,d:0}, kendaraan:{v:0,e:0,d:0}, servis:{v:0,e:0,d:0}, sparepart:{v:0,e:0,d:0}, keuangan:{v:1,e:1,d:0}, laporan:{v:1,e:0,d:0}, pelanggan:{v:0,e:0,d:0}, staff:{v:0,e:0,d:0}, 'master-data':{v:0,e:0,d:0}, pengaturan:{v:0,e:0,d:0} },
+    staff:   { dashboard:{v:1,e:0,d:0}, kendaraan:{v:1,e:0,d:0}, servis:{v:1,e:0,d:0}, sparepart:{v:1,e:0,d:0}, keuangan:{v:0,e:0,d:0}, laporan:{v:0,e:0,d:0}, pelanggan:{v:1,e:0,d:0}, staff:{v:1,e:0,d:0}, 'master-data':{v:0,e:0,d:0}, pengaturan:{v:0,e:0,d:0} },
+  };
+
+  let currentPermissions = JSON.parse(JSON.stringify(DEFAULT_PERMISSIONS));
+
+  async function loadRolePermission() {
+    try {
+      const snap = await getDoc(doc(db,'pengaturan','permissions'));
+      if (snap.exists()) currentPermissions = snap.data();
+    } catch(e) {}
+    renderRolePermission();
+  }
+
+  function renderRolePermission() {
+    const wrap = document.getElementById('rolePermissionWrap');
+    wrap.innerHTML = ROLES.map(role => {
+      const perm = currentPermissions[role.id] || DEFAULT_PERMISSIONS[role.id];
+      const isOwner = role.locked;
+      return `
+        <div class="role-card">
+          <div class="role-card-hd">
+            <span class="role-badge ${role.badge}">${role.label}</span>
+            <span class="role-desc">${role.desc}</span>
+            ${isOwner ? '<span style="font-size:0.7em;color:var(--gold)">🔒 Tidak dapat diubah</span>' : ''}
+          </div>
+          <div style="overflow-x:auto">
+            <table class="role-table">
+              <thead>
+                <tr>
+                  <th style="min-width:120px">Halaman</th>
+                  <th>Lihat</th>
+                  <th>Edit</th>
+                  <th>Hapus</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${PAGES.map(page => {
+                  const p = perm[page.id]||{v:0,e:0,d:0};
+                  if (isOwner) {
+                    return `<tr>
+                      <td>${page.label}</td>
+                      <td>✅</td><td>✅</td><td>✅</td>
+                    </tr>`;
+                  }
+                  return `<tr>
+                    <td>${page.label}</td>
+                    <td><input type="checkbox" class="role-check" ${p.v?'checked':''} onchange="updatePerm('${role.id}','${page.id}','v',this.checked)" ${page.id==='dashboard'?'disabled':''}></td>
+                    <td><input type="checkbox" class="role-check" ${p.e?'checked':''} onchange="updatePerm('${role.id}','${page.id}','e',this.checked)"></td>
+                    <td><input type="checkbox" class="role-check" ${p.d?'checked':''} onchange="updatePerm('${role.id}','${page.id}','d',this.checked)"></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.updatePerm = function(roleId, pageId, type, checked) {
+    if (!currentPermissions[roleId]) currentPermissions[roleId] = {};
+    if (!currentPermissions[roleId][pageId]) currentPermissions[roleId][pageId] = {v:0,e:0,d:0};
+    currentPermissions[roleId][pageId][type] = checked ? 1 : 0;
+    // Kalau edit/hapus dicentang, otomatis lihat juga dicentang
+    if ((type==='e'||type==='d') && checked) {
+      currentPermissions[roleId][pageId].v = 1;
+    }
+  };
+
+  window.simpanRolePermission = async function() {
+    try {
+      await setDoc(doc(db,'pengaturan','permissions'), currentPermissions);
+      showToast('Permission berhasil disimpan ✓','success');
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+  };
+
   // ── Tab Switch ──
   window.switchTab = function(tab, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     document.getElementById(`tab-${tab}`).classList.add('active');
+    if (tab === 'role')  loadRolePermission();
+    if (tab === 'akun')  loadAkunStaff();
   };
 
   // ── Toast ──
