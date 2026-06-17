@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navbar:#1a1a1a; --sidebar:#222222; --content:#1e1e1e; --card:#272727; --card2:#2d2d2d;
+      --border:#333333; --border2:#3a3a3a; --gold:#c9a84c; --gold2:#e8c96a; --gold-dim:#7a5c18;
+      --gold-bg:rgba(201,168,76,0.07); --silver:#b0b0b0; --silver2:#d0d0d0;
+      --text:#a8a8a8; --text2:#c8c8c8; --text3:#686868;
+      --success:#4caf80; --warning:#e8a030; --error:#e05858; --info:#4890e8;
+      --sidebar-w:230px; --navbar-h:56px;
+    }
+    html,body{height:100%;background:var(--content);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;}
+    .navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);background:var(--navbar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px 0 0;z-index:100;gap:10px;}
+    .navbar-brand{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+    .navbar-brand img{height:32px;width:auto;filter:brightness(0.9);}
+    .navbar-brand-text{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;line-height:1.2;}
+    .navbar-brand-text span{display:block;font-size:0.62em;color:var(--gold);letter-spacing:1px;font-weight:400;}
+    .navbar-brand-fallback{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;letter-spacing:4px;color:var(--silver2);display:none;}
+    .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2em;cursor:pointer;padding:6px 10px;border-radius:4px;}
+    .navbar-spacer{flex:1;}
+    .navbar-clock{text-align:right;line-height:1.4;}
+    .clock-time{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:600;color:var(--silver2);letter-spacing:1px;}
+    .clock-date{font-size:0.68em;color:var(--text3);}
+    .navbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+    .btn-notif{position:relative;background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95em;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1px solid var(--navbar);}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;}
+    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .user-info{line-height:1.3;}
+    .user-name{font-size:0.78em;color:var(--silver2);font-weight:600;}
+    .user-role{font-size:0.62em;color:var(--gold);}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);font-size:0.7em;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .navbar-goldline{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 30%,var(--gold) 50%,var(--gold-dim) 70%,transparent 100%);opacity:0.6;}
+    .sidebar{position:fixed;top:var(--navbar-h);left:0;width:var(--sidebar-w);height:calc(100vh - var(--navbar-h));background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:90;transition:transform 0.25s ease;padding-bottom:24px;}
+    .sidebar::-webkit-scrollbar{width:3px;}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .sidebar-section{padding:20px 14px 5px;font-size:0.58em;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;}
+    .menu-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--text);font-size:0.84em;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .menu-item:hover{background:rgba(255,255,255,0.04);color:var(--silver2);border-left-color:var(--border2);}
+    .menu-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold);font-weight:500;}
+    .menu-icon{width:18px;text-align:center;font-size:0.95em;flex-shrink:0;opacity:0.8;}
+    .menu-item.active .menu-icon{opacity:1;}
+    .menu-label{flex:1;}
+    .sidebar-sep{height:1px;background:var(--border);margin:6px 14px;}
+    .sidebar-user{margin:8px 10px 0;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+    .sidebar-user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .su-name{font-size:0.8em;color:var(--silver2);font-weight:600;}
+    .su-role{font-size:0.62em;color:var(--gold);}
+    .su-logout{width:100%;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.75em;padding:7px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .su-logout:hover{border-color:var(--error);color:var(--error);}
+    .s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:89;}
+    .main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:20px;min-height:calc(100vh - var(--navbar-h));}
+    .pg-header{margin-bottom:16px;}
+    .pg-title{font-family:'Rajdhani',sans-serif;font-size:1.5em;font-weight:700;color:var(--silver2);letter-spacing:2px;text-transform:uppercase;}
+    .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
+
+    /* ══ MINI STATS ══ */
+    .mini-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .mini-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;}
+    .mini-stat-icon{font-size:1.2em;}
+    .mini-stat-val{font-family:'Rajdhani',sans-serif;font-size:1.4em;font-weight:700;color:var(--silver2);line-height:1;}
+    .mini-stat-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+
+    /* ══ TOOLBAR ══ */
+    .toolbar{background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .filter-select{padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .filter-select option{background:var(--card2);}
+    .search-wrap{position:relative;flex:1;min-width:150px;}
+    .search-input{width:100%;padding:8px 10px 8px 30px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;}
+    .search-input:focus{border-color:var(--gold);}
+    .search-input::placeholder{color:var(--text3);}
+    .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.78em;pointer-events:none;}
+    .btn-add{padding:8px 16px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .btn-add:hover{filter:brightness(1.1);}
+
+    /* ══ STAFF GRID ══ */
+    .tbl-wrap{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px;}
+    .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+    .staff-card{background:var(--content);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;}
+    .staff-card:hover{border-color:var(--gold-dim);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+    .staff-card-foto{width:100%;height:120px;object-fit:cover;background:var(--card2);display:block;}
+    .staff-card-av{width:100%;height:120px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:2.5em;font-weight:700;color:#1a1000;}
+    .staff-card-body{padding:12px;}
+    .staff-card-nama{font-size:0.88em;font-weight:600;color:var(--silver2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .staff-card-jabatan{font-size:0.72em;color:var(--gold);margin-top:2px;}
+    .staff-card-ft{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+    .bs{display:inline-block;padding:2px 8px;border-radius:3px;font-size:0.68em;font-weight:600;text-transform:uppercase;}
+    .bs-aktif{background:rgba(76,175,128,0.12);color:var(--success);border:1px solid rgba(76,175,128,0.2);}
+    .bs-nonaktif{background:rgba(224,88,88,0.12);color:var(--error);border:1px solid rgba(224,88,88,0.2);}
+    .staff-card-wa{font-size:0.7em;color:var(--text3);}
+    .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.82em;}
+    .empty-icon{font-size:2.5em;margin-bottom:10px;opacity:0.3;}
+
+    /* ══ MODAL FORM ══ */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+    .modal-overlay.show{display:flex;}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:520px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:modalIn 0.2s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
+    .modal-title{font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .modal-close{background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer;padding:2px 6px;border-radius:4px;}
+    .modal-close:hover{color:var(--error);}
+    .modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+    .modal-body::-webkit-scrollbar{width:4px;}
+    .modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-field{}
+    .form-field.span2{grid-column:span 2;}
+    .form-label{display:block;font-size:0.63em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600;}
+    .form-input,.form-select{width:100%;padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.85em;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+    .form-input:focus,.form-select:focus{border-color:var(--gold);}
+    .form-input::placeholder{color:var(--text3);}
+    .form-select option{background:var(--card2);}
+    .modal-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+    .btn-cancel{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-save{padding:8px 22px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-size:0.82em;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-save:disabled{opacity:0.6;pointer-events:none;}
+
+    /* ══ ID CARD PRINT ══ */
+    #idCardPrint{
+      display:none;position:fixed;inset:0;background:#e8e8e8;
+      z-index:9999;overflow-y:auto;
+      font-family:'Inter',sans-serif;
+    }
+    #idCardPrint.show{display:block;}
+    .idcard-toolbar{
+      position:fixed;top:16px;right:16px;
+      display:flex;gap:8px;z-index:10000;
+    }
+    .idcard-btn{
+      padding:9px 16px;border-radius:6px;font-size:0.82em;
+      font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+      display:flex;align-items:center;gap:6px;border:none;
+    }
+    .idcard-btn-close{background:#1a1a1a;color:#c9a84c;border:1px solid #c9a84c !important;}
+    .idcard-btn-print{background:#c9a84c;color:#1a1000;}
+    .idcard-page{
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:60px 20px;
+    }
+
+    /* Kartu ID */
+    .idcard{
+      width:340px;border-radius:16px;overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+      background:#1a1a1a;
+    }
+    /* Header kartu */
+    .idcard-header{
+      background:linear-gradient(135deg,#1a1a1a 0%,#2d2200 50%,#1a1a1a 100%);
+      padding:20px;
+      display:flex;align-items:center;gap:12px;
+      border-bottom:2px solid #c9a84c;
+      position:relative;overflow:hidden;
+    }
+    .idcard-header::before{
+      content:'';position:absolute;top:-20px;right:-20px;
+      width:100px;height:100px;
+      border-radius:50%;
+      background:rgba(201,168,76,0.08);
+    }
+    .idcard-logo{width:48px;height:48px;object-fit:contain;flex-shrink:0;}
+    .idcard-logo-fallback{
+      width:48px;height:48px;border-radius:50%;
+      background:linear-gradient(135deg,#7a5c18,#c9a84c);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;
+      flex-shrink:0;
+    }
+    .idcard-company{flex:1;}
+    .idcard-company-name{
+      font-family:'Rajdhani',sans-serif;font-size:0.95em;font-weight:700;
+      color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;
+    }
+    .idcard-company-tag{font-size:0.62em;color:#c9a84c;letter-spacing:1px;margin-top:2px;}
+    .idcard-type{
+      font-size:0.6em;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      color:#c9a84c;background:rgba(201,168,76,0.15);
+      padding:3px 8px;border-radius:3px;border:1px solid rgba(201,168,76,0.3);
+    }
+
+    /* Foto staff */
+    .idcard-foto-wrap{
+      background:linear-gradient(180deg,#1a1a1a 0%,#222 100%);
+      padding:20px;
+      display:flex;flex-direction:column;align-items:center;
+    }
+    .idcard-foto{
+      width:100px;height:100px;border-radius:50%;object-fit:cover;
+      border:3px solid #c9a84c;
+      box-shadow:0 0 0 4px rgba(201,168,76,0.2);
+    }
+    .idcard-foto-placeholder{
+      width:100px;height:100px;border-radius:50%;
+      background:linear-gradient(135deg,#7a5c18,#c9a84c);
+      border:3px solid #c9a84c;
+      box-shadow:0 0 0 4px rgba(201,168,76,0.2);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Rajdhani',sans-serif;font-size:2.5em;font-weight:700;color:#1a1000;
+    }
+    .idcard-nama{
+      font-family:'Rajdhani',sans-serif;font-size:1.2em;font-weight:700;
+      color:#d0d0d0;letter-spacing:1.5px;text-transform:uppercase;
+      margin-top:14px;text-align:center;
+    }
+    .idcard-jabatan{
+      font-size:0.78em;color:#c9a84c;margin-top:4px;
+      text-align:center;letter-spacing:1px;
+    }
+
+    /* Body kartu */
+    .idcard-body{
+      background:#222;
+      padding:16px 20px;
+      border-top:1px solid #333;
+    }
+    .idcard-row{
+      display:flex;gap:10px;padding:6px 0;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+      align-items:center;
+    }
+    .idcard-row:last-child{border-bottom:none;}
+    .idcard-row-icon{font-size:0.85em;width:20px;text-align:center;flex-shrink:0;}
+    .idcard-row-lbl{font-size:0.65em;color:#686868;width:70px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.5px;}
+    .idcard-row-val{font-size:0.78em;color:#c8c8c8;font-weight:500;}
+
+    /* Footer kartu */
+    .idcard-footer{
+      background:linear-gradient(135deg,#1a1a1a,#2d2200);
+      padding:12px 20px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-top:2px solid #c9a84c;
+    }
+    .idcard-footer-copy{font-size:0.6em;color:#686868;letter-spacing:1px;}
+    .idcard-footer-ver{font-size:0.6em;color:#c9a84c;letter-spacing:1px;}
+    /* Garis gold dekoratif */
+    .idcard-goldbar{height:3px;background:linear-gradient(90deg,transparent,#c9a84c,#e8c96a,#c9a84c,transparent);}
+
+    @media print {
+      body * { visibility: hidden; }
+      #idCardPrint, #idCardPrint * { visibility: visible; }
+      #idCardPrint { position: fixed !important; top:0 !important; left:0 !important; width:100% !important; background:#fff !important; }
+      .idcard-toolbar { display: none !important; }
+      .idcard-page { padding: 20px; }
+      .idcard { box-shadow: none; }
+      @page { size: A6 landscape; margin: 0; }
+    }
+
+    /* toast & loading */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:500;display:none;}
+    .toast.show{display:block;}
+    .toast.success{border-left:3px solid var(--success);}
+    .toast.error{border-left:3px solid var(--error);}
+    .overlay{position:fixed;inset:0;background:#141414;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
+    .overlay.hide{opacity:0;pointer-events:none;}
+    .overlay img{width:64px;animation:pulse 1.5s ease-in-out infinite;filter:brightness(0.85);}
+    .ov-fallback{font-family:'Rajdhani',sans-serif;font-size:2em;font-weight:700;letter-spacing:6px;color:var(--silver);display:none;}
+    @keyframes pulse{0%,100%{opacity:0.5;transform:scale(0.96)}50%{opacity:1;transform:scale(1.03)}}
+    .ld-bar{width:120px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
+    .ld-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:ldfill 1.8s ease-in-out forwards;}
+    @keyframes ldfill{0%{width:0%}60%{width:75%}100%{width:100%}}
+    .ld-text{font-size:0.58em;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+    .caps{text-transform:uppercase;}
+
+    @media(max-width:768px){
+      .hamburger{display:flex;align-items:center;}
+      .navbar-brand{border-right:none;}
+      .navbar-brand-text,.navbar-clock,.navbar-sep{display:none;}
+      .btn-logout,.user-info{display:none;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,0.5);}
+      .s-overlay.show{display:block;}
+      .main{margin-left:0;padding:12px;}
+      .form-grid{grid-template-columns:1fr;}
+      .form-field.span2{grid-column:span 1;}
+      .staff-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('ovF').style.display='block'"/>
+  <div class="ov-fallback" id="ovF">AMU</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-text">Memuat data staff...</div>
+</div>
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('bF').style.display='block'"/>
+    <div class="navbar-brand-fallback" id="bF">AMU</div>
+    <div class="navbar-brand-text">Auto Mitra Utama<span>Start Here, Drive Next</span></div>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
+  <div class="navbar-sep"></div>
+  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <div class="navbar-sep"></div>
+  <div class="user-chip">
+    <div class="user-av" id="uAv">--</div>
+    <div class="user-info"><div class="user-name" id="uName">–</div><div class="user-role" id="uRole">–</div></div>
+  </div>
+  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <div class="navbar-goldline"></div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Utama</div>
+  <div class="menu-item" onclick="goTo('dashboard')"><span class="menu-icon">⊞</span><span class="menu-label">Dashboard</span></div>
+  <div class="sidebar-section">Operasional</div>
+  <div class="menu-item" onclick="goTo('kendaraan')"><span class="menu-icon">🚗</span><span class="menu-label">Kendaraan</span></div>
+  <div class="menu-item" onclick="goTo('servis')"><span class="menu-icon">🔧</span><span class="menu-label">Servis</span></div>
+  <div class="menu-item" onclick="goTo('sparepart')"><span class="menu-icon">🔩</span><span class="menu-label">Sparepart</span></div>
+  <div class="sidebar-section">Keuangan</div>
+  <div class="menu-item" onclick="goTo('keuangan')"><span class="menu-icon">💰</span><span class="menu-label">Keuangan</span></div>
+  <div class="menu-item" onclick="goTo('laporan')"><span class="menu-icon">📊</span><span class="menu-label">Laporan</span></div>
+  <div class="sidebar-section">Manajemen</div>
+  <div class="menu-item" onclick="goTo('pelanggan')"><span class="menu-icon">👥</span><span class="menu-label">Pelanggan</span></div>
+  <div class="menu-item active"><span class="menu-icon">👤</span><span class="menu-label">Staff</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">Sistem</div>
+  <div class="menu-item" onclick="goTo('master-data')"><span class="menu-icon">📋</span><span class="menu-label">Master Data</span></div>
+  <div class="menu-item" onclick="goTo('pengaturan')"><span class="menu-icon">⚙</span><span class="menu-label">Pengaturan</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div><div class="su-name" id="suName">–</div><div class="su-role" id="suRole">–</div></div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-header">
+    <div class="pg-title">Staff</div>
+    <div class="pg-sub">Manajemen data staff Auto Mitra Utama</div>
+    <div class="pg-line"></div>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-stat"><div class="mini-stat-icon">👤</div><div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Staff</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">✅</div><div><div class="mini-stat-val" id="statAktif">0</div><div class="mini-stat-lbl">Aktif</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🔧</div><div><div class="mini-stat-val" id="statMekanik">0</div><div class="mini-stat-lbl">Mekanik</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🚗</div><div><div class="mini-stat-val" id="statSales">0</div><div class="mini-stat-lbl">Sales</div></div></div>
+  </div>
+
+  <div class="toolbar">
+    <select class="filter-select" id="filterJabatan" onchange="applyFilter()"><option value="">Semua Jabatan</option></select>
+    <select class="filter-select" id="filterStatus" onchange="applyFilter()">
+      <option value="">Semua Status</option>
+      <option value="aktif">Aktif</option>
+      <option value="nonaktif">Nonaktif</option>
+    </select>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari nama staff..." oninput="applyFilter()"/>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Tambah Staff</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="staff-grid" id="staffGrid">
+      <div class="empty"><div class="empty-icon">👤</div>Memuat data staff...</div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL FORM -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modalTitle">Tambah Staff</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field span2"><label class="form-label">Nama Lengkap *</label><input type="text" class="form-input caps" id="fNama" placeholder="Nama staff..."/></div>
+        <div class="form-field"><label class="form-label">Jabatan *</label><select class="form-select" id="fJabatan"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
+        <div class="form-field"><label class="form-label">No. WA / HP</label><input type="text" class="form-input" id="fWa" placeholder="08xx / 62xx" oninput="formatWA(this)"/></div>
+        <div class="form-field"><label class="form-label">Tanggal Bergabung</label><input type="date" class="form-input" id="fTglGabung"/></div>
+        <div class="form-field span2"><label class="form-label">Alamat</label><input type="text" class="form-input caps" id="fAlamat" placeholder="Alamat staff..."/></div>
+        <div class="form-field span2"><label class="form-label">URL Foto</label><input type="text" class="form-input" id="fFoto" placeholder="https://..."/></div>
+        <div class="form-field span2"><label class="form-label">Catatan</label><input type="text" class="form-input" id="fCatatan" placeholder="Catatan tambahan..."/></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" id="btnSave" onclick="saveData()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID CARD PRINT -->
+<div id="idCardPrint">
+  <div class="idcard-toolbar">
+    <button class="idcard-btn idcard-btn-close" onclick="tutupIdCard()">✕ Tutup</button>
+    <button class="idcard-btn idcard-btn-print" onclick="cetakIdCard()">🖨️ Cetak ID Card</button>
+  </div>
+  <div class="idcard-page">
+    <div class="idcard">
+      <div class="idcard-goldbar"></div>
+      <div class="idcard-header">
+        <img src="../assets/logo.png" class="idcard-logo"
+             onerror="this.outerHTML='<div class=idcard-logo-fallback>AMU</div>'"/>
+        <div class="idcard-company">
+          <div class="idcard-company-name">Auto Mitra Utama</div>
+          <div class="idcard-company-tag">Start Here, Drive Next</div>
+        </div>
+        <div class="idcard-type">STAFF</div>
+      </div>
+      <div class="idcard-foto-wrap">
+        <div id="idcFotoWrap"></div>
+        <div class="idcard-nama" id="idcNama">–</div>
+        <div class="idcard-jabatan" id="idcJabatan">–</div>
+      </div>
+      <div class="idcard-body">
+        <div class="idcard-row">
+          <div class="idcard-row-icon">📱</div>
+          <div class="idcard-row-lbl">WA / HP</div>
+          <div class="idcard-row-val" id="idcWa">–</div>
+        </div>
+        <div class="idcard-row">
+          <div class="idcard-row-icon">📍</div>
+          <div class="idcard-row-lbl">Alamat</div>
+          <div class="idcard-row-val" id="idcAlamat">–</div>
+        </div>
+        <div class="idcard-row">
+          <div class="idcard-row-icon">📅</div>
+          <div class="idcard-row-lbl">Bergabung</div>
+          <div class="idcard-row-val" id="idcTglGabung">–</div>
+        </div>
+        <div class="idcard-row">
+          <div class="idcard-row-icon">🔵</div>
+          <div class="idcard-row-lbl">Status</div>
+          <div class="idcard-row-val" id="idcStatus">–</div>
+        </div>
+      </div>
+      <div class="idcard-footer">
+        <div class="idcard-footer-copy">© SRISP</div>
+        <div class="idcard-footer-ver">AMU v1.0.0</div>
+      </div>
+      <div class="idcard-goldbar"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let allData = [];
+  let editId  = null;
+
+  // ── Cek login ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    const email = user.email||'';
+    const inisial = email.substring(0,2).toUpperCase();
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadJabatan();
+    await loadData();
+  });
+
+  // ── Load Jabatan ──
+  async function loadJabatan() {
+    try {
+      const snap = await getDocs(query(collection(db,'master_jabatan'), orderBy('nama')));
+      const data = snap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
+      const opts = data.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
+      document.getElementById('fJabatan').innerHTML = `<option value="">— Pilih —</option>${opts}`;
+      document.getElementById('filterJabatan').innerHTML = `<option value="">Semua Jabatan</option>${opts}`;
+    } catch(e) {}
+  }
+
+  // ── Load Staff ──
+  async function loadData() {
+    try {
+      const snap = await getDocs(query(collection(db,'staff'), orderBy('nama')));
+      allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    } catch(e) { allData = []; }
+    updateStats();
+    renderGrid(allData);
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent   = allData.length;
+    document.getElementById('statAktif').textContent   = allData.filter(d => d.status === 'aktif').length;
+    document.getElementById('statMekanik').textContent = allData.filter(d => (d.jabatan||'').toLowerCase().includes('mekanik')).length;
+    document.getElementById('statSales').textContent   = allData.filter(d => (d.jabatan||'').toLowerCase().includes('sales')).length;
+  }
+
+  // ── Filter ──
+  window.applyFilter = function() {
+    const jabatan = document.getElementById('filterJabatan').value;
+    const status  = document.getElementById('filterStatus').value;
+    const search  = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allData.filter(d => {
+      if (jabatan && d.jabatan !== jabatan) return false;
+      if (status  && d.status  !== status)  return false;
+      if (search  && !(d.nama||'').toLowerCase().includes(search)) return false;
+      return true;
+    });
+    renderGrid(filtered);
+  };
+
+  // ── Render Grid ──
+  function renderGrid(data) {
+    if (data.length === 0) {
+      document.getElementById('staffGrid').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👤</div>Belum ada data staff</div>`;
+      return;
+    }
+    document.getElementById('staffGrid').innerHTML = data.map(d => {
+      const inisial = (d.nama||'?').substring(0,2);
+      return `
+        <div class="staff-card" onclick="bukaIdCard('${d.id}')">
+          ${d.foto
+            ? `<img src="${d.foto}" class="staff-card-foto" onerror="this.outerHTML='<div class=staff-card-av>${inisial}</div>'">`
+            : `<div class="staff-card-av">${inisial}</div>`
+          }
+          <div class="staff-card-body">
+            <div class="staff-card-nama">${d.nama||'-'}</div>
+            <div class="staff-card-jabatan">${d.jabatan||'-'}</div>
+            <div class="staff-card-ft">
+              <span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>
+              <div style="display:flex;gap:4px">
+                <button style="background:none;border:1px solid var(--border2);color:var(--text3);font-size:0.65em;padding:3px 7px;border-radius:4px;cursor:pointer" onclick="event.stopPropagation();editData('${d.id}')">✏️</button>
+                <button style="background:none;border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.65em;padding:3px 7px;border-radius:4px;cursor:pointer" onclick="event.stopPropagation();hapusData('${d.id}','${d.nama}')">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Modal ──
+  window.openModal = function() {
+    editId = null;
+    document.getElementById('modalTitle').textContent = 'Tambah Staff';
+    ['fNama','fJabatan','fWa','fAlamat','fFoto','fCatatan'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.getElementById('fStatus').value    = 'aktif';
+    document.getElementById('fTglGabung').value = new Date().toISOString().split('T')[0];
+    document.getElementById('modalOverlay').classList.add('show');
+  };
+
+  window.editData = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    editId = id;
+    document.getElementById('modalTitle').textContent = 'Edit Staff';
+    const map = {fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan'};
+    Object.entries(map).forEach(([elId,key]) => { const el = document.getElementById(elId); if(el) el.value = d[key]||''; });
+    document.getElementById('modalOverlay').classList.add('show');
+  };
+
+  window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('show'); editId = null; };
+
+  window.saveData = async function() {
+    const nama = document.getElementById('fNama').value.trim().toUpperCase();
+    const jabatan = document.getElementById('fJabatan').value;
+    const btn = document.getElementById('btnSave');
+    if (!nama)    { showToast('Nama tidak boleh kosong!','error'); return; }
+    if (!jabatan) { showToast('Pilih jabatan!','error'); return; }
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    const payload = {
+      nama, jabatan,
+      status:    document.getElementById('fStatus').value,
+      wa:        document.getElementById('fWa').value,
+      tglGabung: document.getElementById('fTglGabung').value,
+      alamat:    document.getElementById('fAlamat').value.toUpperCase(),
+      foto:      document.getElementById('fFoto').value,
+      catatan:   document.getElementById('fCatatan').value,
+    };
+    try {
+      if (editId) {
+        await updateDoc(doc(db,'staff',editId), payload);
+        showToast('Staff berhasil diperbarui ✓','success');
+      } else {
+        payload.createdAt = new Date().toISOString();
+        await addDoc(collection(db,'staff'), payload);
+        showToast('Staff berhasil ditambahkan ✓','success');
+      }
+      closeModal();
+      await loadData();
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+    btn.disabled = false; btn.textContent = 'Simpan';
+  };
+
+  window.hapusData = async function(id, nama) {
+    if (!confirm(`Yakin hapus staff "${nama}"?`)) return;
+    const pw = prompt('Masukkan password untuk konfirmasi:');
+    if (!pw) return;
+    try {
+      const user = auth.currentUser;
+      const { EmailAuthProvider, reauthenticateWithCredential } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+      const credential = EmailAuthProvider.credential(user.email, pw);
+      await reauthenticateWithCredential(user, credential);
+      await deleteDoc(doc(db,'staff',id));
+      showToast('Staff dihapus ✓','success');
+      await loadData();
+    } catch(e) {
+      if (e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') showToast('Password salah!','error');
+      else showToast('Gagal: '+e.message,'error');
+    }
+  };
+
+  // ── ID Card ──
+  window.bukaIdCard = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    const inisial = (d.nama||'?').substring(0,2);
+
+    // Foto
+    document.getElementById('idcFotoWrap').innerHTML = d.foto
+      ? `<img src="${d.foto}" class="idcard-foto" onerror="this.outerHTML='<div class=idcard-foto-placeholder>${inisial}</div>'">`
+      : `<div class="idcard-foto-placeholder">${inisial}</div>`;
+
+    document.getElementById('idcNama').textContent     = d.nama||'-';
+    document.getElementById('idcJabatan').textContent  = d.jabatan||'-';
+    document.getElementById('idcWa').textContent       = d.wa ? `+${d.wa}` : '-';
+    document.getElementById('idcAlamat').textContent   = d.alamat||'-';
+    document.getElementById('idcTglGabung').textContent= d.tglGabung||'-';
+    document.getElementById('idcStatus').textContent   = (d.status||'aktif').toUpperCase();
+    document.getElementById('idCardPrint').classList.add('show');
+  };
+
+  window.tutupIdCard = function() {
+    document.getElementById('idCardPrint').classList.remove('show');
+  };
+
+  window.cetakIdCard = function() {
+    const images = document.querySelectorAll('#idCardPrint img');
+    let loaded = 0;
+    if (images.length === 0) { window.print(); return; }
+    images.forEach(img => {
+      if (img.complete) { loaded++; if (loaded === images.length) window.print(); }
+      else {
+        img.onload  = () => { loaded++; if (loaded === images.length) window.print(); };
+        img.onerror = () => { loaded++; if (loaded === images.length) window.print(); };
+      }
+    });
+  };
+
+  // ── Format WA ──
+  window.formatWA = function(el) {
+    let val = el.value.replace(/\D/g,'');
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    else if (val.startsWith('8')) val = '62' + val;
+    el.value = val;
+  };
+
+  // ── Auto Caps ──
+  document.addEventListener('input', e => {
+    if (e.target.classList.contains('caps')) {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos, pos);
+    }
+  });
+
+  // ── Toast ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Clock ──
+  function tick() {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Auto Logout 5 Menit ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      showToast('Sesi berakhir karena tidak aktif.','error');
+      setTimeout(async () => { await signOut(auth); window.location.href = '/automitrautama/index.html'; }, 2000);
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','touchstart'].forEach(e => document.addEventListener(e, resetTimer, {passive:true}));
+  resetTimer();
+
+  // ── Back Button ──
+  window.history.pushState(null,'',window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    } else { window.history.pushState(null,'',window.location.href); }
+  });
+
+  // ── Logout ──
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar?')) { await signOut(auth); window.location.href = '/automitrautama/index.html'; }
+  };
+
+  // ── Navigasi ──
+  const pages = {
+    'dashboard':'/automitrautama/admin/dashboard.html','kendaraan':'/automitrautama/admin/kendaraan.html',
+    'servis':'/automitrautama/admin/servis.html','sparepart':'/automitrautama/admin/sparepart.html',
+    'keuangan':'/automitrautama/admin/keuangan.html','laporan':'/automitrautama/admin/laporan.html',
+    'pelanggan':'/automitrautama/admin/pelanggan.html','staff':'/automitrautama/admin/staff.html',
+    'master-data':'/automitrautama/admin/master-data.html','pengaturan':'/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => {
+    if (pages[page]) { window.location.href = pages[page]; return; }
+    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+  };
+
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); tutupIdCard(); } });
+</script>
+</body>
+</html>
