@@ -190,48 +190,39 @@
 
     /* Foto staff */
     .idcard-foto-wrap{
-      background:linear-gradient(180deg,#1a1a1a 0%,#222 100%);
-      padding:20px;
+      background:#1a1a1a;
+      padding:28px 20px 20px;
       display:flex;flex-direction:column;align-items:center;
     }
     .idcard-foto{
-      width:100px;height:100px;border-radius:50%;object-fit:cover;
+      width:120px;height:120px;border-radius:50%;object-fit:cover;
       border:3px solid #c9a84c;
-      box-shadow:0 0 0 4px rgba(201,168,76,0.2);
+      box-shadow:0 0 0 5px rgba(201,168,76,0.15), 0 8px 24px rgba(0,0,0,0.4);
     }
     .idcard-foto-placeholder{
-      width:100px;height:100px;border-radius:50%;
+      width:120px;height:120px;border-radius:50%;
       background:linear-gradient(135deg,#7a5c18,#c9a84c);
       border:3px solid #c9a84c;
-      box-shadow:0 0 0 4px rgba(201,168,76,0.2);
+      box-shadow:0 0 0 5px rgba(201,168,76,0.15), 0 8px 24px rgba(0,0,0,0.4);
       display:flex;align-items:center;justify-content:center;
-      font-family:'Rajdhani',sans-serif;font-size:2.5em;font-weight:700;color:#1a1000;
+      font-family:'Rajdhani',sans-serif;font-size:3em;font-weight:700;color:#1a1000;
     }
     .idcard-nama{
-      font-family:'Rajdhani',sans-serif;font-size:1.2em;font-weight:700;
-      color:#d0d0d0;letter-spacing:1.5px;text-transform:uppercase;
-      margin-top:14px;text-align:center;
+      font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;
+      color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;
+      margin-top:16px;text-align:center;
     }
     .idcard-jabatan{
-      font-size:0.78em;color:#c9a84c;margin-top:4px;
-      text-align:center;letter-spacing:1px;
+      font-size:0.82em;color:#c9a84c;margin-top:6px;
+      text-align:center;letter-spacing:1.5px;text-transform:uppercase;
+      background:rgba(201,168,76,0.1);padding:4px 14px;border-radius:20px;
+      border:1px solid rgba(201,168,76,0.2);
     }
-
-    /* Body kartu */
-    .idcard-body{
-      background:#222;
-      padding:16px 20px;
-      border-top:1px solid #333;
+    .idcard-divider{
+      width:40px;height:2px;
+      background:linear-gradient(90deg,transparent,#c9a84c,transparent);
+      margin:14px auto 0;
     }
-    .idcard-row{
-      display:flex;gap:10px;padding:6px 0;
-      border-bottom:1px solid rgba(255,255,255,0.05);
-      align-items:center;
-    }
-    .idcard-row:last-child{border-bottom:none;}
-    .idcard-row-icon{font-size:0.85em;width:20px;text-align:center;flex-shrink:0;}
-    .idcard-row-lbl{font-size:0.65em;color:#686868;width:70px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.5px;}
-    .idcard-row-val{font-size:0.78em;color:#c8c8c8;font-weight:500;}
 
     /* Footer kartu */
     .idcard-footer{
@@ -426,31 +417,16 @@
         </div>
         <div class="idcard-type">STAFF</div>
       </div>
-      <div class="idcard-foto-wrap">
-        <div id="idcFotoWrap"></div>
-        <div class="idcard-nama" id="idcNama">–</div>
-        <div class="idcard-jabatan" id="idcJabatan">–</div>
-      </div>
-      <div class="idcard-body">
-        <div class="idcard-row">
-          <div class="idcard-row-icon">📱</div>
-          <div class="idcard-row-lbl">WA / HP</div>
-          <div class="idcard-row-val" id="idcWa">–</div>
+      <div class="idcard-foto-wrap" style="position:relative;overflow:hidden;">
+        <!-- Watermark -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);opacity:0.05;pointer-events:none;z-index:0;">
+          <img src="../assets/logo.png" style="width:200px;" onerror="this.outerHTML='<div style=\'font-family:Rajdhani,sans-serif;font-size:5em;font-weight:700;letter-spacing:8px;color:#fff\'>AMU</div>'"/>
         </div>
-        <div class="idcard-row">
-          <div class="idcard-row-icon">📍</div>
-          <div class="idcard-row-lbl">Alamat</div>
-          <div class="idcard-row-val" id="idcAlamat">–</div>
-        </div>
-        <div class="idcard-row">
-          <div class="idcard-row-icon">📅</div>
-          <div class="idcard-row-lbl">Bergabung</div>
-          <div class="idcard-row-val" id="idcTglGabung">–</div>
-        </div>
-        <div class="idcard-row">
-          <div class="idcard-row-icon">🔵</div>
-          <div class="idcard-row-lbl">Status</div>
-          <div class="idcard-row-val" id="idcStatus">–</div>
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">
+          <div id="idcFotoWrap"></div>
+          <div class="idcard-nama" id="idcNama">–</div>
+          <div class="idcard-jabatan" id="idcJabatan">–</div>
+          <div class="idcard-divider"></div>
         </div>
       </div>
       <div class="idcard-footer">
@@ -646,17 +622,12 @@
     if (!d) return;
     const inisial = (d.nama||'?').substring(0,2);
 
-    // Foto
     document.getElementById('idcFotoWrap').innerHTML = d.foto
       ? `<img src="${d.foto}" class="idcard-foto" onerror="this.outerHTML='<div class=idcard-foto-placeholder>${inisial}</div>'">`
       : `<div class="idcard-foto-placeholder">${inisial}</div>`;
 
-    document.getElementById('idcNama').textContent     = d.nama||'-';
-    document.getElementById('idcJabatan').textContent  = d.jabatan||'-';
-    document.getElementById('idcWa').textContent       = d.wa ? `+${d.wa}` : '-';
-    document.getElementById('idcAlamat').textContent   = d.alamat||'-';
-    document.getElementById('idcTglGabung').textContent= d.tglGabung||'-';
-    document.getElementById('idcStatus').textContent   = (d.status||'aktif').toUpperCase();
+    document.getElementById('idcNama').textContent    = d.nama||'-';
+    document.getElementById('idcJabatan').textContent = d.jabatan||'-';
     document.getElementById('idCardPrint').classList.add('show');
   };
 
