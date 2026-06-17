@@ -228,6 +228,13 @@
 
     .detail-ft { padding: 12px 20px; display: flex; gap: 8px; justify-content: flex-end; background: var(--card2); }
     .btn-edit-detail { padding: 8px 18px; background: rgba(72,144,232,0.1); border: 1px solid rgba(72,144,232,0.3); border-radius: 6px; color: var(--info); font-size: 0.82em; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-jual { padding: 8px 18px; background: linear-gradient(135deg, #1a4a1a, var(--success)); border: none; border-radius: 6px; color: #fff; font-size: 0.82em; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .btn-jual:hover { filter: brightness(1.1); }
+    .btn-jual:disabled { opacity: 0.4; pointer-events: none; }
+    .jual-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+    .jual-modal-overlay.show { display: flex; }
+    .jual-modal { background: var(--card); border: 1px solid var(--border2); border-radius: 10px; width: 100%; max-width: 480px; margin: auto; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: modalIn 0.2s ease; }
+    .jual-info { background: var(--gold-bg); border-bottom: 1px solid var(--border); padding: 10px 20px; font-size: 0.8em; color: var(--gold2); }
 
     /* toast */
     .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 18px; font-size: 0.82em; color: var(--silver2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 300; display: none; }
@@ -599,6 +606,67 @@
     <div class="detail-ft">
       <button class="modal-close btn-cancel" onclick="closeDetail()">Tutup</button>
       <button class="btn-edit-detail" onclick="editFromDetail()">✏️ Edit</button>
+      <button class="btn-jual" id="btnTandaiTerjual" onclick="openJualModal()">🏷️ Tandai Terjual</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TANDAI TERJUAL -->
+<div class="jual-modal-overlay" id="jualModalOverlay">
+  <div class="jual-modal">
+    <div class="modal-hd">
+      <div class="modal-title">Tandai Terjual</div>
+      <button class="modal-close" onclick="closeJualModal()">✕</button>
+    </div>
+    <div class="jual-info" id="jualInfo">–</div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">Nama Pembeli *</label>
+          <input type="text" class="form-input caps" id="jNamaPembeli" placeholder="Nama pembeli..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">No. WA Pembeli</label>
+          <input type="text" class="form-input" id="jWaPembeli" placeholder="08xx / 62xx" oninput="formatWA(this)"/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">No. HP Pembeli</label>
+          <input type="text" class="form-input" id="jHpPembeli" placeholder="08xx..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Alamat Pembeli</label>
+          <input type="text" class="form-input caps" id="jAlamatPembeli" placeholder="Alamat..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Harga Jual Final (Rp) *</label>
+          <input type="number" class="form-input" id="jHargaJual" placeholder="165000000"/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Tanggal Jual *</label>
+          <input type="date" class="form-input" id="jTanggalJual"/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Metode Bayar</label>
+          <select class="form-select" id="jMetodeBayar">
+            <option value="cash">Cash</option>
+            <option value="kredit">Kredit/Cicilan</option>
+            <option value="tukar_tambah">Tukar Tambah</option>
+            <option value="transfer">Transfer Bank</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Sales yang Handle</label>
+          <input type="text" class="form-input caps" id="jSales" placeholder="Nama sales..."/>
+        </div>
+        <div class="form-field span2">
+          <label class="form-label">Catatan</label>
+          <input type="text" class="form-input" id="jCatatan" placeholder="Catatan penjualan..."/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeJualModal()">Batal</button>
+      <button class="btn-save" onclick="simpanTerjual()" style="background:linear-gradient(135deg,#1a4a1a,var(--success));color:#fff">✓ Konfirmasi Terjual</button>
     </div>
   </div>
 </div>
@@ -1006,6 +1074,17 @@
     }
 
     document.getElementById('detailOverlay').classList.add('show');
+
+    // Tampil/sembunyikan tombol Tandai Terjual
+    const btnJual = document.getElementById('btnTandaiTerjual');
+    if (d.status === 'terjual') {
+      btnJual.textContent = '✓ Sudah Terjual';
+      btnJual.disabled = true;
+    } else {
+      btnJual.textContent = '🏷️ Tandai Terjual';
+      btnJual.disabled = false;
+    }
+
     await loadBiaya(d.id);
   };
 
@@ -1294,7 +1373,67 @@
     } catch(e) { showToast('Gagal menghapus', 'error'); }
   };
 
-  // ══ AUTO LOGOUT 5 MENIT ══
+  // ══ TANDAI TERJUAL ══
+  window.openJualModal = function() {
+    if (!detailData) return;
+    // Tampilkan info kendaraan
+    document.getElementById('jualInfo').textContent =
+      `${detailData.merek||''} ${detailData.model||''} ${detailData.tahun||''} — ${detailData.nopol||''}`;
+    // Set default nilai
+    document.getElementById('jNamaPembeli').value  = '';
+    document.getElementById('jWaPembeli').value    = '';
+    document.getElementById('jHpPembeli').value    = '';
+    document.getElementById('jAlamatPembeli').value= '';
+    document.getElementById('jHargaJual').value    = detailData.hargaJual || '';
+    document.getElementById('jTanggalJual').value  = new Date().toISOString().split('T')[0];
+    document.getElementById('jMetodeBayar').value  = 'cash';
+    document.getElementById('jSales').value        = '';
+    document.getElementById('jCatatan').value      = '';
+    document.getElementById('jualModalOverlay').classList.add('show');
+  };
+
+  window.closeJualModal = function() {
+    document.getElementById('jualModalOverlay').classList.remove('show');
+  };
+
+  window.simpanTerjual = async function() {
+    const namaPembeli = document.getElementById('jNamaPembeli').value.trim();
+    const hargaJual   = document.getElementById('jHargaJual').value;
+    const tanggalJual = document.getElementById('jTanggalJual').value;
+
+    if (!namaPembeli) { showToast('Nama pembeli tidak boleh kosong!', 'error'); return; }
+    if (!hargaJual)   { showToast('Harga jual tidak boleh kosong!', 'error'); return; }
+    if (!tanggalJual) { showToast('Tanggal jual tidak boleh kosong!', 'error'); return; }
+
+    const dataPenjualan = {
+      namaPembeli,
+      waPembeli:    document.getElementById('jWaPembeli').value,
+      hpPembeli:    document.getElementById('jHpPembeli').value,
+      alamatPembeli:document.getElementById('jAlamatPembeli').value,
+      hargaJualFinal: parseInt(hargaJual),
+      tanggalJual,
+      metodeBayar:  document.getElementById('jMetodeBayar').value,
+      sales:        document.getElementById('jSales').value,
+      catatan:      document.getElementById('jCatatan').value,
+    };
+
+    try {
+      // Update status kendaraan + simpan data penjualan
+      await updateDoc(doc(db, 'kendaraan', detailData.id), {
+        status: 'terjual',
+        hargaJual: parseInt(hargaJual),
+        penjualan: dataPenjualan,
+        tglTerjual: tanggalJual,
+      });
+
+      showToast(`${detailData.merek} ${detailData.model} berhasil ditandai terjual ✓`, 'success');
+      closeJualModal();
+      closeDetail();
+      await loadData();
+    } catch(e) {
+      showToast('Gagal menyimpan: ' + e.message, 'error');
+    }
+  };
   let autoLogoutTimer;
   function resetTimer() {
     clearTimeout(autoLogoutTimer);
