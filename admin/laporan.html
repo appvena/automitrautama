@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laporan — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navbar:#1a1a1a; --sidebar:#222222; --content:#1e1e1e; --card:#272727; --card2:#2d2d2d;
+      --border:#333333; --border2:#3a3a3a; --gold:#c9a84c; --gold2:#e8c96a; --gold-dim:#7a5c18;
+      --gold-bg:rgba(201,168,76,0.07); --silver:#b0b0b0; --silver2:#d0d0d0;
+      --text:#a8a8a8; --text2:#c8c8c8; --text3:#686868;
+      --success:#4caf80; --warning:#e8a030; --error:#e05858; --info:#4890e8;
+      --sidebar-w:230px; --navbar-h:56px;
+    }
+    html,body{height:100%;background:var(--content);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;}
+    .navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);background:var(--navbar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px 0 0;z-index:100;gap:10px;}
+    .navbar-brand{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+    .navbar-brand img{height:32px;width:auto;filter:brightness(0.9);}
+    .navbar-brand-text{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;line-height:1.2;}
+    .navbar-brand-text span{display:block;font-size:0.62em;color:var(--gold);letter-spacing:1px;font-weight:400;}
+    .navbar-brand-fallback{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;letter-spacing:4px;color:var(--silver2);display:none;}
+    .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2em;cursor:pointer;padding:6px 10px;border-radius:4px;}
+    .navbar-spacer{flex:1;}
+    .navbar-clock{text-align:right;line-height:1.4;}
+    .clock-time{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:600;color:var(--silver2);letter-spacing:1px;}
+    .clock-date{font-size:0.68em;color:var(--text3);}
+    .navbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+    .btn-notif{position:relative;background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95em;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1px solid var(--navbar);}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;}
+    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .user-info{line-height:1.3;}
+    .user-name{font-size:0.78em;color:var(--silver2);font-weight:600;}
+    .user-role{font-size:0.62em;color:var(--gold);}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);font-size:0.7em;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .navbar-goldline{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 30%,var(--gold) 50%,var(--gold-dim) 70%,transparent 100%);opacity:0.6;}
+    .sidebar{position:fixed;top:var(--navbar-h);left:0;width:var(--sidebar-w);height:calc(100vh - var(--navbar-h));background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:90;transition:transform 0.25s ease;padding-bottom:24px;}
+    .sidebar::-webkit-scrollbar{width:3px;}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .sidebar-section{padding:20px 14px 5px;font-size:0.58em;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;}
+    .menu-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--text);font-size:0.84em;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .menu-item:hover{background:rgba(255,255,255,0.04);color:var(--silver2);border-left-color:var(--border2);}
+    .menu-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold);font-weight:500;}
+    .menu-icon{width:18px;text-align:center;font-size:0.95em;flex-shrink:0;opacity:0.8;}
+    .menu-item.active .menu-icon{opacity:1;}
+    .menu-label{flex:1;}
+    .sidebar-sep{height:1px;background:var(--border);margin:6px 14px;}
+    .sidebar-user{margin:8px 10px 0;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+    .sidebar-user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .su-name{font-size:0.8em;color:var(--silver2);font-weight:600;}
+    .su-role{font-size:0.62em;color:var(--gold);}
+    .su-logout{width:100%;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.75em;padding:7px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .su-logout:hover{border-color:var(--error);color:var(--error);}
+    .s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:89;}
+    .main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:20px;min-height:calc(100vh - var(--navbar-h));}
+    .pg-header{margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+    .pg-header-left{}
+    .pg-title{font-family:'Rajdhani',sans-serif;font-size:1.5em;font-weight:700;color:var(--silver2);letter-spacing:2px;text-transform:uppercase;}
+    .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
+
+    /* FILTER */
+    .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+    .filter-select{padding:7px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;}
+    .filter-select option{background:var(--card2);}
+    .btn-refresh{padding:7px 14px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px;color:var(--gold);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-export{padding:7px 14px;background:rgba(76,175,128,0.12);border:1px solid rgba(76,175,128,0.3);border-radius:6px;color:var(--success);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif;}
+
+    /* SUMMARY CARDS */
+    .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+    .sum-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .sum-card-icon{font-size:1.2em;margin-bottom:6px;}
+    .sum-card-val{font-family:'Rajdhani',sans-serif;font-size:1.4em;font-weight:700;line-height:1;}
+    .sum-card-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
+    .sum-card-trend{font-size:0.7em;margin-top:4px;}
+
+    /* CHART PANELS */
+    .chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;}
+    .chart-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .chart-panel-full{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+    .chart-hd{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
+    .chart-title{font-family:'Rajdhani',sans-serif;font-size:0.88em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .chart-body{padding:16px;position:relative;}
+    .chart-body canvas{max-height:260px;}
+
+    /* TABEL LAPORAN */
+    .tbl-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+    .tbl-hd{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
+    .tbl-title{font-family:'Rajdhani',sans-serif;font-size:0.88em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .tbl-wrap{overflow-x:auto;}
+    .tbl{width:100%;border-collapse:collapse;min-width:500px;}
+    .tbl th{font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;background:var(--card2);}
+    .tbl td{padding:9px 14px;font-size:0.82em;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.025);vertical-align:middle;}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl tr:hover td{background:rgba(255,255,255,0.02);}
+    .val-masuk{color:var(--success);font-family:'Rajdhani',sans-serif;font-weight:600;}
+    .val-keluar{color:var(--error);font-family:'Rajdhani',sans-serif;font-weight:600;}
+    .val-gold{color:var(--gold2);font-family:'Rajdhani',sans-serif;font-weight:600;}
+    .empty{text-align:center;padding:30px;color:var(--text3);}
+
+    /* toast & loading */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:400;display:none;}
+    .toast.show{display:block;}
+    .toast.success{border-left:3px solid var(--success);}
+    .toast.error{border-left:3px solid var(--error);}
+    .overlay{position:fixed;inset:0;background:#141414;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
+    .overlay.hide{opacity:0;pointer-events:none;}
+    .overlay img{width:64px;animation:pulse 1.5s ease-in-out infinite;filter:brightness(0.85);}
+    .ov-fallback{font-family:'Rajdhani',sans-serif;font-size:2em;font-weight:700;letter-spacing:6px;color:var(--silver);display:none;}
+    @keyframes pulse{0%,100%{opacity:0.5;transform:scale(0.96)}50%{opacity:1;transform:scale(1.03)}}
+    .ld-bar{width:120px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
+    .ld-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:ldfill 1.8s ease-in-out forwards;}
+    @keyframes ldfill{0%{width:0%}60%{width:75%}100%{width:100%}}
+    .ld-text{font-size:0.58em;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+
+    @media(max-width:768px){
+      .hamburger{display:flex;align-items:center;}
+      .navbar-brand{border-right:none;}
+      .navbar-brand-text,.navbar-clock,.navbar-sep{display:none;}
+      .btn-logout,.user-info{display:none;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,0.5);}
+      .s-overlay.show{display:block;}
+      .main{margin-left:0;padding:12px;}
+      .sum-grid{grid-template-columns:1fr 1fr;}
+      .chart-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('ovF').style.display='block'"/>
+  <div class="ov-fallback" id="ovF">AMU</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-text">Memuat laporan...</div>
+</div>
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('bF').style.display='block'"/>
+    <div class="navbar-brand-fallback" id="bF">AMU</div>
+    <div class="navbar-brand-text">Auto Mitra Utama<span>Start Here, Drive Next</span></div>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
+  <div class="navbar-sep"></div>
+  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <div class="navbar-sep"></div>
+  <div class="user-chip">
+    <div class="user-av" id="uAv">--</div>
+    <div class="user-info"><div class="user-name" id="uName">–</div><div class="user-role" id="uRole">–</div></div>
+  </div>
+  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <div class="navbar-goldline"></div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Utama</div>
+  <div class="menu-item" onclick="goTo('dashboard')"><span class="menu-icon">⊞</span><span class="menu-label">Dashboard</span></div>
+  <div class="sidebar-section">Operasional</div>
+  <div class="menu-item" onclick="goTo('kendaraan')"><span class="menu-icon">🚗</span><span class="menu-label">Kendaraan</span></div>
+  <div class="menu-item" onclick="goTo('servis')"><span class="menu-icon">🔧</span><span class="menu-label">Servis</span></div>
+  <div class="menu-item" onclick="goTo('sparepart')"><span class="menu-icon">🔩</span><span class="menu-label">Sparepart</span></div>
+  <div class="sidebar-section">Keuangan</div>
+  <div class="menu-item" onclick="goTo('keuangan')"><span class="menu-icon">💰</span><span class="menu-label">Keuangan</span></div>
+  <div class="menu-item active"><span class="menu-icon">📊</span><span class="menu-label">Laporan</span></div>
+  <div class="sidebar-section">Manajemen</div>
+  <div class="menu-item" onclick="goTo('pelanggan')"><span class="menu-icon">👥</span><span class="menu-label">Pelanggan</span></div>
+  <div class="menu-item" onclick="goTo('staff')"><span class="menu-icon">👤</span><span class="menu-label">Staff</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">Sistem</div>
+  <div class="menu-item" onclick="goTo('master-data')"><span class="menu-icon">📋</span><span class="menu-label">Master Data</span></div>
+  <div class="menu-item" onclick="goTo('pengaturan')"><span class="menu-icon">⚙</span><span class="menu-label">Pengaturan</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div><div class="su-name" id="suName">–</div><div class="su-role" id="suRole">–</div></div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-title">Laporan</div>
+      <div class="pg-sub">Analisis & grafik keuangan Auto Mitra Utama</div>
+      <div class="pg-line"></div>
+    </div>
+    <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <select class="filter-select" id="filterTahun" onchange="loadData()">
+      <option value="2026">2026</option>
+      <option value="2025">2025</option>
+      <option value="2024">2024</option>
+    </select>
+    <button class="btn-refresh" onclick="loadData()">🔄 Refresh</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sum-grid">
+    <div class="sum-card">
+      <div class="sum-card-icon">💰</div>
+      <div class="sum-card-val" id="sumMasuk" style="color:var(--success)">Rp 0</div>
+      <div class="sum-card-lbl">Total Pemasukan</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-card-icon">💸</div>
+      <div class="sum-card-val" id="sumKeluar" style="color:var(--error)">Rp 0</div>
+      <div class="sum-card-lbl">Total Pengeluaran</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-card-icon">📈</div>
+      <div class="sum-card-val" id="sumLaba" style="color:var(--gold2)">Rp 0</div>
+      <div class="sum-card-lbl">Laba Bersih</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-card-icon">🚗</div>
+      <div class="sum-card-val" id="sumUnit" style="color:var(--silver2)">0</div>
+      <div class="sum-card-lbl">Unit Terjual</div>
+    </div>
+  </div>
+
+  <!-- GRAFIK PENDAPATAN PER BULAN -->
+  <div class="chart-panel-full">
+    <div class="chart-hd">
+      <div class="chart-title">📊 Pendapatan Per Bulan</div>
+      <select class="filter-select" id="filterGrafikType" onchange="updateGrafik()" style="font-size:0.75em;padding:4px 8px">
+        <option value="semua">Semua Divisi</option>
+        <option value="showroom">Showroom</option>
+        <option value="servis">Servis</option>
+        <option value="sparepart">Sparepart</option>
+      </select>
+    </div>
+    <div class="chart-body">
+      <canvas id="chartPendapatan"></canvas>
+    </div>
+  </div>
+
+  <!-- GRAFIK DIVISI + LABA RUGI -->
+  <div class="chart-grid">
+    <div class="chart-panel">
+      <div class="chart-hd"><div class="chart-title">📊 Laba Rugi Per Bulan</div></div>
+      <div class="chart-body">
+        <canvas id="chartLabaRugi"></canvas>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-hd"><div class="chart-title">🥧 Kontribusi Per Divisi</div></div>
+      <div class="chart-body">
+        <canvas id="chartDivisi"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABEL LABA RUGI PER BULAN -->
+  <div class="tbl-panel">
+    <div class="tbl-hd">
+      <div class="tbl-title">📋 Rekap Laba Rugi Per Bulan</div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Bulan</th>
+            <th>Showroom</th>
+            <th>Servis</th>
+            <th>Sparepart</th>
+            <th>Total Masuk</th>
+            <th>Total Keluar</th>
+            <th>Laba Bersih</th>
+          </tr>
+        </thead>
+        <tbody id="tblLabaRugi">
+          <tr><td colspan="7"><div class="empty">Memuat data...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABEL SPAREPART TERLARIS -->
+  <div class="tbl-panel">
+    <div class="tbl-hd">
+      <div class="tbl-title">🔩 Sparepart Paling Sering Dipakai</div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>#</th><th>Nama Sparepart</th><th>Total Keluar</th><th>Satuan</th></tr>
+        </thead>
+        <tbody id="tblSPTerlaris">
+          <tr><td colspan="4"><div class="empty">Memuat data...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const fmt  = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+  const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  let chartPendapatan = null, chartLabaRugi = null, chartDivisi = null;
+  let dataKendaraan = [], dataServis = [], dataSPTrx = [], dataPengeluaran = [];
+
+  // ── Per bulan struktur ──
+  const emptyBulan = () => Array(12).fill(0).map((_,i) => ({
+    bulan: i, showroom: 0, servis: 0, sparepart: 0, spBeli: 0, umum: 0, kendaraanBeli: 0
+  }));
+
+  let bulanData = emptyBulan();
+
+  // ── Cek login ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    const email = user.email||'';
+    const inisial = email.substring(0,2).toUpperCase();
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    // Set tahun filter ke tahun sekarang
+    document.getElementById('filterTahun').value = new Date().getFullYear();
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadData();
+  });
+
+  // ── Load Data ──
+  window.loadData = async function() {
+    const tahun = parseInt(document.getElementById('filterTahun').value);
+    bulanData = emptyBulan();
+
+    try {
+      // Kendaraan terjual
+      const kSnap = await getDocs(collection(db,'kendaraan'));
+      dataKendaraan = kSnap.docs.map(d => ({id:d.id,...d.data()}))
+        .filter(d => d.status === 'terjual' && d.penjualan);
+      dataKendaraan.forEach(d => {
+        const tgl = new Date(d.penjualan?.tanggalJual||'');
+        if (tgl.getFullYear() === tahun) {
+          const m = tgl.getMonth();
+          bulanData[m].showroom += parseInt(d.penjualan?.hargaJualFinal||d.hargaJual||0);
+          bulanData[m].kendaraanBeli += parseInt(d.hargaBeli||0);
+        }
+      });
+
+      // Servis selesai
+      const sSnap = await getDocs(collection(db,'servis'));
+      dataServis = sSnap.docs.map(d => ({id:d.id,...d.data()}))
+        .filter(d => d.status === 'selesai');
+      dataServis.forEach(d => {
+        const tgl = new Date(d.tglMasukServis||'');
+        if (tgl.getFullYear() === tahun) {
+          bulanData[tgl.getMonth()].servis += parseInt(d.totalBiaya||0);
+        }
+      });
+
+      // Sparepart transaksi
+      const spSnap = await getDocs(query(collection(db,'trx_sparepart'), orderBy('tanggal','desc')));
+      dataSPTrx = spSnap.docs.map(d => ({id:d.id,...d.data()}));
+      dataSPTrx.forEach(d => {
+        const tgl = new Date(d.tanggal||'');
+        if (tgl.getFullYear() === tahun) {
+          const m = tgl.getMonth();
+          const total = parseInt(d.harga||0) * parseInt(d.qty||0);
+          if (d.tipe === 'keluar') bulanData[m].sparepart += total;
+          if (d.tipe === 'masuk')  bulanData[m].spBeli    += total;
+        }
+      });
+
+      // Pengeluaran umum
+      const pSnap = await getDocs(query(collection(db,'pengeluaran_umum'), orderBy('tanggal','desc')));
+      dataPengeluaran = pSnap.docs.map(d => ({id:d.id,...d.data()}));
+      dataPengeluaran.forEach(d => {
+        const tgl = new Date(d.tanggal||'');
+        if (tgl.getFullYear() === tahun) {
+          bulanData[tgl.getMonth()].umum += parseInt(d.jumlah||0);
+        }
+      });
+
+    } catch(e) { showToast('Gagal load data: '+e.message,'error'); }
+
+    updateSummary();
+    updateGrafik();
+    renderTabelLabaRugi();
+    renderSPTerlaris();
+  };
+
+  function updateSummary() {
+    const totalShowroom = bulanData.reduce((s,d) => s+d.showroom, 0);
+    const totalServis   = bulanData.reduce((s,d) => s+d.servis, 0);
+    const totalSP       = bulanData.reduce((s,d) => s+d.sparepart, 0);
+    const totalMasuk    = totalShowroom + totalServis + totalSP;
+    const totalKeluar   = bulanData.reduce((s,d) => s+d.kendaraanBeli+d.spBeli+d.umum, 0);
+    const laba          = totalMasuk - totalKeluar;
+    const unitTerjual   = dataKendaraan.filter(d => {
+      const tgl = new Date(d.penjualan?.tanggalJual||'');
+      return tgl.getFullYear() === parseInt(document.getElementById('filterTahun').value);
+    }).length;
+
+    document.getElementById('sumMasuk').textContent  = fmt(totalMasuk);
+    document.getElementById('sumKeluar').textContent = fmt(totalKeluar);
+    document.getElementById('sumLaba').textContent   = fmt(laba);
+    document.getElementById('sumLaba').style.color   = laba >= 0 ? 'var(--gold2)' : 'var(--error)';
+    document.getElementById('sumUnit').textContent   = unitTerjual + ' unit';
+  }
+
+  // ── Grafik ──
+  window.updateGrafik = function() {
+    const tipe = document.getElementById('filterGrafikType').value;
+    const labels = bln;
+
+    // Chart Pendapatan
+    if (chartPendapatan) chartPendapatan.destroy();
+    const ctxP = document.getElementById('chartPendapatan').getContext('2d');
+
+    let datasets = [];
+    if (tipe === 'semua' || tipe === 'showroom') {
+      datasets.push({
+        label: '🚗 Showroom',
+        data: bulanData.map(d => d.showroom),
+        backgroundColor: 'rgba(201,168,76,0.2)',
+        borderColor: '#c9a84c',
+        borderWidth: 2, fill: true, tension: 0.4
+      });
+    }
+    if (tipe === 'semua' || tipe === 'servis') {
+      datasets.push({
+        label: '🔧 Servis',
+        data: bulanData.map(d => d.servis),
+        backgroundColor: 'rgba(72,144,232,0.2)',
+        borderColor: '#4890e8',
+        borderWidth: 2, fill: true, tension: 0.4
+      });
+    }
+    if (tipe === 'semua' || tipe === 'sparepart') {
+      datasets.push({
+        label: '🔩 Sparepart',
+        data: bulanData.map(d => d.sparepart),
+        backgroundColor: 'rgba(76,175,128,0.2)',
+        borderColor: '#4caf80',
+        borderWidth: 2, fill: true, tension: 0.4
+      });
+    }
+
+    chartPendapatan = new Chart(ctxP, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: '#a8a8a8', font: { family: 'Inter', size: 11 } } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: Rp ${parseInt(ctx.raw||0).toLocaleString('id-ID')}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#686868', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { color: '#686868', font: { size: 10 }, callback: v => 'Rp '+(v/1000000).toFixed(1)+'jt' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+      }
+    });
+
+    // Chart Laba Rugi
+    if (chartLabaRugi) chartLabaRugi.destroy();
+    const ctxL = document.getElementById('chartLabaRugi').getContext('2d');
+    const labaPerBulan = bulanData.map(d => {
+      const masuk  = d.showroom + d.servis + d.sparepart;
+      const keluar = d.kendaraanBeli + d.spBeli + d.umum;
+      return masuk - keluar;
+    });
+    chartLabaRugi = new Chart(ctxL, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Laba Bersih',
+          data: labaPerBulan,
+          backgroundColor: labaPerBulan.map(v => v >= 0 ? 'rgba(76,175,128,0.6)' : 'rgba(224,88,88,0.6)'),
+          borderColor:     labaPerBulan.map(v => v >= 0 ? '#4caf80' : '#e05858'),
+          borderWidth: 1, borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => `Laba: Rp ${parseInt(ctx.raw||0).toLocaleString('id-ID')}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#686868', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { color: '#686868', font: { size: 10 }, callback: v => 'Rp '+(v/1000000).toFixed(1)+'jt' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+      }
+    });
+
+    // Chart Divisi (Donut)
+    if (chartDivisi) chartDivisi.destroy();
+    const ctxD = document.getElementById('chartDivisi').getContext('2d');
+    const totalShow = bulanData.reduce((s,d) => s+d.showroom, 0);
+    const totalSrv  = bulanData.reduce((s,d) => s+d.servis, 0);
+    const totalSP   = bulanData.reduce((s,d) => s+d.sparepart, 0);
+    chartDivisi = new Chart(ctxD, {
+      type: 'doughnut',
+      data: {
+        labels: ['🚗 Showroom', '🔧 Servis', '🔩 Sparepart'],
+        datasets: [{
+          data: [totalShow, totalSrv, totalSP],
+          backgroundColor: ['rgba(201,168,76,0.8)', 'rgba(72,144,232,0.8)', 'rgba(76,175,128,0.8)'],
+          borderColor: ['#c9a84c','#4890e8','#4caf80'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position:'bottom', labels: { color:'#a8a8a8', font:{ size:11 }, padding: 12 } },
+          tooltip: { callbacks: { label: ctx => `${ctx.label}: Rp ${parseInt(ctx.raw||0).toLocaleString('id-ID')}` } }
+        }
+      }
+    });
+  };
+
+  // ── Tabel Laba Rugi ──
+  function renderTabelLabaRugi() {
+    const rows = bulanData.map((d, i) => {
+      const masuk  = d.showroom + d.servis + d.sparepart;
+      const keluar = d.kendaraanBeli + d.spBeli + d.umum;
+      const laba   = masuk - keluar;
+      if (masuk === 0 && keluar === 0) return '';
+      return `<tr>
+        <td style="font-weight:600;color:var(--silver2)">${bln[i]}</td>
+        <td class="val-gold">${d.showroom>0?fmt(d.showroom):'-'}</td>
+        <td class="val-masuk">${d.servis>0?fmt(d.servis):'-'}</td>
+        <td class="val-masuk">${d.sparepart>0?fmt(d.sparepart):'-'}</td>
+        <td class="val-masuk">${fmt(masuk)}</td>
+        <td class="val-keluar">${fmt(keluar)}</td>
+        <td class="${laba>=0?'val-gold':'val-keluar'}" style="font-weight:700">${fmt(laba)}</td>
+      </tr>`;
+    }).filter(Boolean).join('');
+
+    document.getElementById('tblLabaRugi').innerHTML = rows ||
+      `<tr><td colspan="7"><div class="empty">Belum ada data untuk tahun ini</div></td></tr>`;
+  }
+
+  // ── Sparepart Terlaris ──
+  function renderSPTerlaris() {
+    const map = {};
+    dataSPTrx.filter(d => d.tipe === 'keluar').forEach(d => {
+      const key = d.namaSP||'-';
+      if (!map[key]) map[key] = { nama: key, qty: 0, satuan: d.satuan||'' };
+      map[key].qty += parseInt(d.qty||0);
+    });
+    const sorted = Object.values(map).sort((a,b) => b.qty - a.qty).slice(0,10);
+    if (sorted.length === 0) {
+      document.getElementById('tblSPTerlaris').innerHTML = `<tr><td colspan="4"><div class="empty">Belum ada data</div></td></tr>`;
+      return;
+    }
+    document.getElementById('tblSPTerlaris').innerHTML = sorted.map((d,i) => `
+      <tr>
+        <td style="color:var(--text3)">${i+1}</td>
+        <td style="font-weight:600;color:var(--silver2)">${d.nama}</td>
+        <td class="val-gold">${d.qty}</td>
+        <td style="color:var(--text3)">${d.satuan}</td>
+      </tr>`).join('');
+  }
+
+  // ── Export CSV ──
+  window.exportCSV = function() {
+    const tahun = document.getElementById('filterTahun').value;
+    let csv = 'Bulan,Showroom,Servis,Sparepart,Total Masuk,Total Keluar,Laba Bersih\n';
+    bulanData.forEach((d,i) => {
+      const masuk  = d.showroom + d.servis + d.sparepart;
+      const keluar = d.kendaraanBeli + d.spBeli + d.umum;
+      const laba   = masuk - keluar;
+      csv += `${bln[i]} ${tahun},${d.showroom},${d.servis},${d.sparepart},${masuk},${keluar},${laba}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `laporan-amu-${tahun}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Laporan berhasil diexport ✓','success');
+  };
+
+  // ── Toast ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Clock ──
+  function tick() {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln2 = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln2[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Auto Logout ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      showToast('Sesi berakhir karena tidak aktif.','error');
+      setTimeout(async () => { await signOut(auth); window.location.href = '/automitrautama/index.html'; }, 2000);
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','touchstart'].forEach(e => document.addEventListener(e, resetTimer, {passive:true}));
+  resetTimer();
+
+  // ── Back Button ──
+  window.history.pushState(null,'',window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    } else { window.history.pushState(null,'',window.location.href); }
+  });
+
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar?')) { await signOut(auth); window.location.href = '/automitrautama/index.html'; }
+  };
+
+  const pages = {
+    'dashboard':'/automitrautama/admin/dashboard.html','kendaraan':'/automitrautama/admin/kendaraan.html',
+    'servis':'/automitrautama/admin/servis.html','sparepart':'/automitrautama/admin/sparepart.html',
+    'keuangan':'/automitrautama/admin/keuangan.html','laporan':'/automitrautama/admin/laporan.html',
+    'pelanggan':'/automitrautama/admin/pelanggan.html','staff':'/automitrautama/admin/staff.html',
+    'master-data':'/automitrautama/admin/master-data.html','pengaturan':'/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => { if (pages[page]) { window.location.href = pages[page]; } };
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+</script>
+</body>
+</html>
