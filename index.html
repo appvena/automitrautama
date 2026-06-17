@@ -508,6 +508,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, where }
+    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   // Firebase Config AMU
   const firebaseConfig = {
@@ -521,12 +523,12 @@
 
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db   = getFirestore(app);
 
   // ── Tahun otomatis ──
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // ── Loading overlay ──
-  // Tunggu Firebase cek sesi + animasi selesai
   let systemReady = false, animDone = false;
 
   function tryHide() {
@@ -539,10 +541,8 @@
   // Cek kalau sudah login sebelumnya → langsung ke dashboard
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // Sudah login → langsung dashboard
       window.location.href = '/automitrautama/admin/dashboard.html';
     } else {
-      // Belum login → tampilkan form
       systemReady = true;
       tryHide();
     }
@@ -556,7 +556,7 @@
     btn.textContent = pw.type === 'password' ? '👁' : '🙈';
   };
 
-  // ── Login dengan Firebase ──
+  // ── Login ──
   window.doLogin = function() {
     const email    = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
@@ -565,32 +565,54 @@
     const errGen   = document.getElementById('err-general');
     const btn      = document.getElementById('btnLogin');
 
-    // Reset error
     errUser.classList.remove('show');
     errPass.classList.remove('show');
     errGen.classList.remove('show');
 
-    // Validasi kosong
     let valid = true;
     if (!email)    { errUser.classList.add('show'); valid = false; }
     if (!password) { errPass.classList.add('show'); valid = false; }
     if (!valid) return;
 
-    // Loading
     btn.classList.add('loading');
     btn.textContent = 'Memverifikasi...';
 
-    // Firebase login
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // Berhasil → ke dashboard
+      .then(async (userCred) => {
+        const uid   = userCred.user.uid;
+        const uEmail = userCred.user.email;
+
+        // Cek apakah ini akun staff (bukan owner)
+        try {
+          const staffSnap = await getDocs(query(
+            collection(db, 'akun_staff'),
+            where('email', '==', uEmail),
+            where('aktif', '==', true)
+          ));
+
+          if (!staffSnap.empty) {
+            // Login sebagai staff → simpan role di sessionStorage
+            const staffData = staffSnap.docs[0].data();
+            sessionStorage.setItem('amu_role', staffData.role||'staff');
+            sessionStorage.setItem('amu_nama', staffData.nama||uEmail);
+            sessionStorage.setItem('amu_uid',  uid);
+          } else {
+            // Owner/Admin
+            sessionStorage.setItem('amu_role', 'owner');
+            sessionStorage.setItem('amu_nama', 'Administrator');
+            sessionStorage.setItem('amu_uid',  uid);
+          }
+        } catch(e) {
+          sessionStorage.setItem('amu_role', 'owner');
+          sessionStorage.setItem('amu_nama', 'Administrator');
+          sessionStorage.setItem('amu_uid',  uid);
+        }
+
         window.location.href = '/automitrautama/admin/dashboard.html';
       })
       .catch((error) => {
         btn.classList.remove('loading');
         btn.textContent = 'Masuk';
-
-        // Pesan error spesifik
         if (error.code === 'auth/invalid-email') {
           errUser.textContent = 'Format email tidak valid.';
           errUser.classList.add('show');
