@@ -377,10 +377,21 @@
 
       <div class="modal-section">Data Kendaraan</div>
       <div class="form-grid">
+        <div class="form-field span2">
+          <label class="form-label">No. Polisi — Ketik untuk cari dari database</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" class="form-input caps" id="fNopolServis" placeholder="BL 1234 AB" oninput="cariKendaraan(this.value)"/>
+            <div id="nopolStatus" style="font-size:0.72em;color:var(--text3);align-self:center;white-space:nowrap;min-width:80px"></div>
+          </div>
+        </div>
         <div class="form-field"><label class="form-label">Merek / Model *</label><input type="text" class="form-input caps" id="fMerekKendaraan" placeholder="Toyota Avanza..."/></div>
-        <div class="form-field"><label class="form-label">No. Polisi</label><input type="text" class="form-input caps" id="fNopolServis" placeholder="BL 1234 AB"/></div>
-        <div class="form-field"><label class="form-label">Tahun</label><input type="number" class="form-input" id="fTahunKendaraan" placeholder="2022"/></div>
+        <div class="form-field"><label class="form-label">Tahun</label><input type="text" class="form-input" id="fTahunKendaraan" placeholder="2022"/></div>
         <div class="form-field"><label class="form-label">Warna</label><input type="text" class="form-input caps" id="fWarnaKendaraan" placeholder="Putih..."/></div>
+        <div class="form-field"><label class="form-label">Transmisi</label><input type="text" class="form-input caps" id="fTransmisiKendaraan" placeholder="Matic..."/></div>
+        <div class="form-field"><label class="form-label">Bahan Bakar</label><input type="text" class="form-input caps" id="fBahanBakarKendaraan" placeholder="Bensin..."/></div>
+        <div class="form-field"><label class="form-label">No. Rangka</label><input type="text" class="form-input caps" id="fNoRangkaServis" placeholder="MHFXXX..."/></div>
+        <div class="form-field"><label class="form-label">No. Mesin</label><input type="text" class="form-input caps" id="fNoMesinServis" placeholder="DXXX..."/></div>
+        <div class="form-field"><label class="form-label">Nama di BPKB / STNK</label><input type="text" class="form-input caps" id="fNamaBpkbServis" placeholder="Nama pemilik..."/></div>
       </div>
 
       <div class="modal-section">Detail Servis</div>
@@ -430,10 +441,15 @@
       <div class="detail-section">
         <div class="detail-section-title">🚗 Data Kendaraan</div>
         <div class="detail-grid">
-          <div><div class="detail-item-label">Merek / Model</div><div class="detail-item-value" id="dMerekKendaraan">–</div></div>
           <div><div class="detail-item-label">No. Polisi</div><div class="detail-item-value" id="dNopolServis">–</div></div>
+          <div><div class="detail-item-label">Merek / Model</div><div class="detail-item-value" id="dMerekKendaraan">–</div></div>
           <div><div class="detail-item-label">Tahun</div><div class="detail-item-value" id="dTahunKendaraan">–</div></div>
           <div><div class="detail-item-label">Warna</div><div class="detail-item-value" id="dWarnaKendaraan">–</div></div>
+          <div><div class="detail-item-label">Transmisi</div><div class="detail-item-value" id="dTransmisiKendaraan">–</div></div>
+          <div><div class="detail-item-label">Bahan Bakar</div><div class="detail-item-value" id="dBahanBakarKendaraan">–</div></div>
+          <div><div class="detail-item-label">No. Rangka</div><div class="detail-item-value" id="dNoRangkaServis">–</div></div>
+          <div><div class="detail-item-label">No. Mesin</div><div class="detail-item-value" id="dNoMesinServis">–</div></div>
+          <div><div class="detail-item-label">Nama di BPKB/STNK</div><div class="detail-item-value" id="dNamaBpkbServis">–</div></div>
         </div>
       </div>
 
@@ -550,6 +566,7 @@
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadMaster();
+    await loadKendaraanDB();
     await loadData();
   });
 
@@ -643,10 +660,13 @@
     document.getElementById('modalTitle').textContent = 'Servis Baru';
     ['fNamaPelanggan','fWaPelanggan','fHpPelanggan','fAlamat',
      'fMerekKendaraan','fNopolServis','fTahunKendaraan','fWarnaKendaraan',
+     'fTransmisiKendaraan','fBahanBakarKendaraan','fNoRangkaServis',
+     'fNoMesinServis','fNamaBpkbServis',
      'fJenisServis','fMekanik','fEstimasi','fKeluhan'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    document.getElementById('nopolStatus').textContent = '';
     document.getElementById('fTglMasukServis').value = new Date().toISOString().split('T')[0];
     document.getElementById('modalOverlay').classList.add('show');
   };
@@ -671,21 +691,25 @@
     btn.disabled = true; btn.textContent = 'Menyimpan...';
 
     const payload = {
-      namaPelanggan:  nama,
-      waPelanggan:    document.getElementById('fWaPelanggan').value,
-      hpPelanggan:    document.getElementById('fHpPelanggan').value,
-      alamat:         document.getElementById('fAlamat').value,
-      merekKendaraan: merek,
-      nopolServis:    document.getElementById('fNopolServis').value,
-      tahunKendaraan: document.getElementById('fTahunKendaraan').value,
-      warnaKendaraan: document.getElementById('fWarnaKendaraan').value,
-      jenisServis:    jenis,
-      mekanik:        document.getElementById('fMekanik').value,
-      tglMasukServis: tgl,
-      estimasi:       parseInt(document.getElementById('fEstimasi').value||0),
-      keluhan:        document.getElementById('fKeluhan').value,
-      status:         editId ? undefined : 'antri',
-      totalBiaya:     0,
+      namaPelanggan:      nama,
+      waPelanggan:        document.getElementById('fWaPelanggan').value,
+      hpPelanggan:        document.getElementById('fHpPelanggan').value,
+      alamat:             document.getElementById('fAlamat').value,
+      merekKendaraan:     merek,
+      nopolServis:        document.getElementById('fNopolServis').value,
+      tahunKendaraan:     document.getElementById('fTahunKendaraan').value,
+      warnaKendaraan:     document.getElementById('fWarnaKendaraan').value,
+      transmisiKendaraan: document.getElementById('fTransmisiKendaraan').value,
+      bahanBakarKendaraan:document.getElementById('fBahanBakarKendaraan').value,
+      noRangkaServis:     document.getElementById('fNoRangkaServis').value,
+      noMesinServis:      document.getElementById('fNoMesinServis').value,
+      namaBpkbServis:     document.getElementById('fNamaBpkbServis').value,
+      jenisServis:        jenis,
+      mekanik:            document.getElementById('fMekanik').value,
+      tglMasukServis:     tgl,
+      estimasi:           parseInt(document.getElementById('fEstimasi').value||0),
+      keluhan:            document.getElementById('fKeluhan').value,
+      totalBiaya:         0,
     };
     if (editId) delete payload.status;
 
@@ -718,10 +742,15 @@
     set('dWaPelanggan',   d.waPelanggan ? `+${d.waPelanggan}` : null);
     set('dHpPelanggan',   d.hpPelanggan);
     set('dAlamat',        d.alamat);
-    set('dMerekKendaraan',d.merekKendaraan);
-    set('dNopolServis',   d.nopolServis);
-    set('dTahunKendaraan',d.tahunKendaraan);
-    set('dWarnaKendaraan',d.warnaKendaraan);
+    set('dNopolServis',        d.nopolServis);
+    set('dMerekKendaraan',     d.merekKendaraan);
+    set('dTahunKendaraan',     d.tahunKendaraan);
+    set('dWarnaKendaraan',     d.warnaKendaraan);
+    set('dTransmisiKendaraan', d.transmisiKendaraan);
+    set('dBahanBakarKendaraan',d.bahanBakarKendaraan);
+    set('dNoRangkaServis',     d.noRangkaServis);
+    set('dNoMesinServis',      d.noMesinServis);
+    set('dNamaBpkbServis',     d.namaBpkbServis);
     set('dJenisServis',   d.jenisServis);
     set('dMekanik',       d.mekanik);
     set('dTglMasuk',      d.tglMasukServis);
@@ -748,6 +777,10 @@
       fHpPelanggan:'hpPelanggan', fAlamat:'alamat',
       fMerekKendaraan:'merekKendaraan', fNopolServis:'nopolServis',
       fTahunKendaraan:'tahunKendaraan', fWarnaKendaraan:'warnaKendaraan',
+      fTransmisiKendaraan:'transmisiKendaraan',
+      fBahanBakarKendaraan:'bahanBakarKendaraan',
+      fNoRangkaServis:'noRangkaServis', fNoMesinServis:'noMesinServis',
+      fNamaBpkbServis:'namaBpkbServis',
       fJenisServis:'jenisServis', fMekanik:'mekanik',
       fTglMasukServis:'tglMasukServis', fEstimasi:'estimasi', fKeluhan:'keluhan'
     };
@@ -879,7 +912,50 @@
   // ── Print Invoice ──
   window.printInvoice = function() { window.print(); };
 
-  // ── Format WA ──
+  // ── Cari Kendaraan dari Database ──
+  let cariTimeout = null;
+  let dbKendaraan = [];
+
+  async function loadKendaraanDB() {
+    try {
+      const snap = await getDocs(collection(db, 'kendaraan'));
+      dbKendaraan = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    } catch(e) { dbKendaraan = []; }
+  }
+
+  window.cariKendaraan = function(nopol) {
+    clearTimeout(cariTimeout);
+    const status = document.getElementById('nopolStatus');
+    if (!nopol || nopol.length < 3) {
+      status.textContent = '';
+      return;
+    }
+    status.textContent = '🔍 Mencari...';
+    status.style.color = 'var(--text3)';
+
+    cariTimeout = setTimeout(() => {
+      const found = dbKendaraan.find(k =>
+        (k.nopol||'').toUpperCase().replace(/\s/g,'') === nopol.toUpperCase().replace(/\s/g,'')
+      );
+      if (found) {
+        // Isi semua field otomatis
+        const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+        set('fMerekKendaraan',     `${found.merek||''} ${found.model||''}`.trim());
+        set('fTahunKendaraan',     found.tahun);
+        set('fWarnaKendaraan',     found.warna);
+        set('fTransmisiKendaraan', found.transmisi);
+        set('fBahanBakarKendaraan',found.bahanBakar);
+        set('fNoRangkaServis',     found.noRangka);
+        set('fNoMesinServis',      found.noMesin);
+        set('fNamaBpkbServis',     found.namaBpkb);
+        status.textContent = '✓ Ditemukan!';
+        status.style.color = 'var(--success)';
+      } else {
+        status.textContent = '⚠ Input manual';
+        status.style.color = 'var(--warning)';
+      }
+    }, 600);
+  };
   window.formatWA = function(el) {
     let val = el.value.replace(/\D/g,'');
     if (val.startsWith('0')) val = '62' + val.slice(1);
