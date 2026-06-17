@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pengaturan — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navbar:#1a1a1a; --sidebar:#222222; --content:#1e1e1e; --card:#272727; --card2:#2d2d2d;
+      --border:#333333; --border2:#3a3a3a; --gold:#c9a84c; --gold2:#e8c96a; --gold-dim:#7a5c18;
+      --gold-bg:rgba(201,168,76,0.07); --silver:#b0b0b0; --silver2:#d0d0d0;
+      --text:#a8a8a8; --text2:#c8c8c8; --text3:#686868;
+      --success:#4caf80; --warning:#e8a030; --error:#e05858; --info:#4890e8;
+      --sidebar-w:230px; --navbar-h:56px;
+    }
+    html,body{height:100%;background:var(--content);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;}
+    .navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);background:var(--navbar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px 0 0;z-index:100;gap:10px;}
+    .navbar-brand{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+    .navbar-brand img{height:32px;width:auto;filter:brightness(0.9);}
+    .navbar-brand-text{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;line-height:1.2;}
+    .navbar-brand-text span{display:block;font-size:0.62em;color:var(--gold);letter-spacing:1px;font-weight:400;}
+    .navbar-brand-fallback{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;letter-spacing:4px;color:var(--silver2);display:none;}
+    .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2em;cursor:pointer;padding:6px 10px;border-radius:4px;}
+    .navbar-spacer{flex:1;}
+    .navbar-clock{text-align:right;line-height:1.4;}
+    .clock-time{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:600;color:var(--silver2);letter-spacing:1px;}
+    .clock-date{font-size:0.68em;color:var(--text3);}
+    .navbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+    .btn-notif{position:relative;background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95em;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1px solid var(--navbar);}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;}
+    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .user-info{line-height:1.3;}
+    .user-name{font-size:0.78em;color:var(--silver2);font-weight:600;}
+    .user-role{font-size:0.62em;color:var(--gold);}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);font-size:0.7em;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .navbar-goldline{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 30%,var(--gold) 50%,var(--gold-dim) 70%,transparent 100%);opacity:0.6;}
+    .sidebar{position:fixed;top:var(--navbar-h);left:0;width:var(--sidebar-w);height:calc(100vh - var(--navbar-h));background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:90;transition:transform 0.25s ease;padding-bottom:24px;}
+    .sidebar::-webkit-scrollbar{width:3px;}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .sidebar-section{padding:20px 14px 5px;font-size:0.58em;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;}
+    .menu-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--text);font-size:0.84em;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .menu-item:hover{background:rgba(255,255,255,0.04);color:var(--silver2);border-left-color:var(--border2);}
+    .menu-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold);font-weight:500;}
+    .menu-icon{width:18px;text-align:center;font-size:0.95em;flex-shrink:0;opacity:0.8;}
+    .menu-item.active .menu-icon{opacity:1;}
+    .menu-label{flex:1;}
+    .sidebar-sep{height:1px;background:var(--border);margin:6px 14px;}
+    .sidebar-user{margin:8px 10px 0;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+    .sidebar-user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .su-name{font-size:0.8em;color:var(--silver2);font-weight:600;}
+    .su-role{font-size:0.62em;color:var(--gold);}
+    .su-logout{width:100%;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.75em;padding:7px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .su-logout:hover{border-color:var(--error);color:var(--error);}
+    .s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:89;}
+    .main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:20px;min-height:calc(100vh - var(--navbar-h));}
+    .pg-header{margin-bottom:16px;}
+    .pg-title{font-family:'Rajdhani',sans-serif;font-size:1.5em;font-weight:700;color:var(--silver2);letter-spacing:2px;text-transform:uppercase;}
+    .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
+
+    /* TABS */
+    .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto;}
+    .tab{padding:8px 16px;font-size:0.82em;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all 0.15s;font-family:'Inter',sans-serif;white-space:nowrap;}
+    .tab:hover{color:var(--silver2);}
+    .tab.active{color:var(--gold2);border-bottom-color:var(--gold);font-weight:600;}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* SETTING PANEL */
+    .set-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+    .set-panel-hd{padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .set-panel-title{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .set-panel-body{padding:16px;}
+    .set-group{margin-bottom:14px;}
+    .set-group:last-child{margin-bottom:0;}
+    .set-label{display:block;font-size:0.63em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600;}
+    .set-hint{font-size:0.7em;color:var(--text3);margin-top:4px;line-height:1.4;}
+    .set-input,.set-select,.set-textarea{width:100%;padding:9px 12px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.85em;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+    .set-input:focus,.set-select:focus,.set-textarea:focus{border-color:var(--gold);}
+    .set-input::placeholder,.set-textarea::placeholder{color:var(--text3);}
+    .set-textarea{resize:vertical;min-height:80px;line-height:1.6;}
+    .set-select option{background:var(--card2);}
+    .set-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .preview-box{padding:10px 14px;background:var(--content);border:1px solid var(--border2);border-radius:6px;font-size:0.82em;color:var(--gold2);font-family:'Rajdhani',sans-serif;letter-spacing:1px;margin-top:6px;}
+
+    /* TOMBOL */
+    .btn-save-set{padding:9px 20px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
+    .btn-save-set:hover{filter:brightness(1.1);}
+    .btn-save-set:disabled{opacity:0.6;pointer-events:none;}
+    .btn-danger{padding:9px 20px;background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.3);border-radius:6px;color:var(--error);font-family:'Inter',sans-serif;font-size:0.82em;cursor:pointer;transition:all 0.15s;}
+    .btn-danger:hover{background:rgba(224,88,88,0.2);}
+    .btn-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+
+    /* SISTEM INFO */
+    .sys-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .sys-item{background:var(--content);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+    .sys-item-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+    .sys-item-val{font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);}
+
+    /* toast & loading */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:400;display:none;}
+    .toast.show{display:block;}
+    .toast.success{border-left:3px solid var(--success);}
+    .toast.error{border-left:3px solid var(--error);}
+    .overlay{position:fixed;inset:0;background:#141414;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
+    .overlay.hide{opacity:0;pointer-events:none;}
+    .overlay img{width:64px;animation:pulse 1.5s ease-in-out infinite;filter:brightness(0.85);}
+    .ov-fallback{font-family:'Rajdhani',sans-serif;font-size:2em;font-weight:700;letter-spacing:6px;color:var(--silver);display:none;}
+    @keyframes pulse{0%,100%{opacity:0.5;transform:scale(0.96)}50%{opacity:1;transform:scale(1.03)}}
+    .ld-bar{width:120px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
+    .ld-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:ldfill 1.8s ease-in-out forwards;}
+    @keyframes ldfill{0%{width:0%}60%{width:75%}100%{width:100%}}
+    .ld-text{font-size:0.58em;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+
+    @media(max-width:768px){
+      .hamburger{display:flex;align-items:center;}
+      .navbar-brand{border-right:none;}
+      .navbar-brand-text,.navbar-clock,.navbar-sep{display:none;}
+      .btn-logout,.user-info{display:none;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,0.5);}
+      .s-overlay.show{display:block;}
+      .main{margin-left:0;padding:12px;}
+      .set-row{grid-template-columns:1fr;}
+      .sys-info{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('ovF').style.display='block'"/>
+  <div class="ov-fallback" id="ovF">AMU</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-text">Memuat pengaturan...</div>
+</div>
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('bF').style.display='block'"/>
+    <div class="navbar-brand-fallback" id="bF">AMU</div>
+    <div class="navbar-brand-text">Auto Mitra Utama<span>Start Here, Drive Next</span></div>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
+  <div class="navbar-sep"></div>
+  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <div class="navbar-sep"></div>
+  <div class="user-chip">
+    <div class="user-av" id="uAv">--</div>
+    <div class="user-info"><div class="user-name" id="uName">–</div><div class="user-role" id="uRole">–</div></div>
+  </div>
+  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <div class="navbar-goldline"></div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Utama</div>
+  <div class="menu-item" onclick="goTo('dashboard')"><span class="menu-icon">⊞</span><span class="menu-label">Dashboard</span></div>
+  <div class="sidebar-section">Operasional</div>
+  <div class="menu-item" onclick="goTo('kendaraan')"><span class="menu-icon">🚗</span><span class="menu-label">Kendaraan</span></div>
+  <div class="menu-item" onclick="goTo('servis')"><span class="menu-icon">🔧</span><span class="menu-label">Servis</span></div>
+  <div class="menu-item" onclick="goTo('sparepart')"><span class="menu-icon">🔩</span><span class="menu-label">Sparepart</span></div>
+  <div class="sidebar-section">Keuangan</div>
+  <div class="menu-item" onclick="goTo('keuangan')"><span class="menu-icon">💰</span><span class="menu-label">Keuangan</span></div>
+  <div class="menu-item" onclick="goTo('laporan')"><span class="menu-icon">📊</span><span class="menu-label">Laporan</span></div>
+  <div class="sidebar-section">Manajemen</div>
+  <div class="menu-item" onclick="goTo('pelanggan')"><span class="menu-icon">👥</span><span class="menu-label">Pelanggan</span></div>
+  <div class="menu-item" onclick="goTo('staff')"><span class="menu-icon">👤</span><span class="menu-label">Staff</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">Sistem</div>
+  <div class="menu-item" onclick="goTo('master-data')"><span class="menu-icon">📋</span><span class="menu-label">Master Data</span></div>
+  <div class="menu-item active"><span class="menu-icon">⚙</span><span class="menu-label">Pengaturan</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div><div class="su-name" id="suName">–</div><div class="su-role" id="suRole">–</div></div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-header">
+    <div class="pg-title">Pengaturan</div>
+    <div class="pg-sub">Konfigurasi sistem Auto Mitra Utama</div>
+    <div class="pg-line"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('perusahaan',this)">🏢 Perusahaan</div>
+    <div class="tab" onclick="switchTab('invoice',this)">📄 Invoice</div>
+    <div class="tab" onclick="switchTab('staff',this)">👤 Staff & ID Card</div>
+    <div class="tab" onclick="switchTab('sistem',this)">⚙️ Sistem</div>
+  </div>
+
+  <!-- TAB: PERUSAHAAN -->
+  <div class="tab-content active" id="tab-perusahaan">
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">🏢 Info Perusahaan</div></div>
+      <div class="set-panel-body">
+        <div class="set-row">
+          <div class="set-group">
+            <label class="set-label">Nama Perusahaan</label>
+            <input type="text" class="set-input" id="sNamaPerusahaan" placeholder="Auto Mitra Utama"/>
+          </div>
+          <div class="set-group">
+            <label class="set-label">Tagline</label>
+            <input type="text" class="set-input" id="sTagline" placeholder="Start Here, Drive Next"/>
+          </div>
+          <div class="set-group">
+            <label class="set-label">No. WA Utama</label>
+            <input type="text" class="set-input" id="sWaUtama" placeholder="628116063012" oninput="formatWAInput(this)"/>
+            <div class="set-hint">Dipakai di invoice & kontak perusahaan</div>
+          </div>
+          <div class="set-group">
+            <label class="set-label">No. WA Darurat</label>
+            <input type="text" class="set-input" id="sWaDarurat" placeholder="6285260699191" oninput="formatWAInput(this)"/>
+            <div class="set-hint">Dipakai di halaman scan ID Card staff</div>
+          </div>
+          <div class="set-group span2">
+            <label class="set-label">Alamat</label>
+            <input type="text" class="set-input" id="sAlamat" placeholder="Jl Dr Mr Mohd Hasan Batoh, Kota Banda Aceh"/>
+          </div>
+          <div class="set-group">
+            <label class="set-label">Email</label>
+            <input type="email" class="set-input" id="sEmail" placeholder="automitrautama.office@gmail.com"/>
+          </div>
+          <div class="set-group">
+            <label class="set-label">Copyright</label>
+            <input type="text" class="set-input" id="sCopyright" placeholder="© SRISP"/>
+          </div>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" onclick="simpanPengaturan('perusahaan')">💾 Simpan Info Perusahaan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: INVOICE -->
+  <div class="tab-content" id="tab-invoice">
+
+    <!-- Format Nomor Invoice -->
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">📋 Format Nomor Invoice</div></div>
+      <div class="set-panel-body">
+        <div class="set-row">
+          <div class="set-group">
+            <label class="set-label">Prefix Invoice</label>
+            <input type="text" class="set-input" id="sInvPrefix" placeholder="AMU/INV" oninput="updateInvPreview()"/>
+            <div class="set-hint">Contoh: AMU/INV atau SERVIS</div>
+          </div>
+          <div class="set-group">
+            <label class="set-label">Format Tanggal</label>
+            <select class="set-select" id="sInvFormatTgl" onchange="updateInvPreview()">
+              <option value="DDMMYY">DDMMYY (170626)</option>
+              <option value="DDMMYYYY">DDMMYYYY (17062026)</option>
+              <option value="YYYYMMDD">YYYYMMDD (20260617)</option>
+            </select>
+          </div>
+        </div>
+        <div class="set-group">
+          <label class="set-label">Preview Nomor Invoice</label>
+          <div class="preview-box" id="invPreview">AMU/INV/170626/001/1430</div>
+        </div>
+        <div class="set-group">
+          <label class="set-label">Nomor Urut Terakhir</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" class="set-input" id="sInvNomorUrut" placeholder="0" min="0" style="max-width:120px"/>
+            <button class="btn-danger" onclick="resetNomorUrut()">🔄 Reset ke 0</button>
+          </div>
+          <div class="set-hint">Reset membutuhkan konfirmasi password</div>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" onclick="simpanPengaturan('invoice-format')">💾 Simpan Format Invoice</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Pesan WA -->
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">💬 Template Pesan WA Tagihan</div></div>
+      <div class="set-panel-body">
+        <div class="set-group">
+          <label class="set-label">Template Pesan</label>
+          <textarea class="set-textarea" id="sTemplateWa" rows="8" placeholder="Template pesan WA..."></textarea>
+          <div class="set-hint">
+            Variabel yang tersedia:<br>
+            <code style="color:var(--gold)">{no_invoice}</code> — Nomor invoice<br>
+            <code style="color:var(--gold)">{nama_pelanggan}</code> — Nama pelanggan<br>
+            <code style="color:var(--gold)">{nopol}</code> — No. Polisi kendaraan<br>
+            <code style="color:var(--gold)">{jenis_servis}</code> — Jenis servis<br>
+            <code style="color:var(--gold)">{daftar_pekerjaan}</code> — Daftar pekerjaan & biaya<br>
+            <code style="color:var(--gold)">{total}</code> — Total biaya<br>
+            <code style="color:var(--gold)">{nama_perusahaan}</code> — Nama perusahaan<br>
+            <code style="color:var(--gold)">{tagline}</code> — Tagline perusahaan
+          </div>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" style="background:none;border:1px solid var(--border2);color:var(--text);margin-right:auto" onclick="resetTemplateWa()">↩ Reset Default</button>
+          <button class="btn-save-set" onclick="simpanPengaturan('template-wa')">💾 Simpan Template WA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Invoice -->
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">📝 Catatan Footer Invoice</div></div>
+      <div class="set-panel-body">
+        <div class="set-group">
+          <label class="set-label">Teks Footer</label>
+          <textarea class="set-textarea" id="sFooterInvoice" rows="3" placeholder="Terima kasih telah mempercayakan kendaraan Anda kepada kami..."></textarea>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" onclick="simpanPengaturan('footer-invoice')">💾 Simpan Footer Invoice</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: STAFF & ID CARD -->
+  <div class="tab-content" id="tab-staff">
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">👤 Format NIK Staff</div></div>
+      <div class="set-panel-body">
+        <div class="set-row">
+          <div class="set-group">
+            <label class="set-label">Prefix NIK</label>
+            <input type="text" class="set-input" id="sNikPrefix" placeholder="AMU" oninput="updateNikPreview()"/>
+            <div class="set-hint">Contoh: AMU atau STAFF</div>
+          </div>
+          <div class="set-group">
+            <label class="set-label">Panjang Nomor Urut</label>
+            <select class="set-select" id="sNikPanjang" onchange="updateNikPreview()">
+              <option value="2">2 digit (01)</option>
+              <option value="3" selected>3 digit (001)</option>
+              <option value="4">4 digit (0001)</option>
+            </select>
+          </div>
+        </div>
+        <div class="set-group">
+          <label class="set-label">Preview NIK</label>
+          <div class="preview-box" id="nikPreview">AMU-001</div>
+        </div>
+        <div class="set-group">
+          <label class="set-label">Nomor Urut Terakhir</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" class="set-input" id="sNikNomorUrut" placeholder="0" min="0" style="max-width:120px"/>
+            <button class="btn-danger" onclick="resetNikUrut()">🔄 Reset ke 0</button>
+          </div>
+          <div class="set-hint">Reset membutuhkan konfirmasi password</div>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" onclick="simpanPengaturan('nik-format')">💾 Simpan Format NIK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SISTEM -->
+  <div class="tab-content" id="tab-sistem">
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">⚙️ Pengaturan Sistem</div></div>
+      <div class="set-panel-body">
+        <div class="set-group">
+          <label class="set-label">Auto Logout (menit tidak aktif)</label>
+          <select class="set-select" id="sAutoLogout">
+            <option value="3">3 menit</option>
+            <option value="5" selected>5 menit</option>
+            <option value="10">10 menit</option>
+            <option value="15">15 menit</option>
+            <option value="30">30 menit</option>
+          </select>
+          <div class="set-hint">Sistem akan logout otomatis setelah tidak aktif selama waktu ini</div>
+        </div>
+        <div class="btn-ft">
+          <button class="btn-save-set" onclick="simpanPengaturan('sistem')">💾 Simpan Pengaturan Sistem</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Sistem -->
+    <div class="set-panel">
+      <div class="set-panel-hd"><div class="set-panel-title">ℹ️ Info Sistem</div></div>
+      <div class="set-panel-body">
+        <div class="sys-info">
+          <div class="sys-item"><div class="sys-item-lbl">Nama Sistem</div><div class="sys-item-val">AMU System</div></div>
+          <div class="sys-item"><div class="sys-item-lbl">Versi</div><div class="sys-item-val">v1.0.0</div></div>
+          <div class="sys-item"><div class="sys-item-lbl">Copyright</div><div class="sys-item-val">© SRISP</div></div>
+          <div class="sys-item"><div class="sys-item-lbl">Platform</div><div class="sys-item-val">GitHub Pages</div></div>
+          <div class="sys-item"><div class="sys-item-lbl">Database</div><div class="sys-item-val">Firebase</div></div>
+          <div class="sys-item"><div class="sys-item-lbl">Status</div><div class="sys-item-val" style="color:var(--success)">● Online</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // Default template WA
+  const DEFAULT_TEMPLATE_WA =
+`*INVOICE SERVIS — {nama_perusahaan}*
+No: {no_invoice}
+
+Kepada Yth,
+*{nama_pelanggan}*
+
+*Kendaraan:*
+No. Polisi: {nopol}
+Jenis Servis: {jenis_servis}
+
+*Daftar Pekerjaan:*
+{daftar_pekerjaan}
+
+*TOTAL: {total}*
+
+{tagline}`;
+
+  const DEFAULT_FOOTER = `Terima kasih telah mempercayakan kendaraan Anda kepada kami.
+Semoga kendaraan Anda selalu dalam kondisi prima.`;
+
+  // ── Cek login ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    const email = user.email||'';
+    const inisial = email.substring(0,2).toUpperCase();
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadAllSettings();
+  });
+
+  // ── Load Semua Pengaturan ──
+  async function loadAllSettings() {
+    try {
+      const snap = await getDoc(doc(db, 'pengaturan', 'config'));
+      if (!snap.exists()) {
+        // Set default
+        isiDefault();
+        return;
+      }
+      const d = snap.data();
+
+      // Perusahaan
+      set('sNamaPerusahaan', d.namaPerusahaan || 'Auto Mitra Utama');
+      set('sTagline',        d.tagline         || 'Start Here, Drive Next');
+      set('sWaUtama',        d.waUtama         || '628116063012');
+      set('sWaDarurat',      d.waDarurat       || '6285260699191');
+      set('sAlamat',         d.alamat          || 'Jl Dr Mr Mohd Hasan Batoh, Kota Banda Aceh');
+      set('sEmail',          d.email           || 'automitrautama.office@gmail.com');
+      set('sCopyright',      d.copyright       || '© SRISP');
+
+      // Invoice
+      set('sInvPrefix',      d.invPrefix       || 'AMU/INV');
+      set('sInvFormatTgl',   d.invFormatTgl    || 'DDMMYY');
+      set('sInvNomorUrut',   d.invNomorUrut    || 0);
+      set('sTemplateWa',     d.templateWa      || DEFAULT_TEMPLATE_WA);
+      set('sFooterInvoice',  d.footerInvoice   || DEFAULT_FOOTER);
+
+      // Staff
+      set('sNikPrefix',      d.nikPrefix       || 'AMU');
+      set('sNikPanjang',     d.nikPanjang      || '3');
+      set('sNikNomorUrut',   d.nikNomorUrut    || 0);
+
+      // Sistem
+      set('sAutoLogout',     d.autoLogout      || '5');
+
+    } catch(e) { isiDefault(); }
+    updateInvPreview();
+    updateNikPreview();
+  }
+
+  function set(id, val) { const el = document.getElementById(id); if(el) el.value = val; }
+
+  function isiDefault() {
+    set('sNamaPerusahaan', 'Auto Mitra Utama');
+    set('sTagline',        'Start Here, Drive Next');
+    set('sWaUtama',        '628116063012');
+    set('sWaDarurat',      '6285260699191');
+    set('sAlamat',         'Jl Dr Mr Mohd Hasan Batoh, Kota Banda Aceh');
+    set('sEmail',          'automitrautama.office@gmail.com');
+    set('sCopyright',      '© SRISP');
+    set('sInvPrefix',      'AMU/INV');
+    set('sInvFormatTgl',   'DDMMYY');
+    set('sInvNomorUrut',   0);
+    set('sTemplateWa',     DEFAULT_TEMPLATE_WA);
+    set('sFooterInvoice',  DEFAULT_FOOTER);
+    set('sNikPrefix',      'AMU');
+    set('sNikPanjang',     '3');
+    set('sNikNomorUrut',   0);
+    set('sAutoLogout',     '5');
+  }
+
+  // ── Simpan Pengaturan ──
+  window.simpanPengaturan = async function(section) {
+    try {
+      let payload = {};
+
+      if (section === 'perusahaan') {
+        payload = {
+          namaPerusahaan: document.getElementById('sNamaPerusahaan').value,
+          tagline:        document.getElementById('sTagline').value,
+          waUtama:        document.getElementById('sWaUtama').value,
+          waDarurat:      document.getElementById('sWaDarurat').value,
+          alamat:         document.getElementById('sAlamat').value,
+          email:          document.getElementById('sEmail').value,
+          copyright:      document.getElementById('sCopyright').value,
+        };
+      } else if (section === 'invoice-format') {
+        payload = {
+          invPrefix:    document.getElementById('sInvPrefix').value,
+          invFormatTgl: document.getElementById('sInvFormatTgl').value,
+          invNomorUrut: parseInt(document.getElementById('sInvNomorUrut').value||0),
+        };
+      } else if (section === 'template-wa') {
+        payload = { templateWa: document.getElementById('sTemplateWa').value };
+      } else if (section === 'footer-invoice') {
+        payload = { footerInvoice: document.getElementById('sFooterInvoice').value };
+      } else if (section === 'nik-format') {
+        payload = {
+          nikPrefix:    document.getElementById('sNikPrefix').value,
+          nikPanjang:   document.getElementById('sNikPanjang').value,
+          nikNomorUrut: parseInt(document.getElementById('sNikNomorUrut').value||0),
+        };
+      } else if (section === 'sistem') {
+        payload = { autoLogout: document.getElementById('sAutoLogout').value };
+      }
+
+      await setDoc(doc(db, 'pengaturan', 'config'), payload, { merge: true });
+      showToast('Pengaturan berhasil disimpan ✓', 'success');
+    } catch(e) { showToast('Gagal menyimpan: ' + e.message, 'error'); }
+  };
+
+  // ── Reset Nomor Urut Invoice ──
+  window.resetNomorUrut = async function() {
+    if (!confirm('Yakin reset nomor urut invoice ke 0?')) return;
+    const pw = prompt('Masukkan password untuk konfirmasi:');
+    if (!pw) return;
+    try {
+      const user = auth.currentUser;
+      const credential = EmailAuthProvider.credential(user.email, pw);
+      await reauthenticateWithCredential(user, credential);
+      await setDoc(doc(db, 'pengaturan', 'config'), { invNomorUrut: 0 }, { merge: true });
+      document.getElementById('sInvNomorUrut').value = 0;
+      showToast('Nomor urut invoice direset ke 0 ✓', 'success');
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') showToast('Password salah!', 'error');
+      else showToast('Gagal: ' + e.message, 'error');
+    }
+  };
+
+  // ── Reset NIK Urut ──
+  window.resetNikUrut = async function() {
+    if (!confirm('Yakin reset nomor urut NIK staff ke 0?')) return;
+    const pw = prompt('Masukkan password untuk konfirmasi:');
+    if (!pw) return;
+    try {
+      const user = auth.currentUser;
+      const credential = EmailAuthProvider.credential(user.email, pw);
+      await reauthenticateWithCredential(user, credential);
+      await setDoc(doc(db, 'pengaturan', 'config'), { nikNomorUrut: 0 }, { merge: true });
+      document.getElementById('sNikNomorUrut').value = 0;
+      showToast('Nomor urut NIK direset ke 0 ✓', 'success');
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') showToast('Password salah!', 'error');
+      else showToast('Gagal: ' + e.message, 'error');
+    }
+  };
+
+  // ── Reset Template WA ──
+  window.resetTemplateWa = function() {
+    if (!confirm('Reset template WA ke default?')) return;
+    document.getElementById('sTemplateWa').value = DEFAULT_TEMPLATE_WA;
+    showToast('Template WA direset ke default ✓', 'success');
+  };
+
+  // ── Preview Nomor Invoice ──
+  window.updateInvPreview = function() {
+    const prefix  = document.getElementById('sInvPrefix').value || 'AMU/INV';
+    const format  = document.getElementById('sInvFormatTgl').value || 'DDMMYY';
+    const now     = new Date();
+    const dd      = String(now.getDate()).padStart(2,'0');
+    const mm      = String(now.getMonth()+1).padStart(2,'0');
+    const yy      = String(now.getFullYear()).slice(2);
+    const yyyy    = String(now.getFullYear());
+    const jam     = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+    let tgl = '';
+    if (format === 'DDMMYY')   tgl = `${dd}${mm}${yy}`;
+    if (format === 'DDMMYYYY') tgl = `${dd}${mm}${yyyy}`;
+    if (format === 'YYYYMMDD') tgl = `${yyyy}${mm}${dd}`;
+    const urut = String(parseInt(document.getElementById('sInvNomorUrut').value||0)+1).padStart(3,'0');
+    document.getElementById('invPreview').textContent = `${prefix}/${tgl}/${urut}/${jam}`;
+  };
+
+  // ── Preview NIK ──
+  window.updateNikPreview = function() {
+    const prefix  = document.getElementById('sNikPrefix').value || 'AMU';
+    const panjang = parseInt(document.getElementById('sNikPanjang').value || 3);
+    const urut    = String(parseInt(document.getElementById('sNikNomorUrut').value||0)+1).padStart(panjang,'0');
+    document.getElementById('nikPreview').textContent = `${prefix}-${urut}`;
+  };
+
+  // ── Format WA ──
+  window.formatWAInput = function(el) {
+    let val = el.value.replace(/\D/g,'');
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    else if (val.startsWith('8')) val = '62' + val;
+    el.value = val;
+  };
+
+  // ── Tab Switch ──
+  window.switchTab = function(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+  };
+
+  // ── Toast ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Clock ──
+  function tick() {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Auto Logout 5 Menit ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      showToast('Sesi berakhir karena tidak aktif.', 'error');
+      setTimeout(async () => { await signOut(auth); window.location.href = '/automitrautama/index.html'; }, 2000);
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','touchstart'].forEach(e => document.addEventListener(e, resetTimer, {passive:true}));
+  resetTimer();
+
+  // ── Back Button ──
+  window.history.pushState(null,'',window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    } else { window.history.pushState(null,'',window.location.href); }
+  });
+
+  // ── Logout ──
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar?')) { await signOut(auth); window.location.href = '/automitrautama/index.html'; }
+  };
+
+  // ── Navigasi ──
+  const pages = {
+    'dashboard':'/automitrautama/admin/dashboard.html','kendaraan':'/automitrautama/admin/kendaraan.html',
+    'servis':'/automitrautama/admin/servis.html','sparepart':'/automitrautama/admin/sparepart.html',
+    'keuangan':'/automitrautama/admin/keuangan.html','laporan':'/automitrautama/admin/laporan.html',
+    'pelanggan':'/automitrautama/admin/pelanggan.html','staff':'/automitrautama/admin/staff.html',
+    'master-data':'/automitrautama/admin/master-data.html','pengaturan':'/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => {
+    if (pages[page]) { window.location.href = pages[page]; return; }
+    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+  };
+
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+</script>
+</body>
+</html>
