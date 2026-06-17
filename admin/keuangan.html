@@ -597,6 +597,28 @@
       const all = snap.docs.map(d => ({id:d.id,...d.data()}));
       dataSPMasuk  = all.filter(d => d.tipe === 'keluar'); // keluar = terjual
       dataSPKeluar = all.filter(d => d.tipe === 'masuk');  // masuk = beli stok
+
+      // Tambah sparepart dari pekerjaan servis
+      for (const servis of dataServis) {
+        try {
+          const pkSnap = await getDocs(collection(db, `servis/${servis.id}/pekerjaan`));
+          pkSnap.docs.forEach(d => {
+            const p = d.data();
+            if (p.tipe === 'sparepart') {
+              dataSPMasuk.push({
+                id: d.id,
+                tipe: 'keluar',
+                namaSP: p.nama,
+                qty: p.qty||1,
+                satuan: p.satuan||'pcs',
+                harga: p.harga||0,
+                keterangan: `Servis: ${servis.nopolServis||''}`,
+                tanggal: servis.tglMasukServis||''
+              });
+            }
+          });
+        } catch(e) {}
+      }
     } catch(e) { dataSPMasuk = []; dataSPKeluar = []; }
     renderSPMasuk();
     renderSPKeluar();
@@ -777,7 +799,7 @@
         const d = snap.data();
         ['KasTunai','BRI','BNI','Mandiri','BCA','Lain'].forEach(k => {
           const el = document.getElementById(`kas${k}`);
-          if(el) el.value = d[k.toLowerCase()]||'';
+          if(el) el.value = d[k === 'KasTunai' ? 'kastunai' : k.toLowerCase()]||'';
         });
         document.getElementById('kasTerakhir').textContent = d.updatedAt ? new Date(d.updatedAt).toLocaleString('id-ID') : '–';
         hitungTotalKas();
