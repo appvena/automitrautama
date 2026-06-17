@@ -240,11 +240,22 @@
     @media print {
       body * { visibility: hidden; }
       #idCardPrint, #idCardPrint * { visibility: visible; }
-      #idCardPrint { position: fixed !important; top:0 !important; left:0 !important; width:100% !important; background:#fff !important; }
+      #idCardPrint {
+        position: fixed !important;
+        top: 0 !important; left: 0 !important;
+        width: 100% !important; height: 100% !important;
+        background: #e8e8e8 !important;
+        z-index: 9999 !important;
+      }
+      /* Paksa semua warna background muncul */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
       .idcard-toolbar { display: none !important; }
-      .idcard-page { padding: 20px; }
-      .idcard { box-shadow: none; }
-      @page { size: A6 landscape; margin: 0; }
+      .idcard { box-shadow: none !important; }
+      @page { size: A6 portrait; margin: 5mm; }
     }
 
     /* toast & loading */
