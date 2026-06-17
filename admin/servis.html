@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Servis — Auto Mitra Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navbar:#1a1a1a; --sidebar:#222222; --content:#1e1e1e; --card:#272727; --card2:#2d2d2d;
+      --border:#333333; --border2:#3a3a3a; --gold:#c9a84c; --gold2:#e8c96a; --gold-dim:#7a5c18;
+      --gold-bg:rgba(201,168,76,0.07); --silver:#b0b0b0; --silver2:#d0d0d0;
+      --text:#a8a8a8; --text2:#c8c8c8; --text3:#686868;
+      --success:#4caf80; --warning:#e8a030; --error:#e05858; --info:#4890e8;
+      --sidebar-w:230px; --navbar-h:56px;
+    }
+    html,body{height:100%;background:var(--content);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;}
+
+    /* ══ NAVBAR ══ */
+    .navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);background:var(--navbar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px 0 0;z-index:100;gap:10px;}
+    .navbar-brand{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+    .navbar-brand img{height:32px;width:auto;filter:brightness(0.9);}
+    .navbar-brand-text{font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;line-height:1.2;}
+    .navbar-brand-text span{display:block;font-size:0.62em;color:var(--gold);letter-spacing:1px;font-weight:400;}
+    .navbar-brand-fallback{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;letter-spacing:4px;color:var(--silver2);display:none;}
+    .hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.2em;cursor:pointer;padding:6px 10px;border-radius:4px;}
+    .navbar-spacer{flex:1;}
+    .navbar-clock{text-align:right;line-height:1.4;}
+    .clock-time{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:600;color:var(--silver2);letter-spacing:1px;}
+    .clock-date{font-size:0.68em;color:var(--text3);}
+    .navbar-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+    .btn-notif{position:relative;background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.95em;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1px solid var(--navbar);}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;}
+    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .user-info{line-height:1.3;}
+    .user-name{font-size:0.78em;color:var(--silver2);font-weight:600;}
+    .user-role{font-size:0.62em;color:var(--gold);}
+    .btn-logout{background:none;border:1px solid var(--border);color:var(--text3);font-size:0.7em;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .navbar-goldline{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold-dim) 30%,var(--gold) 50%,var(--gold-dim) 70%,transparent 100%);opacity:0.6;}
+
+    /* ══ SIDEBAR ══ */
+    .sidebar{position:fixed;top:var(--navbar-h);left:0;width:var(--sidebar-w);height:calc(100vh - var(--navbar-h));background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;z-index:90;transition:transform 0.25s ease;padding-bottom:24px;}
+    .sidebar::-webkit-scrollbar{width:3px;}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .sidebar-section{padding:20px 14px 5px;font-size:0.58em;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;}
+    .menu-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--text);font-size:0.84em;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+    .menu-item:hover{background:rgba(255,255,255,0.04);color:var(--silver2);border-left-color:var(--border2);}
+    .menu-item.active{background:var(--gold-bg);color:var(--gold2);border-left-color:var(--gold);font-weight:500;}
+    .menu-icon{width:18px;text-align:center;font-size:0.95em;flex-shrink:0;opacity:0.8;}
+    .menu-item.active .menu-icon{opacity:1;}
+    .menu-label{flex:1;}
+    .sidebar-sep{height:1px;background:var(--border);margin:6px 14px;}
+    .sidebar-user{margin:8px 10px 0;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+    .sidebar-user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:0.78em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .su-name{font-size:0.8em;color:var(--silver2);font-weight:600;}
+    .su-role{font-size:0.62em;color:var(--gold);}
+    .su-logout{width:100%;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.75em;padding:7px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .su-logout:hover{border-color:var(--error);color:var(--error);}
+    .s-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:89;}
+
+    /* ══ MAIN ══ */
+    .main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:20px;min-height:calc(100vh - var(--navbar-h));}
+    .pg-header{margin-bottom:16px;}
+    .pg-title{font-family:'Rajdhani',sans-serif;font-size:1.5em;font-weight:700;color:var(--silver2);letter-spacing:2px;text-transform:uppercase;}
+    .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
+    .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
+
+    /* ══ MINI STATS ══ */
+    .mini-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .mini-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;}
+    .mini-stat-icon{font-size:1.2em;}
+    .mini-stat-val{font-family:'Rajdhani',sans-serif;font-size:1.4em;font-weight:700;color:var(--silver2);line-height:1;}
+    .mini-stat-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+
+    /* ══ TOOLBAR ══ */
+    .toolbar{background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .filter-select{padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .filter-select:focus{border-color:var(--gold);}
+    .filter-select option{background:var(--card2);}
+    .search-wrap{position:relative;flex:1;min-width:150px;}
+    .search-input{width:100%;padding:8px 10px 8px 30px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;}
+    .search-input:focus{border-color:var(--gold);}
+    .search-input::placeholder{color:var(--text3);}
+    .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.78em;pointer-events:none;}
+    .btn-add{padding:8px 16px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .btn-add:hover{filter:brightness(1.1);transform:translateY(-1px);}
+
+    /* ══ TABLE ══ */
+    .tbl-wrap{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow-x:auto;}
+    .tbl{width:100%;border-collapse:collapse;min-width:600px;}
+    .tbl th{font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;background:var(--card2);white-space:nowrap;}
+    .tbl td{padding:10px 14px;font-size:0.82em;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.025);vertical-align:middle;}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl tr:hover td{background:rgba(255,255,255,0.02);color:var(--silver2);}
+
+    /* status badge */
+    .bs{display:inline-block;padding:2px 8px;border-radius:3px;font-size:0.7em;font-weight:600;text-transform:uppercase;}
+    .bs-antri    {background:rgba(72,144,232,0.12);color:var(--info);border:1px solid rgba(72,144,232,0.2);}
+    .bs-dikerjakan{background:rgba(232,160,48,0.12);color:var(--warning);border:1px solid rgba(232,160,48,0.2);}
+    .bs-selesai  {background:rgba(76,175,128,0.12);color:var(--success);border:1px solid rgba(76,175,128,0.2);}
+    .bs-batal    {background:rgba(224,88,88,0.12);color:var(--error);border:1px solid rgba(224,88,88,0.2);}
+
+    .btn-detail{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:var(--gold);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:3px;}
+    .btn-detail:hover{background:rgba(201,168,76,0.2);}
+    .btn-edit{background:rgba(72,144,232,0.1);border:1px solid rgba(72,144,232,0.2);color:var(--info);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:3px;}
+    .btn-edit:hover{background:rgba(72,144,232,0.2);}
+    .btn-del{background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-del:hover{background:rgba(224,88,88,0.2);}
+    .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.82em;}
+    .empty-icon{font-size:2.5em;margin-bottom:10px;opacity:0.3;}
+
+    /* ══ MODAL FORM ══ */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+    .modal-overlay.show{display:flex;}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:600px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:modalIn 0.2s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
+    .modal-title{font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .modal-close{background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer;padding:2px 6px;border-radius:4px;transition:all 0.15s;}
+    .modal-close:hover{color:var(--error);}
+    .modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+    .modal-body::-webkit-scrollbar{width:4px;}
+    .modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+    .form-field{}
+    .form-field.span2{grid-column:span 2;}
+    .form-label{display:block;font-size:0.63em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600;}
+    .form-input,.form-select,.form-textarea{width:100%;padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--silver2);font-size:0.85em;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);}
+    .form-input::placeholder,.form-textarea::placeholder{color:var(--text3);}
+    .form-select option{background:var(--card2);}
+    .form-textarea{resize:vertical;min-height:60px;}
+    .modal-section{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+    .modal-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+    .btn-cancel{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-save{padding:8px 22px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-size:0.82em;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+    .btn-save:disabled{opacity:0.6;pointer-events:none;}
+
+    /* ══ MODAL DETAIL SERVIS ══ */
+    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+    .detail-overlay.show{display:flex;}
+    .detail-modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:640px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalIn 0.2s ease;}
+    .detail-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
+    .detail-hd-title{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
+    .detail-body{padding:0;max-height:80vh;overflow-y:auto;}
+    .detail-body::-webkit-scrollbar{width:4px;}
+    .detail-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .detail-section{padding:14px 20px;border-bottom:1px solid var(--border);}
+    .detail-section-title{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .detail-item-label{font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+    .detail-item-value{font-size:0.85em;color:var(--silver2);font-weight:500;}
+    .detail-ft{padding:12px 20px;display:flex;gap:8px;justify-content:flex-end;background:var(--card2);flex-wrap:wrap;}
+
+    /* ══ PEKERJAAN LIST ══ */
+    .pekerjaan-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.82em;}
+    .pekerjaan-item:last-child{border-bottom:none;}
+    .pekerjaan-nama{flex:1;color:var(--text2);font-weight:500;}
+    .pekerjaan-ket{font-size:0.78em;color:var(--text3);}
+    .pekerjaan-harga{font-family:'Rajdhani',sans-serif;font-size:0.95em;color:var(--gold2);font-weight:600;white-space:nowrap;}
+    .pekerjaan-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.8em;padding:2px 4px;}
+    .pekerjaan-del:hover{color:var(--error);}
+    .total-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border2);margin-top:6px;}
+    .total-label{font-family:'Rajdhani',sans-serif;font-size:0.85em;color:var(--silver2);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+    .total-val{font-family:'Rajdhani',sans-serif;font-size:1.2em;color:var(--gold2);font-weight:700;}
+
+    /* ══ MODAL TAMBAH PEKERJAAN ══ */
+    .pekerjaan-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}
+    .pekerjaan-modal-overlay.show{display:flex;}
+    .pekerjaan-modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalIn 0.2s ease;}
+
+    /* ══ STATUS BUTTONS ══ */
+    .btn-status{padding:7px 14px;border:none;border-radius:6px;font-size:0.78em;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-status-antri{background:rgba(72,144,232,0.15);color:var(--info);border:1px solid rgba(72,144,232,0.3);}
+    .btn-status-dikerjakan{background:rgba(232,160,48,0.15);color:var(--warning);border:1px solid rgba(232,160,48,0.3);}
+    .btn-status-selesai{background:rgba(76,175,128,0.15);color:var(--success);border:1px solid rgba(76,175,128,0.3);}
+    .btn-status:hover{filter:brightness(1.2);}
+
+    /* ══ PRINT INVOICE ══ */
+    .btn-print{padding:7px 14px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+    .btn-print:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+    @media print {
+      .navbar,.sidebar,.detail-ft,.modal-overlay,.s-overlay,
+      .detail-overlay > *:not(.detail-modal) { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .detail-modal { box-shadow: none !important; border: none !important; max-width: 100% !important; }
+      .detail-body { max-height: none !important; }
+      .detail-section { border-color: #ddd !important; }
+      .detail-section-title { color: #333 !important; }
+      .detail-item-label { color: #666 !important; }
+      .detail-item-value { color: #000 !important; }
+      .pekerjaan-nama { color: #000 !important; }
+      .pekerjaan-harga { color: #000 !important; }
+      .total-val { color: #000 !important; }
+      .invoice-header { display: block !important; }
+    }
+
+    .invoice-header { display: none; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .invoice-logo { font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700; letter-spacing: 3px; }
+    .invoice-info { font-size: 0.75em; color: var(--text3); margin-top: 4px; }
+
+    /* toast */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:400;display:none;}
+    .toast.show{display:block;}
+    .toast.success{border-left:3px solid var(--success);}
+    .toast.error{border-left:3px solid var(--error);}
+
+    /* loading */
+    .overlay{position:fixed;inset:0;background:#141414;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
+    .overlay.hide{opacity:0;pointer-events:none;}
+    .overlay img{width:64px;animation:pulse 1.5s ease-in-out infinite;filter:brightness(0.85);}
+    .ov-fallback{font-family:'Rajdhani',sans-serif;font-size:2em;font-weight:700;letter-spacing:6px;color:var(--silver);display:none;}
+    @keyframes pulse{0%,100%{opacity:0.5;transform:scale(0.96)}50%{opacity:1;transform:scale(1.03)}}
+    .ld-bar{width:120px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
+    .ld-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:ldfill 1.8s ease-in-out forwards;}
+    @keyframes ldfill{0%{width:0%}60%{width:75%}100%{width:100%}}
+    .ld-text{font-size:0.58em;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+
+    /* caps */
+    .caps{text-transform:uppercase;}
+
+    /* responsive */
+    @media(max-width:768px){
+      .hamburger{display:flex;align-items:center;}
+      .navbar-brand{border-right:none;}
+      .navbar-brand-text,.navbar-clock,.navbar-sep{display:none;}
+      .btn-logout,.user-info{display:none;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,0.5);}
+      .s-overlay.show{display:block;}
+      .main{margin-left:0;padding:12px;}
+      .form-grid{grid-template-columns:1fr;}
+      .form-field.span2{grid-column:span 1;}
+      .detail-grid{grid-template-columns:1fr;}
+      .mini-stats{gap:6px;}
+      .mini-stat{min-width:100px;padding:8px 12px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="overlay" id="overlay">
+  <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('ovF').style.display='block'"/>
+  <div class="ov-fallback" id="ovF">AMU</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-text">Memuat data servis...</div>
+</div>
+
+<div class="s-overlay" id="sOverlay" onclick="closeSidebar()"></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <img src="../assets/logo.png" alt="AMU" onerror="this.style.display='none';document.getElementById('bF').style.display='block'"/>
+    <div class="navbar-brand-fallback" id="bF">AMU</div>
+    <div class="navbar-brand-text">Auto Mitra Utama<span>Start Here, Drive Next</span></div>
+  </div>
+  <div class="navbar-spacer"></div>
+  <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
+  <div class="navbar-sep"></div>
+  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <div class="navbar-sep"></div>
+  <div class="user-chip">
+    <div class="user-av" id="uAv">--</div>
+    <div class="user-info"><div class="user-name" id="uName">–</div><div class="user-role" id="uRole">–</div></div>
+  </div>
+  <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  <div class="navbar-goldline"></div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Utama</div>
+  <div class="menu-item" onclick="goTo('dashboard')"><span class="menu-icon">⊞</span><span class="menu-label">Dashboard</span></div>
+  <div class="sidebar-section">Operasional</div>
+  <div class="menu-item" onclick="goTo('kendaraan')"><span class="menu-icon">🚗</span><span class="menu-label">Kendaraan</span></div>
+  <div class="menu-item active"><span class="menu-icon">🔧</span><span class="menu-label">Servis</span></div>
+  <div class="menu-item" onclick="goTo('sparepart')"><span class="menu-icon">🔩</span><span class="menu-label">Sparepart</span></div>
+  <div class="sidebar-section">Keuangan</div>
+  <div class="menu-item" onclick="goTo('keuangan')"><span class="menu-icon">💰</span><span class="menu-label">Keuangan</span></div>
+  <div class="menu-item" onclick="goTo('laporan')"><span class="menu-icon">📊</span><span class="menu-label">Laporan</span></div>
+  <div class="sidebar-section">Manajemen</div>
+  <div class="menu-item" onclick="goTo('pelanggan')"><span class="menu-icon">👥</span><span class="menu-label">Pelanggan</span></div>
+  <div class="menu-item" onclick="goTo('staff')"><span class="menu-icon">👤</span><span class="menu-label">Staff</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-section">Sistem</div>
+  <div class="menu-item" onclick="goTo('master-data')"><span class="menu-icon">📋</span><span class="menu-label">Master Data</span></div>
+  <div class="menu-item" onclick="goTo('pengaturan')"><span class="menu-icon">⚙</span><span class="menu-label">Pengaturan</span></div>
+  <div class="sidebar-sep"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="su-av" id="suAv">--</div>
+      <div><div class="su-name" id="suName">–</div><div class="su-role" id="suRole">–</div></div>
+    </div>
+    <button class="su-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-header">
+    <div class="pg-title">Servis</div>
+    <div class="pg-sub">Manajemen antrian & pekerjaan bengkel</div>
+    <div class="pg-line"></div>
+  </div>
+
+  <!-- MINI STATS -->
+  <div class="mini-stats">
+    <div class="mini-stat"><div class="mini-stat-icon">📋</div><div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">⏳</div><div><div class="mini-stat-val" id="statAntri">0</div><div class="mini-stat-lbl">Antri</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">🔧</div><div><div class="mini-stat-val" id="statDikerjakan">0</div><div class="mini-stat-lbl">Dikerjakan</div></div></div>
+    <div class="mini-stat"><div class="mini-stat-icon">✅</div><div><div class="mini-stat-val" id="statSelesai">0</div><div class="mini-stat-lbl">Selesai</div></div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <select class="filter-select" id="filterStatus" onchange="applyFilter()">
+      <option value="">Semua Status</option>
+      <option value="antri">Antri</option>
+      <option value="dikerjakan">Dikerjakan</option>
+      <option value="selesai">Selesai</option>
+      <option value="batal">Batal</option>
+    </select>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari pelanggan / kendaraan..." oninput="applyFilter()"/>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Servis Baru</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Pelanggan</th>
+          <th>Kendaraan</th>
+          <th>Jenis Servis</th>
+          <th>Mekanik</th>
+          <th>Tgl Masuk</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tblBody">
+        <tr><td colspan="9"><div class="empty"><div class="empty-icon">🔧</div>Memuat data...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- MODAL FORM SERVIS BARU -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modalTitle">Servis Baru</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">Data Pelanggan</div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Nama Pelanggan *</label><input type="text" class="form-input caps" id="fNamaPelanggan" placeholder="Nama pelanggan..."/></div>
+        <div class="form-field"><label class="form-label">No. WA</label><input type="text" class="form-input" id="fWaPelanggan" placeholder="08xx / 62xx" oninput="formatWA(this)"/></div>
+        <div class="form-field"><label class="form-label">No. HP</label><input type="text" class="form-input" id="fHpPelanggan" placeholder="08xx..."/></div>
+        <div class="form-field"><label class="form-label">Alamat</label><input type="text" class="form-input caps" id="fAlamat" placeholder="Alamat..."/></div>
+      </div>
+
+      <div class="modal-section">Data Kendaraan</div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Merek / Model *</label><input type="text" class="form-input caps" id="fMerekKendaraan" placeholder="Toyota Avanza..."/></div>
+        <div class="form-field"><label class="form-label">No. Polisi</label><input type="text" class="form-input caps" id="fNopolServis" placeholder="BL 1234 AB"/></div>
+        <div class="form-field"><label class="form-label">Tahun</label><input type="number" class="form-input" id="fTahunKendaraan" placeholder="2022"/></div>
+        <div class="form-field"><label class="form-label">Warna</label><input type="text" class="form-input caps" id="fWarnaKendaraan" placeholder="Putih..."/></div>
+      </div>
+
+      <div class="modal-section">Detail Servis</div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Jenis Servis Utama *</label><select class="form-select" id="fJenisServis"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Mekanik</label><select class="form-select" id="fMekanik"><option value="">— Pilih —</option></select></div>
+        <div class="form-field"><label class="form-label">Tanggal Masuk *</label><input type="date" class="form-input" id="fTglMasukServis"/></div>
+        <div class="form-field"><label class="form-label">Estimasi Biaya (Rp)</label><input type="number" class="form-input" id="fEstimasi" placeholder="150000"/></div>
+        <div class="form-field span2"><label class="form-label">Keluhan / Keterangan</label><textarea class="form-textarea" id="fKeluhan" placeholder="Keluhan pelanggan..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" id="btnSave" onclick="saveServis()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL SERVIS -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-modal">
+    <div class="detail-hd">
+      <div class="detail-hd-title" id="dTitle">Detail Servis</div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+
+      <!-- Invoice Header (untuk print) -->
+      <div class="invoice-header">
+        <div class="invoice-logo">AUTO MITRA UTAMA</div>
+        <div class="invoice-info">Jl Dr Mr Mohd Hasan Batoh, Kota Banda Aceh | WA: 08116063012</div>
+        <div class="invoice-info" style="margin-top:4px">INVOICE SERVIS</div>
+      </div>
+
+      <!-- Info Pelanggan -->
+      <div class="detail-section">
+        <div class="detail-section-title">👤 Data Pelanggan</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">Nama</div><div class="detail-item-value" id="dNamaPelanggan">–</div></div>
+          <div><div class="detail-item-label">No. WA</div><div class="detail-item-value" id="dWaPelanggan">–</div></div>
+          <div><div class="detail-item-label">No. HP</div><div class="detail-item-value" id="dHpPelanggan">–</div></div>
+          <div><div class="detail-item-label">Alamat</div><div class="detail-item-value" id="dAlamat">–</div></div>
+        </div>
+      </div>
+
+      <!-- Info Kendaraan -->
+      <div class="detail-section">
+        <div class="detail-section-title">🚗 Data Kendaraan</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">Merek / Model</div><div class="detail-item-value" id="dMerekKendaraan">–</div></div>
+          <div><div class="detail-item-label">No. Polisi</div><div class="detail-item-value" id="dNopolServis">–</div></div>
+          <div><div class="detail-item-label">Tahun</div><div class="detail-item-value" id="dTahunKendaraan">–</div></div>
+          <div><div class="detail-item-label">Warna</div><div class="detail-item-value" id="dWarnaKendaraan">–</div></div>
+        </div>
+      </div>
+
+      <!-- Info Servis -->
+      <div class="detail-section">
+        <div class="detail-section-title">🔧 Detail Servis</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">Jenis Servis</div><div class="detail-item-value" id="dJenisServis">–</div></div>
+          <div><div class="detail-item-label">Mekanik</div><div class="detail-item-value" id="dMekanik">–</div></div>
+          <div><div class="detail-item-label">Tgl Masuk</div><div class="detail-item-value" id="dTglMasuk">–</div></div>
+          <div><div class="detail-item-label">Status</div><div class="detail-item-value" id="dStatus">–</div></div>
+          <div class="span2"><div class="detail-item-label">Keluhan</div><div class="detail-item-value" id="dKeluhan" style="line-height:1.5">–</div></div>
+        </div>
+      </div>
+
+      <!-- Daftar Pekerjaan -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>📋 Daftar Pekerjaan</span>
+          <button class="btn-add" style="font-size:0.7em;padding:4px 10px" onclick="openPekerjaanModal()">+ Tambah</button>
+        </div>
+        <div id="pekerjaanList">
+          <div style="padding:12px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada pekerjaan</div>
+        </div>
+        <div class="total-bar" id="totalBar" style="display:none">
+          <div class="total-label">Total Biaya</div>
+          <div class="total-val" id="totalBiaya">Rp 0</div>
+        </div>
+      </div>
+
+      <!-- Ubah Status -->
+      <div class="detail-section">
+        <div class="detail-section-title">🔄 Ubah Status</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-status btn-status-antri"      onclick="ubahStatus('antri')">⏳ Antri</button>
+          <button class="btn-status btn-status-dikerjakan" onclick="ubahStatus('dikerjakan')">🔧 Dikerjakan</button>
+          <button class="btn-status btn-status-selesai"    onclick="ubahStatus('selesai')">✅ Selesai</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="detail-ft">
+      <button class="btn-cancel" onclick="closeDetail()">Tutup</button>
+      <button class="btn-print" onclick="printInvoice()">🖨️ Print Invoice</button>
+      <button class="btn-edit" style="padding:7px 14px" onclick="editServis()">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAMBAH PEKERJAAN -->
+<div class="pekerjaan-modal-overlay" id="pekerjaanModalOverlay">
+  <div class="pekerjaan-modal">
+    <div class="modal-hd">
+      <div class="modal-title">Tambah Pekerjaan</div>
+      <button class="modal-close" onclick="closePekerjaanModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field" style="margin-bottom:12px">
+        <label class="form-label">Pilih dari Master Data</label>
+        <select class="form-select" id="pPilihJenis" onchange="isiDariMaster()">
+          <option value="">— Pilih atau ketik manual —</option>
+        </select>
+      </div>
+      <div class="form-field" style="margin-bottom:12px">
+        <label class="form-label">Nama Pekerjaan *</label>
+        <input type="text" class="form-input caps" id="pNama" placeholder="Nama pekerjaan..."/>
+      </div>
+      <div class="form-field" style="margin-bottom:12px">
+        <label class="form-label">Keterangan</label>
+        <input type="text" class="form-input" id="pKeterangan" placeholder="Keterangan tambahan..."/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Harga (Rp) *</label>
+        <input type="number" class="form-input" id="pHarga" placeholder="50000"/>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closePekerjaanModal()">Batal</button>
+      <button class="btn-save" onclick="savePekerjaan()">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
+    authDomain: "auto-mitra-utama-f522f.firebaseapp.com",
+    projectId: "auto-mitra-utama-f522f",
+    storageBucket: "auto-mitra-utama-f522f.firebasestorage.app",
+    messagingSenderId: "462939673521",
+    appId: "1:462939673521:web:55b5b7659113e8edec2390"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let allData = [];
+  let editId  = null;
+  let currentServisId = null;
+  let masterJenisServis = [];
+
+  // ── Cek login ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    const email = user.email || '';
+    const inisial = email.substring(0, 2).toUpperCase();
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
+    await loadMaster();
+    await loadData();
+  });
+
+  // ── Load Master Data ──
+  async function loadMaster() {
+    try {
+      // Jenis Servis
+      const jsSnap = await getDocs(query(collection(db, 'master_jenis_servis'), orderBy('nama')));
+      masterJenisServis = jsSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => d.status === 'aktif');
+      const jsEl = document.getElementById('fJenisServis');
+      jsEl.innerHTML = `<option value="">— Pilih —</option>` +
+        masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||0}">${j.nama}</option>`).join('');
+
+      // Mekanik (dari master jabatan/staff)
+      const mSnap = await getDocs(query(collection(db, 'master_jabatan'), orderBy('nama')));
+      const mekanik = mSnap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
+      const mEl = document.getElementById('fMekanik');
+      mEl.innerHTML = `<option value="">— Pilih —</option>` +
+        mekanik.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('');
+
+      // Untuk modal pekerjaan
+      const ppEl = document.getElementById('pPilihJenis');
+      ppEl.innerHTML = `<option value="">— Pilih atau ketik manual —</option>` +
+        masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||''}">${j.nama}</option>`).join('');
+    } catch(e) { console.log('Master data:', e); }
+  }
+
+  // ── Load Data Servis ──
+  async function loadData() {
+    try {
+      const snap = await getDocs(collection(db, 'servis'));
+      allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      allData.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+    } catch(e) { allData = []; }
+    updateStats();
+    renderTable(allData);
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent      = allData.length;
+    document.getElementById('statAntri').textContent      = allData.filter(d => d.status === 'antri').length;
+    document.getElementById('statDikerjakan').textContent = allData.filter(d => d.status === 'dikerjakan').length;
+    document.getElementById('statSelesai').textContent    = allData.filter(d => d.status === 'selesai').length;
+  }
+
+  // ── Filter ──
+  window.applyFilter = function() {
+    const status = document.getElementById('filterStatus').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allData.filter(d => {
+      if (status && d.status !== status) return false;
+      if (search && ![(d.namaPelanggan||''),(d.merekKendaraan||''),(d.nopolServis||''),(d.jenisServis||'')].some(v => v.toLowerCase().includes(search))) return false;
+      return true;
+    });
+    renderTable(filtered);
+  };
+
+  // ── Render Tabel ──
+  function renderTable(data) {
+    const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+    if (data.length === 0) {
+      document.getElementById('tblBody').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🔧</div>Belum ada data servis</div></td></tr>`;
+      return;
+    }
+    document.getElementById('tblBody').innerHTML = data.map((d,i) => `
+      <tr>
+        <td style="color:var(--text3)">${i+1}</td>
+        <td>
+          <div style="font-weight:600;color:var(--silver2)">${d.namaPelanggan||'-'}</div>
+          <div style="font-size:0.75em;color:var(--text3)">${d.waPelanggan ? `WA: ${d.waPelanggan}` : ''}</div>
+        </td>
+        <td>
+          <div style="font-weight:600;color:var(--silver2)">${d.merekKendaraan||'-'}</div>
+          <div style="font-size:0.75em;color:var(--text3)">${d.nopolServis||''}</div>
+        </td>
+        <td>${d.jenisServis||'-'}</td>
+        <td>${d.mekanik||'-'}</td>
+        <td>${d.tglMasukServis||'-'}</td>
+        <td><span class="bs bs-${d.status||'antri'}">${d.status||'antri'}</span></td>
+        <td style="color:var(--gold2);font-family:'Rajdhani',sans-serif">${d.totalBiaya ? fmt(d.totalBiaya) : '-'}</td>
+        <td>
+          <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
+          <button class="btn-del"    onclick="hapusData('${d.id}','${d.namaPelanggan}')">Hapus</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  // ── Modal Tambah ──
+  window.openModal = function() {
+    editId = null;
+    document.getElementById('modalTitle').textContent = 'Servis Baru';
+    ['fNamaPelanggan','fWaPelanggan','fHpPelanggan','fAlamat',
+     'fMerekKendaraan','fNopolServis','fTahunKendaraan','fWarnaKendaraan',
+     'fJenisServis','fMekanik','fEstimasi','fKeluhan'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('fTglMasukServis').value = new Date().toISOString().split('T')[0];
+    document.getElementById('modalOverlay').classList.add('show');
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    editId = null;
+  };
+
+  // ── Simpan Servis ──
+  window.saveServis = async function() {
+    const nama = document.getElementById('fNamaPelanggan').value.trim();
+    const merek = document.getElementById('fMerekKendaraan').value.trim();
+    const jenis = document.getElementById('fJenisServis').value;
+    const tgl   = document.getElementById('fTglMasukServis').value;
+    const btn   = document.getElementById('btnSave');
+
+    if (!nama)  { showToast('Nama pelanggan tidak boleh kosong!', 'error'); return; }
+    if (!merek) { showToast('Merek kendaraan tidak boleh kosong!', 'error'); return; }
+    if (!jenis) { showToast('Pilih jenis servis!', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+    const payload = {
+      namaPelanggan:  nama,
+      waPelanggan:    document.getElementById('fWaPelanggan').value,
+      hpPelanggan:    document.getElementById('fHpPelanggan').value,
+      alamat:         document.getElementById('fAlamat').value,
+      merekKendaraan: merek,
+      nopolServis:    document.getElementById('fNopolServis').value,
+      tahunKendaraan: document.getElementById('fTahunKendaraan').value,
+      warnaKendaraan: document.getElementById('fWarnaKendaraan').value,
+      jenisServis:    jenis,
+      mekanik:        document.getElementById('fMekanik').value,
+      tglMasukServis: tgl,
+      estimasi:       parseInt(document.getElementById('fEstimasi').value||0),
+      keluhan:        document.getElementById('fKeluhan').value,
+      status:         editId ? undefined : 'antri',
+      totalBiaya:     0,
+    };
+    if (editId) delete payload.status;
+
+    try {
+      if (editId) {
+        await updateDoc(doc(db, 'servis', editId), payload);
+        showToast('Data servis berhasil diperbarui ✓', 'success');
+      } else {
+        payload.status = 'antri';
+        payload.createdAt = new Date().toISOString();
+        await addDoc(collection(db, 'servis'), payload);
+        showToast('Servis baru berhasil ditambahkan ✓', 'success');
+      }
+      closeModal();
+      await loadData();
+    } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
+
+    btn.disabled = false; btn.textContent = 'Simpan';
+  };
+
+  // ── Detail Servis ──
+  window.showDetail = async function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    currentServisId = id;
+
+    const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.textContent = val||'-'; };
+    document.getElementById('dTitle').textContent = `${d.merekKendaraan||''} — ${d.namaPelanggan||''}`;
+    set('dNamaPelanggan', d.namaPelanggan);
+    set('dWaPelanggan',   d.waPelanggan ? `+${d.waPelanggan}` : null);
+    set('dHpPelanggan',   d.hpPelanggan);
+    set('dAlamat',        d.alamat);
+    set('dMerekKendaraan',d.merekKendaraan);
+    set('dNopolServis',   d.nopolServis);
+    set('dTahunKendaraan',d.tahunKendaraan);
+    set('dWarnaKendaraan',d.warnaKendaraan);
+    set('dJenisServis',   d.jenisServis);
+    set('dMekanik',       d.mekanik);
+    set('dTglMasuk',      d.tglMasukServis);
+    set('dKeluhan',       d.keluhan);
+    document.getElementById('dStatus').innerHTML = `<span class="bs bs-${d.status||'antri'}">${d.status||'antri'}</span>`;
+
+    document.getElementById('detailOverlay').classList.add('show');
+    await loadPekerjaan(id);
+  };
+
+  window.closeDetail = function() {
+    document.getElementById('detailOverlay').classList.remove('show');
+    currentServisId = null;
+  };
+
+  window.editServis = function() {
+    const d = allData.find(x => x.id === currentServisId);
+    if (!d) return;
+    editId = currentServisId;
+    closeDetail();
+    document.getElementById('modalTitle').textContent = 'Edit Servis';
+    const map = {
+      fNamaPelanggan:'namaPelanggan', fWaPelanggan:'waPelanggan',
+      fHpPelanggan:'hpPelanggan', fAlamat:'alamat',
+      fMerekKendaraan:'merekKendaraan', fNopolServis:'nopolServis',
+      fTahunKendaraan:'tahunKendaraan', fWarnaKendaraan:'warnaKendaraan',
+      fJenisServis:'jenisServis', fMekanik:'mekanik',
+      fTglMasukServis:'tglMasukServis', fEstimasi:'estimasi', fKeluhan:'keluhan'
+    };
+    Object.entries(map).forEach(([elId, key]) => {
+      const el = document.getElementById(elId);
+      if (el) el.value = d[key]||'';
+    });
+    document.getElementById('modalOverlay').classList.add('show');
+  };
+
+  // ── Pekerjaan ──
+  async function loadPekerjaan(servisId) {
+    try {
+      const snap = await getDocs(query(collection(db, `servis/${servisId}/pekerjaan`), orderBy('createdAt')));
+      const data = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      renderPekerjaan(data, servisId);
+    } catch(e) { renderPekerjaan([], servisId); }
+  }
+
+  function renderPekerjaan(data, servisId) {
+    const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+    if (data.length === 0) {
+      document.getElementById('pekerjaanList').innerHTML = '<div style="padding:12px 0;text-align:center;color:var(--text3);font-size:0.78em">Belum ada pekerjaan ditambahkan</div>';
+      document.getElementById('totalBar').style.display = 'none';
+      return;
+    }
+    const total = data.reduce((s, p) => s + parseInt(p.harga||0), 0);
+    document.getElementById('pekerjaanList').innerHTML = data.map(p => `
+      <div class="pekerjaan-item">
+        <div style="flex:1">
+          <div class="pekerjaan-nama">${p.nama||'-'}</div>
+          ${p.keterangan ? `<div class="pekerjaan-ket">${p.keterangan}</div>` : ''}
+        </div>
+        <div class="pekerjaan-harga">${fmt(p.harga)}</div>
+        <button class="pekerjaan-del" onclick="hapusPekerjaan('${servisId}','${p.id}','${p.nama}')">✕</button>
+      </div>`).join('');
+    document.getElementById('totalBar').style.display = 'flex';
+    document.getElementById('totalBiaya').textContent = fmt(total);
+
+    // Update total di Firebase
+    updateDoc(doc(db, 'servis', servisId), { totalBiaya: total }).catch(()=>{});
+    // Update allData lokal
+    const idx = allData.findIndex(d => d.id === servisId);
+    if (idx >= 0) allData[idx].totalBiaya = total;
+  }
+
+  window.openPekerjaanModal = function() {
+    document.getElementById('pPilihJenis').value = '';
+    document.getElementById('pNama').value        = '';
+    document.getElementById('pKeterangan').value  = '';
+    document.getElementById('pHarga').value       = '';
+    document.getElementById('pekerjaanModalOverlay').classList.add('show');
+  };
+
+  window.closePekerjaanModal = function() {
+    document.getElementById('pekerjaanModalOverlay').classList.remove('show');
+  };
+
+  window.isiDariMaster = function() {
+    const sel = document.getElementById('pPilihJenis');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    document.getElementById('pNama').value  = opt.value;
+    const harga = opt.dataset.harga;
+    if (harga && parseInt(harga) > 0) document.getElementById('pHarga').value = harga;
+  };
+
+  window.savePekerjaan = async function() {
+    const nama  = document.getElementById('pNama').value.trim();
+    const harga = document.getElementById('pHarga').value;
+    const ket   = document.getElementById('pKeterangan').value;
+    if (!nama)  { showToast('Nama pekerjaan tidak boleh kosong!', 'error'); return; }
+    if (!harga) { showToast('Harga tidak boleh kosong!', 'error'); return; }
+    try {
+      await addDoc(collection(db, `servis/${currentServisId}/pekerjaan`), {
+        nama, harga: parseInt(harga), keterangan: ket,
+        createdAt: new Date().toISOString()
+      });
+      showToast('Pekerjaan berhasil ditambahkan ✓', 'success');
+      closePekerjaanModal();
+      await loadPekerjaan(currentServisId);
+    } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
+  };
+
+  window.hapusPekerjaan = async function(servisId, pekerjaanId, nama) {
+    if (!confirm(`Hapus pekerjaan "${nama}"?`)) return;
+    try {
+      await deleteDoc(doc(db, `servis/${servisId}/pekerjaan`, pekerjaanId));
+      showToast('Pekerjaan dihapus ✓', 'success');
+      await loadPekerjaan(servisId);
+    } catch(e) { showToast('Gagal menghapus', 'error'); }
+  };
+
+  // ── Ubah Status ──
+  window.ubahStatus = async function(status) {
+    if (!currentServisId) return;
+    try {
+      await updateDoc(doc(db, 'servis', currentServisId), { status });
+      // Update lokal
+      const idx = allData.findIndex(d => d.id === currentServisId);
+      if (idx >= 0) allData[idx].status = status;
+      document.getElementById('dStatus').innerHTML = `<span class="bs bs-${status}">${status}</span>`;
+      updateStats();
+      renderTable(allData);
+      showToast(`Status diubah ke "${status}" ✓`, 'success');
+    } catch(e) { showToast('Gagal ubah status', 'error'); }
+  };
+
+  // ── Hapus Servis ──
+  window.hapusData = async function(id, nama) {
+    if (!confirm(`Yakin hapus servis "${nama}"?`)) return;
+    const pw = prompt('Masukkan password untuk konfirmasi:');
+    if (!pw) return;
+    try {
+      const user = auth.currentUser;
+      const { EmailAuthProvider, reauthenticateWithCredential } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+      const credential = EmailAuthProvider.credential(user.email, pw);
+      await reauthenticateWithCredential(user, credential);
+      await deleteDoc(doc(db, 'servis', id));
+      showToast('Data servis dihapus ✓', 'success');
+      await loadData();
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        showToast('Password salah!', 'error');
+      } else { showToast('Gagal: ' + e.message, 'error'); }
+    }
+  };
+
+  // ── Print Invoice ──
+  window.printInvoice = function() { window.print(); };
+
+  // ── Format WA ──
+  window.formatWA = function(el) {
+    let val = el.value.replace(/\D/g,'');
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    else if (val.startsWith('8')) val = '62' + val;
+    el.value = val;
+  };
+
+  // ── Toast ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Clock ──
+  function tick() {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('clock').textContent     = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('clockDate').textContent = `${hari[now.getDay()]}, ${now.getDate()} ${bln[now.getMonth()]} ${now.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── Auto Logout 5 Menit ──
+  let autoLogoutTimer;
+  function resetTimer() {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = setTimeout(async () => {
+      showToast('Sesi berakhir karena tidak aktif.', 'error');
+      setTimeout(async () => { await signOut(auth); window.location.href = '/automitrautama/index.html'; }, 2000);
+    }, 5 * 60 * 1000);
+  }
+  ['click','keydown','scroll','touchstart'].forEach(e => document.addEventListener(e, resetTimer, { passive: true }));
+  resetTimer();
+
+  // ── Back Button Handler ──
+  window.history.pushState(null, '', window.location.href);
+  window.addEventListener('popstate', async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    } else { window.history.pushState(null, '', window.location.href); }
+  });
+
+  // ── Logout ──
+  window.doLogout = async () => {
+    if (confirm('Yakin mau keluar dari sistem AMU?')) {
+      await signOut(auth); window.location.href = '/automitrautama/index.html';
+    }
+  };
+
+  // ── Navigasi ──
+  const pages = {
+    'dashboard':'/automitrautama/admin/dashboard.html',
+    'kendaraan':'/automitrautama/admin/kendaraan.html',
+    'servis':'/automitrautama/admin/servis.html',
+    'sparepart':'/automitrautama/admin/sparepart.html',
+    'keuangan':'/automitrautama/admin/keuangan.html',
+    'laporan':'/automitrautama/admin/laporan.html',
+    'pelanggan':'/automitrautama/admin/pelanggan.html',
+    'staff':'/automitrautama/admin/staff.html',
+    'master-data':'/automitrautama/admin/master-data.html',
+    'pengaturan':'/automitrautama/admin/pengaturan.html',
+  };
+  window.goTo = (page) => {
+    if (pages[page]) { window.location.href = pages[page]; return; }
+    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
+  };
+
+  // ── Sidebar ──
+  window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
+  window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDetail(); closePekerjaanModal(); } });
+</script>
+</body>
+</html>
