@@ -591,20 +591,21 @@
           ));
 
           if (!staffSnap.empty) {
-            // Login sebagai staff → simpan role di sessionStorage
             const staffData = staffSnap.docs[0].data();
             sessionStorage.setItem('amu_role', staffData.role||'staff');
             sessionStorage.setItem('amu_nama', staffData.nama||uEmail);
+            sessionStorage.setItem('amu_nik',  staffData.nik||'');
             sessionStorage.setItem('amu_uid',  uid);
           } else {
-            // Owner/Admin
             sessionStorage.setItem('amu_role', 'owner');
             sessionStorage.setItem('amu_nama', 'Administrator');
+            sessionStorage.setItem('amu_nik',  '');
             sessionStorage.setItem('amu_uid',  uid);
           }
         } catch(e) {
           sessionStorage.setItem('amu_role', 'owner');
           sessionStorage.setItem('amu_nama', 'Administrator');
+          sessionStorage.setItem('amu_nik',  '');
           sessionStorage.setItem('amu_uid',  uid);
         }
 
