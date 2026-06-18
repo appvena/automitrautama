@@ -372,14 +372,42 @@
   </div>
 
   <div class="mini-stats">
-    <div class="mini-stat"><div class="mini-stat-icon">🚗</div><div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Stok</div></div></div>
-    <div class="mini-stat"><div class="mini-stat-icon">✅</div><div><div class="mini-stat-val" id="statTersedia">0</div><div class="mini-stat-lbl">Tersedia</div></div></div>
-    <div class="mini-stat"><div class="mini-stat-icon">⏳</div><div><div class="mini-stat-val" id="statProses">0</div><div class="mini-stat-lbl">Proses</div></div></div>
-    <div class="mini-stat"><div class="mini-stat-icon">🏷️</div><div><div class="mini-stat-val" id="statTerjual">0</div><div class="mini-stat-lbl">Terjual</div></div></div>
+    <div class="mini-stat" onclick="setTab('stok')" style="cursor:pointer">
+      <div class="mini-stat-icon">🚗</div>
+      <div><div class="mini-stat-val" id="statTotal">0</div><div class="mini-stat-lbl">Total Stok</div></div>
+    </div>
+    <div class="mini-stat" onclick="setTab('stok')" style="cursor:pointer">
+      <div class="mini-stat-icon">✅</div>
+      <div><div class="mini-stat-val" id="statTersedia">0</div><div class="mini-stat-lbl">Tersedia</div></div>
+    </div>
+    <div class="mini-stat" onclick="setTab('stok')" style="cursor:pointer">
+      <div class="mini-stat-icon">⏳</div>
+      <div><div class="mini-stat-val" id="statProses">0</div><div class="mini-stat-lbl">Proses</div></div>
+    </div>
+    <div class="mini-stat" onclick="setTab('terjual')" style="cursor:pointer">
+      <div class="mini-stat-icon">🏷️</div>
+      <div><div class="mini-stat-val" id="statTerjual">0</div><div class="mini-stat-lbl">Terjual</div></div>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGASI -->
+  <div style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--border)">
+    <button id="tab-stok" onclick="setTab('stok')"
+      style="padding:10px 20px;background:none;border:none;border-bottom:2px solid var(--gold);margin-bottom:-2px;color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer">
+      🚗 STOK
+    </button>
+    <button id="tab-terjual" onclick="setTab('terjual')"
+      style="padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text3);font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer">
+      🏷️ TERJUAL
+    </button>
+    <button id="tab-semua" onclick="setTab('semua')"
+      style="padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text3);font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer">
+      📋 SEMUA
+    </button>
   </div>
 
   <!-- Toolbar baris 1: tombol aksi -->
-  <div class="toolbar" style="border-radius:10px 10px 0 0;border-bottom:none;">
+  <div class="toolbar" style="border-radius:0;border-top:none;border-bottom:none;">
     <button class="btn-col-toggle" id="btnFilterToggle" onclick="toggleFilter()">🔽 Filter</button>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
@@ -732,6 +760,30 @@
   const db   = getFirestore(app);
 
   let allData    = [];
+  let activeTab  = 'stok'; // default tab stok
+
+  // ── Tab navigasi ──
+  window.setTab = function(tab) {
+    activeTab = tab;
+    // Update style tombol tab
+    ['stok','terjual','semua'].forEach(t => {
+      const btn = document.getElementById('tab-' + t);
+      if (!btn) return;
+      if (t === tab) {
+        btn.style.color = 'var(--gold)';
+        btn.style.borderBottomColor = 'var(--gold)';
+      } else {
+        btn.style.color = 'var(--text3)';
+        btn.style.borderBottomColor = 'transparent';
+      }
+    });
+    // Tombol tambah hanya di tab stok/semua
+    const btnTambah = document.getElementById('btnTambahKendaraan');
+    if (btnTambah) {
+      btnTambah.style.display = (tab === 'terjual' && amuRole !== 'owner') ? 'none' : '';
+    }
+    applyFilter();
+  };
   let editId     = null;
   let detailData = null;
   let dynamicFields = [];
@@ -1105,24 +1157,45 @@
     const kategori = document.getElementById('filterKategori').value;
     const merek    = document.getElementById('filterMerek').value;
     const search   = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allData.filter(d => {
+
+    let filtered = allData.filter(d => {
+      // Filter berdasarkan tab aktif
+      if (activeTab === 'stok'    && d.status === 'terjual') return false;
+      if (activeTab === 'terjual' && d.status !== 'terjual') return false;
+
+      // Filter tambahan
       if (status   && d.status   !== status)   return false;
       if (kategori && d.kategori !== kategori) return false;
       if (merek    && d.merek    !== merek)    return false;
-      if (search && ![(d.merek||''),(d.model||''),(d.warna||''),(d.nopol||''),(d.noRangka||'')].some(v => v.toLowerCase().includes(search))) return false;
+
+      // Search
+      const haystack = [(d.merek||''),(d.model||''),(d.warna||''),(d.nopol||''),(d.noRangka||''),(d.penjualan?.namaPembeli||''),(d.penjualan?.sales||'')];
+      if (search && !haystack.some(v => v.toLowerCase().includes(search))) return false;
+
+      // Filter sales — sales hanya lihat milik sendiri (untuk tab terjual)
+      if (amuRole === 'sales' && activeTab === 'terjual') {
+        return (d.penjualan?.salesNik === amuNik) ||
+               (d.penjualan?.sales?.toUpperCase() === amuNama.toUpperCase());
+      }
+
       return true;
     });
+
     renderTable(filtered);
   };
 
   // ── Render tabel ──
   function renderTable(data) {
+    // Empty message sesuai tab
+    const emptyMsg = activeTab === 'terjual' ? 'Belum ada kendaraan terjual' :
+                     activeTab === 'stok'    ? 'Stok kendaraan kosong' : 'Belum ada data kendaraan';
+
     if (data.length === 0) {
-      document.getElementById('tblBody').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🚗</div>Belum ada data kendaraan</div></td></tr>`;
+      document.getElementById('tblBody').innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon">🚗</div>' + emptyMsg + '</div></td></tr>';
       return;
     }
 
-    // Build header
+    // Build header — tab terjual tampilkan kolom pembeli & sales
     let thHtml = '<th style="width:40px">#</th>';
     if (visibleCols.includes('foto'))      thHtml += '<th style="width:60px">Foto</th>';
     if (visibleCols.includes('merek'))     thHtml += '<th>Merek / Model</th>';
@@ -1131,42 +1204,53 @@
     if (visibleCols.includes('nopol'))     thHtml += '<th>No. Polisi</th>';
     if (visibleCols.includes('noRangka'))  thHtml += '<th>No. Rangka</th>';
     if (visibleCols.includes('namaBpkb'))  thHtml += '<th>Nama BPKB</th>';
-    if (visibleCols.includes('hargaBeli')) thHtml += '<th>Harga Beli</th>';
-    if (visibleCols.includes('hargaJual')) thHtml += '<th>Harga Jual</th>';
+    if (visibleCols.includes('hargaBeli') && activeTab !== 'terjual') thHtml += '<th>Harga Beli</th>';
+    if (visibleCols.includes('hargaJual')) thHtml += '<th>' + (activeTab === 'terjual' ? 'Harga Jual' : 'Harga Jual') + '</th>';
     if (visibleCols.includes('waPenjual')) thHtml += '<th>WA Penjual</th>';
-    if (visibleCols.includes('status'))    thHtml += '<th>Status</th>';
+    if (activeTab !== 'stok') thHtml += '<th>Status</th>';
+    if (activeTab === 'terjual') {
+      thHtml += '<th>Pembeli</th>';
+      thHtml += '<th>Sales</th>';
+      thHtml += '<th>Tgl Jual</th>';
+    }
     thHtml += '<th>Aksi</th>';
-
-    document.querySelector('.tbl thead').innerHTML = `<tr>${thHtml}</tr>`;
+    document.querySelector('.tbl thead').innerHTML = '<tr>' + thHtml + '</tr>';
 
     document.getElementById('tblBody').innerHTML = data.map((d, i) => {
-      let tdHtml = `<td style="color:var(--text3)">${i+1}</td>`;
+      let tdHtml = '<td style="color:var(--text3)">' + (i+1) + '</td>';
       if (visibleCols.includes('foto'))      tdHtml += '<td>' + (d.foto ? '<img src="' + d.foto + '" class="foto-thumb" onerror="this.style.display=\'none\'">' : '<div class="foto-placeholder">🚗</div>') + '</td>';
-      if (visibleCols.includes('merek'))     tdHtml += `<td><div style="font-weight:600;color:var(--silver2)">${d.merek||'-'} ${d.model||''}</div><div style="font-size:0.75em;color:var(--text3)">${d.kategori||''} · ${d.kondisi||''}</div></td>`;
-      if (visibleCols.includes('tahun'))     tdHtml += `<td>${d.tahun||'-'}</td>`;
-      if (visibleCols.includes('warna'))     tdHtml += `<td>${d.warna||'-'}</td>`;
-      if (visibleCols.includes('nopol'))     tdHtml += `<td>${d.nopol||'-'}</td>`;
-      if (visibleCols.includes('noRangka'))  tdHtml += `<td style="font-size:0.78em">${d.noRangka||'-'}</td>`;
-      if (visibleCols.includes('namaBpkb'))  tdHtml += `<td>${d.namaBpkb||'-'}</td>`;
-      if (visibleCols.includes('hargaBeli')) tdHtml += `<td><span class="harga">${d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>`;
-      if (visibleCols.includes('hargaJual')) tdHtml += `<td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>`;
+      if (visibleCols.includes('merek'))     tdHtml += '<td><div style="font-weight:600;color:var(--silver2)">' + (d.merek||'-') + ' ' + (d.model||'') + '</div><div style="font-size:0.75em;color:var(--text3)">' + (d.kategori||'') + (d.kondisi?' · '+d.kondisi:'') + '</div></td>';
+      if (visibleCols.includes('tahun'))     tdHtml += '<td>' + (d.tahun||'-') + '</td>';
+      if (visibleCols.includes('warna'))     tdHtml += '<td>' + (d.warna||'-') + '</td>';
+      if (visibleCols.includes('nopol'))     tdHtml += '<td>' + (d.nopol||'-') + '</td>';
+      if (visibleCols.includes('noRangka'))  tdHtml += '<td style="font-size:0.78em">' + (d.noRangka||'-') + '</td>';
+      if (visibleCols.includes('namaBpkb'))  tdHtml += '<td>' + (d.namaBpkb||'-') + '</td>';
+      if (visibleCols.includes('hargaBeli') && activeTab !== 'terjual') tdHtml += '<td><span class="harga">' + (d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-') + '</span></td>';
+      if (visibleCols.includes('hargaJual')) {
+        const hj = activeTab === 'terjual' ? (d.penjualan?.hargaJualFinal||d.hargaJual) : d.hargaJual;
+        tdHtml += '<td><span class="harga">' + (hj ? 'Rp '+parseInt(hj).toLocaleString('id-ID') : '-') + '</span></td>';
+      }
       if (visibleCols.includes('waPenjual')) tdHtml += '<td>' + (d.waPenjual ? '<a href="https://wa.me/' + d.waPenjual + '" target="_blank" style="color:var(--success)">' + d.waPenjual + '</a>' : '-') + '</td>';
-      if (visibleCols.includes('status'))    tdHtml += `<td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>`;
+      if (activeTab !== 'stok') tdHtml += '<td><span class="bs bs-' + (d.status||'tersedia') + '">' + (d.status||'tersedia') + '</span></td>';
 
-      // Kolom sales — tampil ke semua, tapi hanya kalau terjual
-      tdHtml += `<td style="font-size:0.78em;color:var(--gold)">${d.status==='terjual' ? (d.penjualan?.sales||'-') : '-'}</td>`;
+      // Kolom khusus tab terjual
+      if (activeTab === 'terjual') {
+        tdHtml += '<td style="font-size:0.82em;color:var(--silver2)">' + (d.penjualan?.namaPembeli||'-') + '</td>';
+        tdHtml += '<td style="font-size:0.78em;color:var(--gold)">' + (d.penjualan?.sales||'-') + '</td>';
+        tdHtml += '<td style="font-size:0.78em;color:var(--text3)">' + (d.penjualan?.tanggalJual||'-') + '</td>';
+      }
 
-      // Tombol aksi — sales hanya bisa hapus kalau itu miliknya
+      // Tombol aksi
       const isMilikSales = amuRole === 'owner' ||
         (d.penjualan?.salesNik === amuNik) ||
         (d.penjualan?.sales?.toUpperCase() === amuNama.toUpperCase());
 
-      tdHtml += `<td>
-        <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
-        ${amuRole !== 'sales' ? `<button class="btn-edit" onclick="editData('${d.id}')">Edit</button>` : ''}
-        ${(amuRole === 'owner' || isMilikSales) ? `<button class="btn-del" onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>` : ''}
-      </td>`;
-      return `<tr>${tdHtml}</tr>`;
+      tdHtml += '<td>';
+      tdHtml += '<button class="btn-detail" onclick="showDetail(\'' + d.id + '\')">Detail</button>';
+      if (amuRole !== 'sales') tdHtml += '<button class="btn-edit" onclick="editData(\'' + d.id + '\')">Edit</button>';
+      if (amuRole === 'owner' || isMilikSales) tdHtml += '<button class="btn-del" onclick="hapusData(\'' + d.id + '\',\'' + (d.merek||'') + ' ' + (d.model||'') + '\')">Hapus</button>';
+      tdHtml += '</td>';
+      return '<tr>' + tdHtml + '</tr>';
     }).join('');
   }
 
