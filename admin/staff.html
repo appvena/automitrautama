@@ -498,53 +498,70 @@
 
   // ── Cek login ──
   
-  // Cek akses halaman
 
-  // ── Cek Permission ──
-  function cekPermission(halaman) {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return true;
-    const dp = {
-      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
-      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
-    };
-    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  // ── Permission System (baca dari Firestore) ──
+  const DEFAULT_PERMS = {
+    owner:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:1,laporan:1,pelanggan:1,staff:1,"master-data":1,pengaturan:1},
+    mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+    kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+  };
+
+  async function loadPermissions() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    if (sessionStorage.getItem('amu_perms')) return;
+    try {
+      const snap = await getDoc(doc(db, 'pengaturan', 'permissions'));
+      const allPerms = snap.exists() ? snap.data() : {};
+      const myPerms  = allPerms[role] || DEFAULT_PERMS[role] || DEFAULT_PERMS.staff;
+      sessionStorage.setItem('amu_perms', JSON.stringify(myPerms));
+    } catch(e) {
+      sessionStorage.setItem('amu_perms', JSON.stringify(DEFAULT_PERMS[role] || DEFAULT_PERMS.staff));
+    }
   }
+
+  function getMyPerms() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return DEFAULT_PERMS.owner;
+    const cached = sessionStorage.getItem('amu_perms');
+    return cached ? JSON.parse(cached) : (DEFAULT_PERMS[role] || DEFAULT_PERMS.staff);
+  }
+
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return true;
+    return (getMyPerms()[halaman] || 0) === 1;
+  }
+
   function redirectIfNoAccess(h) {
     if (!cekPermission(h)) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">\u{1F6AB}</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer">Kembali</button></div></div>';
       return false;
     }
     return true;
   }
 
-
-
-  // ── Update Sidebar sesuai Role ──
   function updateSidebarByRole() {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return;
-    const dp = {
-      mekanik: ["servis","sparepart"],
-      sales:   ["kendaraan","pelanggan"],
-      kasir:   ["keuangan","laporan"],
-      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
-    };
-    const boleh = (dp[role] || dp.staff);
-    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    const perms = getMyPerms();
+    const semua = ['kendaraan','servis','sparepart','keuangan','laporan','pelanggan','staff','master-data','pengaturan'];
     semua.forEach(m => {
-      if (!boleh.includes(m)) {
-        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
-          el.style.display = "none";
+      if (!perms[m]) {
+        document.querySelectorAll('[onclick]').forEach(el => {
+          const oc = el.getAttribute('onclick') || '';
+          if (oc.includes('goTo') && oc.includes(m)) el.style.display = 'none';
         });
       }
     });
   }
 
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    await loadPermissions();
     if (!redirectIfNoAccess('staff')) return;
     const email   = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();

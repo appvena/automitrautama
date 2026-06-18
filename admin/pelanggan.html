@@ -126,6 +126,7 @@
     .detail-section{padding:14px 20px;border-bottom:1px solid var(--border);}
     .detail-section-title{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
     .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .detail-grid .span2{grid-column:span 2;}
     .detail-item-label{font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
     .detail-item-value{font-size:0.85em;color:var(--silver2);font-weight:500;}
 
@@ -194,7 +195,7 @@
   <div class="navbar-spacer"></div>
   <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
   <div class="navbar-sep"></div>
-  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <button class="btn-notif" id="btnNotif" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notifDot" style="display:none"></div></button>
   <div class="navbar-sep"></div>
   <div class="user-chip">
     <div class="user-av" id="uAv">--</div>
@@ -340,8 +341,102 @@
   const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
 
   // ── Cek login ──
+  
+  // ── Notifikasi Panel ──
+  let notifList = [];
+  async function loadNotifikasi() {
+    notifList = [];
+    try {
+      const spSnap = await getDocs(collection(db,"sparepart"));
+      spSnap.docs.forEach(d => {
+        const sp = d.data();
+        const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
+        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
+        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+      });
+      const sSnap = await getDocs(collection(db,"servis"));
+      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
+      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+    } catch(e) {}
+    const dot = document.getElementById("notifDot");
+    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+  }
+  window.toggleNotifPanel = function() {
+    let panel = document.getElementById("notifPanel");
+    if (panel) { panel.remove(); return; }
+    const items = notifList.length === 0
+      ? '<div style="padding:20px;text-align:center;color:#686868;font-size:0.82em">Tidak ada notifikasi</div>'
+      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
+    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
+    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+  };
+
+  
+
+  // ── Permission System (baca dari Firestore) ──
+  const DEFAULT_PERMS = {
+    owner:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:1,laporan:1,pelanggan:1,staff:1,"master-data":1,pengaturan:1},
+    mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+    kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+  };
+
+  async function loadPermissions() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    if (sessionStorage.getItem('amu_perms')) return;
+    try {
+      const snap = await getDoc(doc(db, 'pengaturan', 'permissions'));
+      const allPerms = snap.exists() ? snap.data() : {};
+      const myPerms  = allPerms[role] || DEFAULT_PERMS[role] || DEFAULT_PERMS.staff;
+      sessionStorage.setItem('amu_perms', JSON.stringify(myPerms));
+    } catch(e) {
+      sessionStorage.setItem('amu_perms', JSON.stringify(DEFAULT_PERMS[role] || DEFAULT_PERMS.staff));
+    }
+  }
+
+  function getMyPerms() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return DEFAULT_PERMS.owner;
+    const cached = sessionStorage.getItem('amu_perms');
+    return cached ? JSON.parse(cached) : (DEFAULT_PERMS[role] || DEFAULT_PERMS.staff);
+  }
+
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return true;
+    return (getMyPerms()[halaman] || 0) === 1;
+  }
+
+  function redirectIfNoAccess(h) {
+    if (!cekPermission(h)) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">\u{1F6AB}</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer">Kembali</button></div></div>';
+      return false;
+    }
+    return true;
+  }
+
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    const perms = getMyPerms();
+    const semua = ['kendaraan','servis','sparepart','keuangan','laporan','pelanggan','staff','master-data','pengaturan'];
+    semua.forEach(m => {
+      if (!perms[m]) {
+        document.querySelectorAll('[onclick]').forEach(el => {
+          const oc = el.getAttribute('onclick') || '';
+          if (oc.includes('goTo') && oc.includes(m)) el.style.display = 'none';
+        });
+      }
+    });
+  }
+
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    await loadPermissions();
+    if (!redirectIfNoAccess('pelanggan')) return;
     const email = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
@@ -349,6 +444,7 @@
     ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadData();
+    updateSidebarByRole();
   });
 
   // ── Load & Agregasi Data Pelanggan ──

@@ -463,6 +463,8 @@
           <option value="Sewa Tempat">Sewa Tempat</option>
           <option value="Peralatan">Peralatan</option>
           <option value="Iklan & Marketing">Iklan & Marketing</option>
+          <option value="Transportasi">Transportasi</option>
+          <option value="Pajak">Pajak</option>
           <option value="Lain-lain">Lain-lain</option>
         </select>
       </div>
@@ -472,7 +474,13 @@
       </div>
       <div class="form-field">
         <label class="form-label">Jumlah (Rp) *</label>
-        <input type="number" class="form-input" id="pJumlah" placeholder="0"/>
+        <input type="number" class="form-input" id="pJumlah" placeholder="0" min="0"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Via Bank / Kas *</label>
+        <select class="form-select" id="pBank">
+          <option value="">— Pilih —</option>
+        </select>
       </div>
       <div class="form-field">
         <label class="form-label">Tanggal *</label>
@@ -564,53 +572,70 @@
 
 
   
-  // Cek akses halaman
 
-  // ── Cek Permission ──
-  function cekPermission(halaman) {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return true;
-    const dp = {
-      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
-      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
-    };
-    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  // ── Permission System (baca dari Firestore) ──
+  const DEFAULT_PERMS = {
+    owner:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:1,laporan:1,pelanggan:1,staff:1,"master-data":1,pengaturan:1},
+    mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+    kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+  };
+
+  async function loadPermissions() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    if (sessionStorage.getItem('amu_perms')) return;
+    try {
+      const snap = await getDoc(doc(db, 'pengaturan', 'permissions'));
+      const allPerms = snap.exists() ? snap.data() : {};
+      const myPerms  = allPerms[role] || DEFAULT_PERMS[role] || DEFAULT_PERMS.staff;
+      sessionStorage.setItem('amu_perms', JSON.stringify(myPerms));
+    } catch(e) {
+      sessionStorage.setItem('amu_perms', JSON.stringify(DEFAULT_PERMS[role] || DEFAULT_PERMS.staff));
+    }
   }
+
+  function getMyPerms() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return DEFAULT_PERMS.owner;
+    const cached = sessionStorage.getItem('amu_perms');
+    return cached ? JSON.parse(cached) : (DEFAULT_PERMS[role] || DEFAULT_PERMS.staff);
+  }
+
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return true;
+    return (getMyPerms()[halaman] || 0) === 1;
+  }
+
   function redirectIfNoAccess(h) {
     if (!cekPermission(h)) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">\u{1F6AB}</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer">Kembali</button></div></div>';
       return false;
     }
     return true;
   }
 
-
-
-  // ── Update Sidebar sesuai Role ──
   function updateSidebarByRole() {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return;
-    const dp = {
-      mekanik: ["servis","sparepart"],
-      sales:   ["kendaraan","pelanggan"],
-      kasir:   ["keuangan","laporan"],
-      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
-    };
-    const boleh = (dp[role] || dp.staff);
-    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    const perms = getMyPerms();
+    const semua = ['kendaraan','servis','sparepart','keuangan','laporan','pelanggan','staff','master-data','pengaturan'];
     semua.forEach(m => {
-      if (!boleh.includes(m)) {
-        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
-          el.style.display = "none";
+      if (!perms[m]) {
+        document.querySelectorAll('[onclick]').forEach(el => {
+          const oc = el.getAttribute('onclick') || '';
+          if (oc.includes('goTo') && oc.includes(m)) el.style.display = 'none';
         });
       }
     });
   }
 
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    await loadPermissions();
     if (sessionStorage.getItem('amu_role') && !redirectIfNoAccess('keuangan')) return;
     const email = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
@@ -814,19 +839,28 @@
     const filtered = dataPengeluaran.filter(d => inPeriode(d.tanggal));
     const total = filtered.reduce((s,d) => s + parseInt(d.jumlah||0), 0);
     document.getElementById('totalPengeluaranUmum').textContent = fmt(total);
+
+    // Update header tabel - tambah kolom Via Bank
+    const tblHead = document.querySelector('#tblPengeluaranUmum').closest('table').querySelector('thead tr');
+    if (tblHead) tblHead.innerHTML = '<th>#</th><th>Kategori</th><th>Keterangan</th><th>Via Bank</th><th>Tanggal</th><th>Jumlah</th><th>Aksi</th>';
+
     if (filtered.length === 0) {
-      document.getElementById('tblPengeluaranUmum').innerHTML = `<tr><td colspan="6"><div class="empty">Belum ada pengeluaran</div></td></tr>`;
+      document.getElementById('tblPengeluaranUmum').innerHTML = '<tr><td colspan="7"><div class="empty">Belum ada pengeluaran di periode ini.<br>Klik "+ Tambah" untuk mencatat.</div></td></tr>';
       return;
     }
-    document.getElementById('tblPengeluaranUmum').innerHTML = filtered.map((d,i) => `
-      <tr>
-        <td style="color:var(--text3)">${i+1}</td>
-        <td style="font-weight:600;color:var(--silver2)">${d.kategori||'-'}</td>
-        <td>${d.keterangan||'-'}</td>
-        <td>${d.tanggal||'-'}</td>
-        <td class="val-keluar">${fmt(d.jumlah)}</td>
-        <td><button style="background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="hapusPengeluaran('${d.id}')">Hapus</button></td>
-      </tr>`).join('');
+    let html = '';
+    filtered.forEach((d,i) => {
+      html += '<tr>';
+      html += '<td style="color:var(--text3)">' + (i+1) + '</td>';
+      html += '<td style="font-weight:600;color:var(--silver2)">' + (d.kategori||'-') + '</td>';
+      html += '<td style="color:var(--text3)">' + (d.keterangan||'-') + '</td>';
+      html += '<td><span style="font-size:0.75em;color:var(--info)">' + (d.bankNama||'-') + '</span></td>';
+      html += '<td>' + (d.tanggal||'-') + '</td>';
+      html += '<td class="val-keluar">' + fmt(d.jumlah) + '</td>';
+      html += '<td><button style="background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="hapusPengeluaran(\'' + d.id + '\')">Hapus</button></td>';
+      html += '</tr>';
+    });
+    document.getElementById('tblPengeluaranUmum').innerHTML = html;
   }
 
   function renderBiayaKendaraan() {
@@ -855,7 +889,10 @@
       .reduce((s,d) => s + parseInt(d.penjualan?.hargaJualFinal||d.hargaJual||0), 0);
     const pServis = dataServis.filter(d => inPeriode(d.tglMasukServis))
       .reduce((s,d) => s + parseInt(d.totalBiaya||0), 0);
-    const pSP = dataSPMasuk.filter(d => inPeriode(d.tanggal))
+    // Sparepart hanya dari trx_sparepart (jual manual) - BUKAN dari servis
+    // karena sparepart dari servis sudah masuk totalBiaya servis
+    const pSPOnly = dataSPMasuk
+      .filter(d => inPeriode(d.tanggal) && !d.keterangan?.startsWith('Servis:'))
       .reduce((s,d) => s + (parseInt(d.harga||0)*parseInt(d.qty||0)), 0);
 
     // Pengeluaran
@@ -865,7 +902,7 @@
     const eUmum = dataPengeluaran.filter(d => inPeriode(d.tanggal))
       .reduce((s,d) => s + parseInt(d.jumlah||0), 0);
 
-    const totalMasuk  = pKendaraan + pServis + pSP;
+    const totalMasuk  = pKendaraan + pServis + pSPOnly;
     const totalKeluar = eBiayaK + eSPBeli + eUmum;
     const laba        = totalMasuk - totalKeluar;
 
@@ -880,11 +917,11 @@
     document.getElementById('divShowKeluar').textContent = fmt(eBiayaK);
     document.getElementById('divShowLaba').textContent   = fmt(labaK);
     document.getElementById('divShowUnit').textContent   = dataKendaraan.filter(d => inPeriode(d.penjualan?.tanggalJual)).length + ' unit';
-    document.getElementById('divServisMasuk').textContent  = fmt(pServis);
-    document.getElementById('divServisCount').textContent  = dataServis.filter(d => inPeriode(d.tglMasukServis)).length + ' servis';
-    document.getElementById('divSPMasuk').textContent   = fmt(pSP);
+    document.getElementById('divServisMasuk').textContent = fmt(pServis);
+    document.getElementById('divServisCount').textContent = dataServis.filter(d => inPeriode(d.tglMasukServis)).length + ' servis';
+    document.getElementById('divSPMasuk').textContent   = fmt(pSPOnly);
     document.getElementById('divSPKeluar').textContent  = fmt(eSPBeli);
-    document.getElementById('divSPLaba').textContent    = fmt(pSP - eSPBeli);
+    document.getElementById('divSPLaba').textContent    = fmt(pSPOnly - eSPBeli);
   }
 
   // ── Kas & Bank ──
@@ -952,11 +989,21 @@
   }
 
   // ── Pengeluaran Umum ──
-  window.openModalPengeluaran = function() {
-    document.getElementById('pKategori').value  = 'Gaji Staff';
+  window.openModalPengeluaran = async function() {
+    document.getElementById('pKategori').value   = 'Gaji Staff';
     document.getElementById('pKeterangan').value = '';
     document.getElementById('pJumlah').value     = '';
     document.getElementById('pTanggal').value    = new Date().toISOString().split('T')[0];
+
+    // Load bank dari master_bank
+    try {
+      const bankSnap = await getDocs(query(collection(db,'master_bank'), orderBy('nama')));
+      const bankList = bankSnap.docs.map(d => ({id:d.id,...d.data()})).filter(d => d.status==='aktif');
+      document.getElementById('pBank').innerHTML =
+        '<option value="">— Pilih Bank/Kas —</option>' +
+        bankList.map(b => '<option value="' + b.id + '" data-nama="' + b.nama + '">' + b.nama + '</option>').join('');
+    } catch(e) {}
+
     document.getElementById('modalPengeluaran').classList.add('show');
   };
 
@@ -965,18 +1012,39 @@
   };
 
   window.savePengeluaran = async function() {
-    const jumlah = document.getElementById('pJumlah').value;
-    const tgl    = document.getElementById('pTanggal').value;
-    if (!jumlah) { showToast('Jumlah tidak boleh kosong!','error'); return; }
-    if (!tgl)    { showToast('Tanggal tidak boleh kosong!','error'); return; }
+    const jumlah   = document.getElementById('pJumlah').value;
+    const tgl      = document.getElementById('pTanggal').value;
+    const bankSel  = document.getElementById('pBank');
+    const bankId   = bankSel.value;
+    const bankNama = bankSel.options[bankSel.selectedIndex]?.dataset?.nama || '';
+    const kategori = document.getElementById('pKategori').value;
+    const ket      = document.getElementById('pKeterangan').value;
+
+    if (!jumlah)  { showToast('Jumlah tidak boleh kosong!','error'); return; }
+    if (!tgl)     { showToast('Tanggal tidak boleh kosong!','error'); return; }
+    if (!bankId)  { showToast('Pilih bank / kas terlebih dahulu!','error'); return; }
+
     try {
-      await addDoc(collection(db,'pengeluaran_umum'), {
-        kategori:    document.getElementById('pKategori').value,
-        keterangan:  document.getElementById('pKeterangan').value,
-        jumlah:      parseInt(jumlah),
-        tanggal:     tgl,
-        createdAt:   new Date().toISOString()
+      // Simpan pengeluaran
+      const docRef = await addDoc(collection(db,'pengeluaran_umum'), {
+        kategori, keterangan: ket,
+        jumlah:   parseInt(jumlah),
+        bankId, bankNama, tanggal: tgl,
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
       });
+
+      // Kurangi saldo bank otomatis
+      await addDoc(collection(db,'transaksi_bank'), {
+        bankId, jumlah: parseInt(jumlah),
+        tipe: 'keluar',
+        keterangan: kategori + (ket ? ': ' + ket : ''),
+        referensi: docRef.id,
+        tanggal: tgl,
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
+      });
+
       showToast('Pengeluaran berhasil dicatat ✓','success');
       closeModalPengeluaran();
       await loadPengeluaranUmum();

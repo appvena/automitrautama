@@ -129,7 +129,11 @@
     .bs-low  {background:rgba(232,160,48,0.12);color:var(--warning);border:1px solid rgba(232,160,48,0.2);}
     .bs-empty{background:rgba(224,88,88,0.12);color:var(--error);border:1px solid rgba(224,88,88,0.2);}
 
-    .btn-detail{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:var(--gold);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:3px;}
+    .modal-section-title{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-field.span2{grid-column:span 2;}
+    .retail-item{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px;padding:10px;background:var(--card2);border-radius:6px;border:1px solid var(--border);}
+    @media(max-width:768px){.form-grid{grid-template-columns:1fr;}.form-field.span2{grid-column:span 1;}.retail-item{grid-template-columns:1fr 1fr;gap:6px;}}border:1px solid rgba(201,168,76,0.2);color:var(--gold);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:3px;}
     .btn-edit{background:rgba(72,144,232,0.1);border:1px solid rgba(72,144,232,0.2);color:var(--info);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:3px;}
     .btn-del{background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;}
     .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.82em;}
@@ -303,6 +307,7 @@
   <!-- TABS -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('stok',this)">📦 Stok Sparepart</div>
+    <div class="tab" onclick="switchTab('retail',this)">🛒 Jual Retail</div>
     <div class="tab" onclick="switchTab('transaksi',this)">🔄 Transaksi</div>
     <div class="tab" onclick="switchTab('laporan',this)">📊 Laporan</div>
   </div>
@@ -334,6 +339,7 @@
         <input type="text" class="search-input" id="searchInput" placeholder="Cari sparepart..." oninput="applyFilter()"/>
       </div>
       <button class="btn-add" onclick="openModal()">+ Tambah Sparepart</button>
+      <button style="padding:8px 14px;background:rgba(72,144,232,0.12);border:1px solid rgba(72,144,232,0.3);border-radius:6px;color:var(--info);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600" onclick="openJualRetailModal()">🛒 Jual Retail</button>
       <button style="padding:8px 14px;background:rgba(76,175,128,0.12);border:1px solid rgba(76,175,128,0.3);border-radius:6px;color:var(--success);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif" onclick="exportExcelSparepart()">📥 Excel</button>
     </div>
 
@@ -362,6 +368,38 @@
     </div>
   </div>
 
+  <!-- TAB JUAL RETAIL -->
+  <div class="tab-content" id="tab-retail">
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">🛒 Penjualan Retail Sparepart</div>
+        <button class="btn-add" onclick="openModalRetail()">+ Jual Retail</button>
+      </div>
+      <div style="padding:10px 16px;background:var(--gold-bg);border-bottom:1px solid var(--gold-dim);font-size:0.78em;color:var(--text3)">
+        💡 Pelanggan beli sparepart langsung tanpa servis kendaraan. Stok otomatis berkurang & saldo bank bertambah.
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>No. Invoice</th>
+              <th>Tanggal</th>
+              <th>Pembeli</th>
+              <th>Item</th>
+              <th>Total</th>
+              <th>Via</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tblRetail">
+            <tr><td colspan="8"><div class="empty"><div class="empty-icon">🛒</div>Belum ada penjualan retail</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- TAB TRANSAKSI -->
   <div class="tab-content" id="tab-transaksi">
     <div class="toolbar">
@@ -376,6 +414,7 @@
       </div>
       <button class="btn-add" onclick="openTrxModal('masuk')">+ Stok Masuk</button>
       <button class="btn-add" style="background:linear-gradient(135deg,#3a1a1a,var(--error));color:#fff" onclick="openTrxModal('keluar')">- Stok Keluar</button>
+      <button class="btn-add" style="background:linear-gradient(135deg,#1a3a1a,var(--success));color:#fff" onclick="openTrxModal('retail')">🛒 Jual Retail</button>
     </div>
     <div class="tbl-wrap">
       <table class="tbl">
@@ -492,6 +531,63 @@
   </div>
 </div>
 
+<!-- MODAL JUAL RETAIL -->
+<div class="modal-overlay" id="modalRetail">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-hd">
+      <div class="modal-title">🛒 Jual Retail Sparepart</div>
+      <button class="modal-close" onclick="closeModalRetail()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Pembeli -->
+      <div class="modal-section-title">👤 Data Pembeli</div>
+      <div class="form-grid">
+        <div class="form-field span2">
+          <label class="form-label">Nama Pembeli</label>
+          <input type="text" class="form-input caps" id="rNamaPembeli" placeholder="Nama pembeli (opsional)..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">No. WA / HP</label>
+          <input type="text" class="form-input" id="rWaPembeli" placeholder="0813..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Tanggal</label>
+          <input type="date" class="form-input" id="rTanggal"/>
+        </div>
+      </div>
+
+      <!-- Item yang dibeli -->
+      <div class="modal-section-title" style="margin-top:14px">📦 Item Sparepart</div>
+      <div id="retailItems">
+        <!-- Diisi oleh JS -->
+      </div>
+      <button onclick="tambahItemRetail()" style="width:100%;padding:8px;background:var(--gold-bg);border:1px dashed var(--gold-dim);color:var(--gold);border-radius:6px;cursor:pointer;font-size:0.82em;margin-top:8px">
+        + Tambah Item
+      </button>
+
+      <!-- Total & bayar -->
+      <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:0.82em;color:var(--text3)">Total</span>
+          <span style="font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;color:var(--gold2)" id="rTotal">Rp 0</span>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Via Bank / Kas *</label>
+          <select class="form-select" id="rBank"><option value="">— Pilih —</option></select>
+        </div>
+        <div class="form-field" style="margin-top:8px">
+          <label class="form-label">Catatan</label>
+          <input type="text" class="form-input" id="rCatatan" placeholder="Catatan tambahan..."/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModalRetail()">Batal</button>
+      <button class="btn-save" id="btnSaveRetail" onclick="simpanRetail()">💾 Simpan & Cetak Invoice</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TRANSAKSI STOK -->
 <div class="modal-overlay" id="trxModalOverlay">
   <div class="modal">
@@ -508,11 +604,20 @@
         <div class="form-field span2" id="trxStokInfo" style="display:none">
           <div style="padding:8px 12px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px;font-size:0.8em;color:var(--gold2)" id="trxStokInfoText">Stok saat ini: 0</div>
         </div>
+        <!-- Field khusus retail -->
+        <div class="form-field span2" id="trxPembeliWrap" style="display:none">
+          <label class="form-label">Nama Pembeli *</label>
+          <input type="text" class="form-input caps" id="trxPembeli" placeholder="Nama pembeli..."/>
+        </div>
+        <div class="form-field" id="trxWaPembeliWrap" style="display:none">
+          <label class="form-label">No. WA Pembeli</label>
+          <input type="text" class="form-input" id="trxWaPembeli" placeholder="628xxx" oninput="formatWATrx(this)"/>
+        </div>
         <div class="form-field"><label class="form-label">Jumlah *</label><input type="number" class="form-input" id="trxQty" placeholder="1" min="1"/></div>
-        <div class="form-field"><label class="form-label">Harga Satuan (Rp)</label><input type="number" class="form-input" id="trxHarga" placeholder="0"/></div>
+        <div class="form-field"><label class="form-label" id="trxHargaLabel">Harga Satuan (Rp)</label><input type="number" class="form-input" id="trxHarga" placeholder="0"/></div>
         <div class="form-field"><label class="form-label">Via Bank / Kas *</label><select class="form-select" id="trxBank"><option value="">— Pilih —</option></select></div>
         <div class="form-field"><label class="form-label">Tanggal *</label><input type="date" class="form-input" id="trxTanggal"/></div>
-        <div class="form-field span2"><label class="form-label">Supplier / Keterangan</label><input type="text" class="form-input" id="trxKeterangan" placeholder="Keterangan..."/></div>
+        <div class="form-field span2"><label class="form-label" id="trxKetLabel">Supplier / Keterangan</label><input type="text" class="form-input" id="trxKeterangan" placeholder="Keterangan..."/></div>
       </div>
     </div>
     <div class="modal-ft">
@@ -563,6 +668,63 @@
       <button class="btn-cancel" onclick="closeDetail()">Tutup</button>
       <button class="btn-add" style="font-size:0.8em;padding:7px 14px" onclick="openTrxModalFromDetail('masuk')">+ Stok Masuk</button>
       <button class="btn-edit" style="padding:7px 14px" onclick="editFromDetail()">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL JUAL RETAIL -->
+<div class="modal-overlay" id="modalJualRetail">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">🛒 Jual Retail Sparepart</div>
+      <button class="modal-close" onclick="closeJualRetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field span2">
+          <label class="form-label">Sparepart *</label>
+          <select class="form-select" id="jrSparepart" onchange="updateJrInfo()">
+            <option value="">— Pilih Sparepart —</option>
+          </select>
+        </div>
+        <div class="form-field span2" id="jrStokInfo" style="display:none">
+          <div style="padding:8px 12px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px;font-size:0.8em;color:var(--gold2)" id="jrStokInfoText">Stok: 0</div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Nama Pembeli *</label>
+          <input type="text" class="form-input caps" id="jrPembeli" placeholder="Nama pembeli..."/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">No. WA Pembeli</label>
+          <input type="text" class="form-input" id="jrWaPembeli" placeholder="628..." oninput="formatWAInput(this)"/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Qty *</label>
+          <input type="number" class="form-input" id="jrQty" placeholder="1" min="1" oninput="hitungTotalJr()"/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Harga Jual (Rp) *</label>
+          <input type="number" class="form-input" id="jrHarga" placeholder="0" oninput="hitungTotalJr()"/>
+        </div>
+        <div class="form-field span2">
+          <label class="form-label">Total</label>
+          <div style="padding:10px 14px;background:var(--content);border:1px solid var(--border2);border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:1.2em;font-weight:700;color:var(--gold2)" id="jrTotal">Rp 0</div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Bayar Via *</label>
+          <select class="form-select" id="jrBank">
+            <option value="">— Pilih —</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Tanggal *</label>
+          <input type="date" class="form-input" id="jrTanggal"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeJualRetailModal()">Batal</button>
+      <button class="btn-save" id="btnJualRetail" onclick="saveJualRetail()">Jual & Invoice</button>
     </div>
   </div>
 </div>
@@ -650,53 +812,70 @@
 
 
   
-  // Cek akses halaman
 
-  // ── Cek Permission ──
-  function cekPermission(halaman) {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return true;
-    const dp = {
-      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
-      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
-      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
-    };
-    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  // ── Permission System (baca dari Firestore) ──
+  const DEFAULT_PERMS = {
+    owner:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:1,laporan:1,pelanggan:1,staff:1,"master-data":1,pengaturan:1},
+    mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+    kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+    staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+  };
+
+  async function loadPermissions() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    if (sessionStorage.getItem('amu_perms')) return;
+    try {
+      const snap = await getDoc(doc(db, 'pengaturan', 'permissions'));
+      const allPerms = snap.exists() ? snap.data() : {};
+      const myPerms  = allPerms[role] || DEFAULT_PERMS[role] || DEFAULT_PERMS.staff;
+      sessionStorage.setItem('amu_perms', JSON.stringify(myPerms));
+    } catch(e) {
+      sessionStorage.setItem('amu_perms', JSON.stringify(DEFAULT_PERMS[role] || DEFAULT_PERMS.staff));
+    }
   }
+
+  function getMyPerms() {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return DEFAULT_PERMS.owner;
+    const cached = sessionStorage.getItem('amu_perms');
+    return cached ? JSON.parse(cached) : (DEFAULT_PERMS[role] || DEFAULT_PERMS.staff);
+  }
+
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return true;
+    return (getMyPerms()[halaman] || 0) === 1;
+  }
+
   function redirectIfNoAccess(h) {
     if (!cekPermission(h)) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">\u{1F6AB}</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer">Kembali</button></div></div>';
       return false;
     }
     return true;
   }
 
-
-
-  // ── Update Sidebar sesuai Role ──
   function updateSidebarByRole() {
-    const role = sessionStorage.getItem("amu_role") || "owner";
-    if (role === "owner") return;
-    const dp = {
-      mekanik: ["servis","sparepart"],
-      sales:   ["kendaraan","pelanggan"],
-      kasir:   ["keuangan","laporan"],
-      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
-    };
-    const boleh = (dp[role] || dp.staff);
-    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    const role = sessionStorage.getItem('amu_role') || 'owner';
+    if (role === 'owner') return;
+    const perms = getMyPerms();
+    const semua = ['kendaraan','servis','sparepart','keuangan','laporan','pelanggan','staff','master-data','pengaturan'];
     semua.forEach(m => {
-      if (!boleh.includes(m)) {
-        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
-          el.style.display = "none";
+      if (!perms[m]) {
+        document.querySelectorAll('[onclick]').forEach(el => {
+          const oc = el.getAttribute('onclick') || '';
+          if (oc.includes('goTo') && oc.includes(m)) el.style.display = 'none';
         });
       }
     });
   }
 
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    await loadPermissions();
     if (sessionStorage.getItem('amu_role') && !redirectIfNoAccess('sparepart')) return;
     const email = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
@@ -1006,14 +1185,38 @@
 
   window.openTrxModal = function(tipe) {
     currentTrxType = tipe;
-    document.getElementById('trxModalTitle').textContent = tipe === 'masuk' ? '📦 Stok Masuk' : '📤 Stok Keluar';
-    document.getElementById('trxSparepart').value = '';
-    document.getElementById('trxQty').value = '';
-    document.getElementById('trxHarga').value = '';
+    const isRetail = tipe === 'retail';
+
+    // Title sesuai tipe
+    const titles = {masuk:'📦 Stok Masuk', keluar:'📤 Stok Keluar (Internal)', retail:'🛒 Jual Retail'};
+    document.getElementById('trxModalTitle').textContent = titles[tipe] || 'Transaksi';
+
+    // Reset form
+    document.getElementById('trxSparepart').value  = '';
+    document.getElementById('trxQty').value        = '';
+    document.getElementById('trxHarga').value      = '';
     document.getElementById('trxKeterangan').value = '';
-    document.getElementById('trxTanggal').value = new Date().toISOString().split('T')[0];
+    document.getElementById('trxPembeli').value    = '';
+    document.getElementById('trxWaPembeli').value  = '';
+    document.getElementById('trxTanggal').value    = new Date().toISOString().split('T')[0];
     document.getElementById('trxStokInfo').style.display = 'none';
+
+    // Tampilkan/sembunyikan field retail
+    document.getElementById('trxPembeliWrap').style.display   = isRetail ? 'block' : 'none';
+    document.getElementById('trxWaPembeliWrap').style.display = isRetail ? 'block' : 'none';
+
+    // Label sesuai tipe
+    document.getElementById('trxHargaLabel').textContent = isRetail ? 'Harga Jual (Rp)' : 'Harga Satuan (Rp)';
+    document.getElementById('trxKetLabel').textContent   = tipe === 'masuk' ? 'Supplier / Keterangan' : 'Keterangan';
+
     document.getElementById('trxModalOverlay').classList.add('show');
+  };
+
+  window.formatWATrx = function(el) {
+    let val = el.value.replace(/\D/g,'');
+    if (val.startsWith('0')) val = '62' + val.slice(1);
+    else if (val.startsWith('8')) val = '62' + val;
+    el.value = val;
   };
 
   window.openTrxModalFromDetail = function(tipe) {
@@ -1038,72 +1241,95 @@
   };
 
   window.saveTrx = async function() {
-    const sel    = document.getElementById('trxSparepart');
-    const opt    = sel.options[sel.selectedIndex];
-    const spId   = sel.value;
-    const qty    = parseInt(document.getElementById('trxQty').value||0);
-    const harga  = parseInt(document.getElementById('trxHarga').value||0);
-    const tgl    = document.getElementById('trxTanggal').value;
-    const ket    = document.getElementById('trxKeterangan').value;
-    const bankSel = document.getElementById('trxBank');
-    const bankId  = bankSel?.options[bankSel.selectedIndex]?.dataset?.bankid || '';
+    const sel      = document.getElementById('trxSparepart');
+    const opt      = sel.options[sel.selectedIndex];
+    const spId     = sel.value;
+    const qty      = parseInt(document.getElementById('trxQty').value||0);
+    const harga    = parseInt(document.getElementById('trxHarga').value||0);
+    const tgl      = document.getElementById('trxTanggal').value;
+    const ket      = document.getElementById('trxKeterangan').value;
+    const bankSel  = document.getElementById('trxBank');
+    const bankId   = bankSel?.options[bankSel.selectedIndex]?.dataset?.bankid || '';
     const bankNama = bankSel?.value || '';
-    const btn    = document.getElementById('btnTrxSave');
+    const pembeli  = document.getElementById('trxPembeli').value.trim().toUpperCase();
+    const waPembeli = document.getElementById('trxWaPembeli').value.trim();
+    const isRetail = currentTrxType === 'retail';
+    const btn      = document.getElementById('btnTrxSave');
 
-    if (!spId) { showToast('Pilih sparepart!','error'); return; }
+    if (!spId)  { showToast('Pilih sparepart!','error'); return; }
     if (!qty || qty < 1) { showToast('Jumlah tidak valid!','error'); return; }
+    if (isRetail && !pembeli) { showToast('Nama pembeli tidak boleh kosong!','error'); return; }
 
     const stokSaatIni = parseInt(opt.dataset.stok||0);
-    if (currentTrxType === 'keluar' && qty > stokSaatIni) {
-      showToast(`Stok tidak cukup! Stok saat ini: ${stokSaatIni}`,'error'); return;
+    if ((currentTrxType === 'keluar' || isRetail) && qty > stokSaatIni) {
+      showToast('Stok tidak cukup! Stok saat ini: ' + stokSaatIni,'error'); return;
     }
 
     btn.disabled = true; btn.textContent = 'Menyimpan...';
 
     try {
-      const trxId = await addDoc(collection(db,'trx_sparepart'), {
-        tipe: currentTrxType,
+      // Tipe yang disimpan ke Firestore
+      const tipeSimpan = isRetail ? 'retail' : currentTrxType;
+
+      const trxRef = await addDoc(collection(db,'trx_sparepart'), {
+        tipe: tipeSimpan,
         sparepartId: spId,
-        namaSP: opt.dataset.nama,
-        satuan: opt.dataset.satuan,
+        namaSP:  opt.dataset.nama,
+        satuan:  opt.dataset.satuan,
         qty, harga, keterangan: ket, tanggal: tgl,
         bankId, bankNama,
-        createdAt: new Date().toISOString()
+        pembeli: isRetail ? pembeli : '',
+        waPembeli: isRetail ? waPembeli : '',
+        createdAt:  new Date().toISOString(),
+        createdBy:  sessionStorage.getItem('amu_nama') || ''
       });
 
-      // Update stok sparepart
+      // Update stok - retail dan keluar sama-sama kurangi stok
       const stokBaru = currentTrxType === 'masuk' ? stokSaatIni + qty : stokSaatIni - qty;
       await updateDoc(doc(db,'sparepart',spId), { stok: stokBaru });
 
       // Update saldo bank
       if (bankId) {
         const total = qty * harga;
-        const tipeTrxBank = currentTrxType === 'masuk' ? 'keluar' : 'masuk'; // beli = keluar uang, jual = masuk uang
+        const tipeTrxBank = currentTrxType === 'masuk' ? 'keluar' : 'masuk';
+        const ketBank = isRetail
+          ? 'Jual retail: ' + opt.dataset.nama + ' x' + qty + ' ke ' + pembeli
+          : (currentTrxType === 'masuk' ? 'Beli' : 'Keluar') + ' sparepart: ' + opt.dataset.nama + ' x' + qty;
         await addDoc(collection(db,'transaksi_bank'), {
-          bankId, jumlah: total,
-          tipe: tipeTrxBank,
-          keterangan: `${currentTrxType==='masuk'?'Beli':'Jual'} sparepart: ${opt.dataset.nama} x${qty}`,
-          referensi: spId,
-          tanggal: tgl,
-          createdAt: new Date().toISOString(),
+          bankId, jumlah: total, tipe: tipeTrxBank,
+          keterangan: ketBank, referensi: trxRef.id,
+          tanggal: tgl, createdAt: new Date().toISOString(),
           createdBy: sessionStorage.getItem('amu_nama') || ''
         });
       }
 
       // Log aktivitas
+      const logAksi = isRetail
+        ? 'Jual retail: ' + opt.dataset.nama + ' x' + qty + ' ke ' + pembeli
+        : (currentTrxType === 'masuk' ? 'Stok masuk' : 'Stok keluar') + ': ' + opt.dataset.nama + ' x' + qty;
       await addDoc(collection(db,'log_aktivitas'), {
-        aksi: `Stok sparepart ${currentTrxType}: ${opt.dataset.nama} x${qty} via ${bankNama||'tidak dicatat'}`,
-        halaman: 'Sparepart',
+        aksi: logAksi, halaman: 'Sparepart',
         user: sessionStorage.getItem('amu_nama') || '',
         role: sessionStorage.getItem('amu_role') || 'owner',
         timestamp: new Date().toISOString(),
         uid: auth.currentUser?.uid || ''
       });
 
-      showToast(`Stok ${currentTrxType === 'masuk' ? 'masuk' : 'keluar'} berhasil dicatat ✓`,'success');
+      showToast(isRetail ? 'Penjualan retail berhasil ✓' : 'Stok ' + currentTrxType + ' berhasil ✓','success');
       closeTrxModal();
+
+      // Kalau retail → tawarkan cetak invoice
+      if (isRetail) {
+        const total = qty * harga;
+        if (confirm('Jual retail berhasil! Cetak invoice?')) {
+          bukaInvoiceRetail({
+            namaSP: opt.dataset.nama, satuan: opt.dataset.satuan,
+            qty, harga, total, pembeli, waPembeli, tgl, bankNama
+          });
+        }
+      }
+
       await loadData();
-    await loadNotifikasi();
       await loadTrx();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
     btn.disabled = false; btn.textContent = 'Simpan';
@@ -1183,6 +1409,183 @@
 
   // ── Auto Logout 5 Menit ──
   // ── Export Excel Sparepart ──
+  // ── Jual Retail ──
+  window.openJualRetailModal = async function() {
+    document.getElementById('jrPembeli').value  = '';
+    document.getElementById('jrWaPembeli').value = '';
+    document.getElementById('jrQty').value      = '1';
+    document.getElementById('jrHarga').value    = '';
+    document.getElementById('jrTotal').textContent = 'Rp 0';
+    document.getElementById('jrTanggal').value  = new Date().toISOString().split('T')[0];
+    document.getElementById('jrStokInfo').style.display = 'none';
+
+    // Isi dropdown sparepart
+    document.getElementById('jrSparepart').innerHTML =
+      '<option value="">— Pilih Sparepart —</option>' +
+      allData.filter(d => parseInt(d.stok||0) > 0).map(d =>
+        '<option value="' + d.id + '" data-nama="' + (d.nama||'') + '" data-stok="' + (d.stok||0) + '" data-satuan="' + (d.satuan||'') + '" data-harga="' + (d.hargaJual||0) + '">' +
+        (d.nama||'-') + ' (Stok: ' + (d.stok||0) + ' ' + (d.satuan||'') + ')' +
+        '</option>'
+      ).join('');
+
+    // Isi dropdown bank
+    try {
+      const bankSnap = await getDocs(query(collection(db,'master_bank'), orderBy('nama')));
+      const bankList = bankSnap.docs.map(d => ({id:d.id,...d.data()})).filter(d => d.status==='aktif');
+      document.getElementById('jrBank').innerHTML =
+        '<option value="">— Pilih Bank/Kas —</option>' +
+        bankList.map(b => '<option value="' + b.id + '" data-nama="' + b.nama + '">' + b.nama + '</option>').join('');
+    } catch(e) {}
+
+    document.getElementById('modalJualRetail').classList.add('show');
+  };
+
+  window.closeJualRetailModal = function() {
+    document.getElementById('modalJualRetail').classList.remove('show');
+  };
+
+  window.updateJrInfo = function() {
+    const sel = document.getElementById('jrSparepart');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) {
+      document.getElementById('jrStokInfo').style.display = 'none';
+      return;
+    }
+    const stok    = opt.dataset.stok || 0;
+    const satuan  = opt.dataset.satuan || '';
+    const harga   = opt.dataset.harga || 0;
+    document.getElementById('jrHarga').value = harga;
+    document.getElementById('jrStokInfo').style.display = 'block';
+    document.getElementById('jrStokInfoText').textContent = 'Stok tersedia: ' + stok + ' ' + satuan;
+    document.getElementById('jrStokInfoText').style.color = parseInt(stok) > 0 ? 'var(--gold2)' : 'var(--error)';
+    hitungTotalJr();
+  };
+
+  window.hitungTotalJr = function() {
+    const qty   = parseInt(document.getElementById('jrQty').value||0);
+    const harga = parseInt(document.getElementById('jrHarga').value||0);
+    const total = qty * harga;
+    document.getElementById('jrTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+  };
+
+  window.saveJualRetail = async function() {
+    const spSel   = document.getElementById('jrSparepart');
+    const spOpt   = spSel.options[spSel.selectedIndex];
+    const spId    = spSel.value;
+    const spNama  = spOpt?.dataset?.nama || '';
+    const spStok  = parseInt(spOpt?.dataset?.stok||0);
+    const spSatuan = spOpt?.dataset?.satuan || '';
+    const pembeli = document.getElementById('jrPembeli').value.trim().toUpperCase();
+    const waPembeli = document.getElementById('jrWaPembeli').value;
+    const qty     = parseInt(document.getElementById('jrQty').value||0);
+    const harga   = parseInt(document.getElementById('jrHarga').value||0);
+    const tgl     = document.getElementById('jrTanggal').value;
+    const bankSel = document.getElementById('jrBank');
+    const bankId  = bankSel.value;
+    const bankNama = bankSel.options[bankSel.selectedIndex]?.dataset?.nama || '';
+    const btn     = document.getElementById('btnJualRetail');
+    const total   = qty * harga;
+
+    if (!spId)    { showToast('Pilih sparepart!','error'); return; }
+    if (!pembeli) { showToast('Nama pembeli wajib diisi!','error'); return; }
+    if (!qty || qty < 1) { showToast('Qty tidak valid!','error'); return; }
+    if (qty > spStok) { showToast('Stok tidak cukup! Sisa: ' + spStok + ' ' + spSatuan,'error'); return; }
+    if (!harga)   { showToast('Harga jual wajib diisi!','error'); return; }
+    if (!bankId)  { showToast('Pilih metode pembayaran!','error'); return; }
+
+    btn.disabled = true; btn.textContent = 'Memproses...';
+
+    try {
+      // Simpan transaksi jual retail
+      const trxRef = await addDoc(collection(db,'trx_sparepart'), {
+        tipe: 'retail',
+        sparepartId: spId, namaSP: spNama, satuan: spSatuan,
+        qty, harga, total,
+        pembeli, waPembeli,
+        bankId, bankNama, tanggal: tgl,
+        keterangan: 'Jual retail ke ' + pembeli,
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
+      });
+
+      // Kurangi stok
+      await updateDoc(doc(db,'sparepart',spId), { stok: spStok - qty });
+
+      // Update saldo bank
+      await addDoc(collection(db,'transaksi_bank'), {
+        bankId, jumlah: total, tipe: 'masuk',
+        keterangan: 'Jual retail: ' + spNama + ' x' + qty + ' ke ' + pembeli,
+        referensi: trxRef.id, tanggal: tgl,
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
+      });
+
+      // Log aktivitas
+      await addDoc(collection(db,'log_aktivitas'), {
+        aksi: 'Jual retail: ' + spNama + ' x' + qty + ' ke ' + pembeli + ' via ' + bankNama,
+        halaman: 'Sparepart',
+        user: sessionStorage.getItem('amu_nama') || '',
+        role: sessionStorage.getItem('amu_role') || 'owner',
+        timestamp: new Date().toISOString(),
+        uid: auth.currentUser?.uid || ''
+      });
+
+      showToast('Penjualan retail berhasil dicatat ✓', 'success');
+      closeJualRetailModal();
+
+      // Cetak invoice
+      cetakInvoiceRetail({spNama, qty, harga, total, satuan: spSatuan, pembeli, waPembeli, bankNama, tgl, noInv: trxRef.id.slice(-6).toUpperCase()});
+
+      await loadData();
+      await loadTrx();
+      await loadNotifikasi();
+    } catch(e) { showToast('Gagal: '+e.message,'error'); }
+    btn.disabled = false; btn.textContent = 'Jual & Invoice';
+  };
+
+  // ── Invoice Jual Retail ──
+  function cetakInvoiceRetail(d) {
+    const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+    const now = new Date();
+    const tgl = now.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const noInv = 'AMU/SP/' + now.getDate().toString().padStart(2,'0') + (now.getMonth()+1).toString().padStart(2,'0') + now.getFullYear().toString().slice(2) + '/' + d.noInv;
+
+    const div = document.createElement('div');
+    div.id = 'invoiceRetailPrint';
+    div.style.cssText = 'position:fixed;inset:0;background:#f5f5f5;z-index:9999;overflow-y:auto;font-family:Inter,sans-serif';
+    div.innerHTML =
+      '<div style="position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10000">' +
+      '<button onclick="document.getElementById(\'invoiceRetailPrint\').remove()" style="padding:8px 16px;background:#1a1a1a;color:#c9a84c;border:1px solid #c9a84c;border-radius:6px;cursor:pointer">✕ Tutup</button>' +
+      '<button onclick="window.print()" style="padding:8px 16px;background:#c9a84c;color:#1a1000;border:none;border-radius:6px;cursor:pointer;font-weight:600">🖨️ Print</button>' +
+      (d.waPembeli ? '<button onclick="kirimWaRetail(\'' + d.waPembeli + '\',\'' + noInv + '\',\'' + d.spNama + '\',' + d.total + ')" style="padding:8px 16px;background:rgba(37,211,102,0.8);color:#fff;border:none;border-radius:6px;cursor:pointer">💬 WA</button>' : '') +
+      '</div>' +
+      '<div style="max-width:600px;margin:60px auto 40px;background:#fff;padding:36px;box-shadow:0 4px 20px rgba(0,0,0,0.1);border-radius:8px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #c9a84c">' +
+      '<div><div style="font-family:Rajdhani,sans-serif;font-size:1.2em;font-weight:700;letter-spacing:2px;color:#1a1a1a">AUTO MITRA UTAMA</div>' +
+      '<div style="font-size:0.72em;color:#c9a84c">Start Here, Drive Next</div></div>' +
+      '<div style="text-align:right"><div style="font-family:Rajdhani,sans-serif;font-size:1.6em;font-weight:700;color:#c9a84c;letter-spacing:3px">NOTA</div>' +
+      '<div style="font-size:0.75em;color:#333">' + noInv + '</div>' +
+      '<div style="font-size:0.7em;color:#666">' + tgl + '</div></div></div>' +
+      '<div style="background:#f9f9f9;padding:12px;border-radius:6px;border-left:3px solid #c9a84c;margin-bottom:16px">' +
+      '<div style="font-size:0.65em;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px">Pembeli</div>' +
+      '<div style="font-weight:600;color:#1a1a1a">' + d.pembeli + '</div>' +
+      (d.waPembeli ? '<div style="font-size:0.82em;color:#666">+' + d.waPembeli + '</div>' : '') + '</div>' +
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:16px">' +
+      '<thead><tr style="background:#1a1a1a;color:#fff"><th style="padding:8px 12px;text-align:left;font-size:0.72em">ITEM</th><th style="padding:8px 12px;text-align:center;font-size:0.72em">QTY</th><th style="padding:8px 12px;text-align:right;font-size:0.72em">HARGA</th><th style="padding:8px 12px;text-align:right;font-size:0.72em">TOTAL</th></tr></thead>' +
+      '<tbody><tr style="border-bottom:1px solid #eee"><td style="padding:10px 12px">' + d.spNama + '</td><td style="padding:10px 12px;text-align:center">' + d.qty + ' ' + d.satuan + '</td><td style="padding:10px 12px;text-align:right">' + fmt(d.harga) + '</td><td style="padding:10px 12px;text-align:right;font-weight:600">' + fmt(d.total) + '</td></tr></tbody>' +
+      '<tfoot><tr style="background:#1a1a1a"><td colspan="3" style="padding:10px 12px;font-family:Rajdhani,sans-serif;font-size:1em;font-weight:700;color:#c9a84c;letter-spacing:2px">TOTAL</td><td style="padding:10px 12px;text-align:right;font-family:Rajdhani,sans-serif;font-size:1.1em;font-weight:700;color:#c9a84c">' + fmt(d.total) + '</td></tr></tfoot></table>' +
+      '<div style="display:flex;justify-content:space-between;font-size:0.82em;margin-bottom:20px">' +
+      '<span style="color:#666">Pembayaran via:</span><strong>' + d.bankNama + '</strong></div>' +
+      '<div style="border-top:1px solid #eee;padding-top:14px;text-align:center;font-size:0.75em;color:#888">Terima kasih telah berbelanja di <strong>Auto Mitra Utama</strong></div>' +
+      '</div>';
+    document.body.appendChild(div);
+  }
+
+  window.kirimWaRetail = function(wa, noInv, nama, total) {
+    const pesan = 'NOTA PEMBELIAN — Auto Mitra Utama\nNo: ' + noInv + '\n\nItem: ' + nama + '\nTotal: Rp ' + parseInt(total).toLocaleString('id-ID') + '\n\nTerima kasih telah berbelanja di Auto Mitra Utama!';
+    window.open('https://wa.me/' + wa + '?text=' + encodeURIComponent(pesan), '_blank');
+  };
+
   window.exportExcelSparepart = function() {
     const header = ['No','Nama','SKU','Kategori','Satuan','Stok','Min Stok','Harga Beli','Harga Jual','Laba/Unit','Status'];
     const rows = allData.map((d,i) => [
