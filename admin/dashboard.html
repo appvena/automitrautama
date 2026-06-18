@@ -892,104 +892,99 @@
 
   <div class="pg-header">
     <div>
-      <div class="pg-title">Dashboard</div>
-      <div class="pg-sub">Ringkasan operasional hari ini</div>
+      <div class="pg-title" id="pgTitle">Dashboard</div>
+      <div class="pg-sub" id="pgSub">Ringkasan operasional hari ini</div>
       <div class="pg-line"></div>
     </div>
-    <div class="pg-date" id="pgDate">–</div>
+    <div class="pg-date" id="pgDate">-</div>
   </div>
 
-  <!-- WIDGET TOGGLE (mobile only) -->
-  <button class="widget-toggle-btn" onclick="toggleWidgetPanel()">⚙ Pilih Widget</button>
-  <div class="widget-panel" id="widgetPanel">
-    <label class="widget-item"><input type="checkbox" checked data-widget="kendaraan" onchange="toggleWidget('kendaraan')"> 🚗 Stok</label>
-    <label class="widget-item"><input type="checkbox" checked data-widget="pendapatan" onchange="toggleWidget('pendapatan')"> 💰 Pendapatan</label>
-    <label class="widget-item"><input type="checkbox" checked data-widget="terjual" onchange="toggleWidget('terjual')"> 📈 Terjual</label>
-    <label class="widget-item"><input type="checkbox" checked data-widget="pelanggan" onchange="toggleWidget('pelanggan')"> 👥 Pelanggan</label>
-    <label class="widget-item"><input type="checkbox" checked data-widget="servis" onchange="toggleWidget('servis')"> 🔧 Servis</label>
-    <label class="widget-item"><input type="checkbox" checked data-widget="sparepart" onchange="toggleWidget('sparepart')"> 🔩 Sparepart</label>
+  <!-- Widget toggle - hanya owner -->
+  <div id="widgetToggleWrap">
+    <button class="widget-toggle-btn" onclick="toggleWidgetPanel()">&#9881; Pilih Widget</button>
+    <div class="widget-panel" id="widgetPanel">
+      <label class="widget-item"><input type="checkbox" checked data-widget="kendaraan" onchange="toggleWidget('kendaraan')"> Stok</label>
+      <label class="widget-item"><input type="checkbox" checked data-widget="pendapatan" onchange="toggleWidget('pendapatan')"> Pendapatan</label>
+      <label class="widget-item"><input type="checkbox" checked data-widget="terjual" onchange="toggleWidget('terjual')"> Terjual</label>
+      <label class="widget-item"><input type="checkbox" checked data-widget="pelanggan" onchange="toggleWidget('pelanggan')"> Pelanggan</label>
+      <label class="widget-item"><input type="checkbox" checked data-widget="servis" onchange="toggleWidget('servis')"> Servis</label>
+      <label class="widget-item"><input type="checkbox" checked data-widget="sparepart" onchange="toggleWidget('sparepart')"> Sparepart</label>
+    </div>
   </div>
 
   <!-- STAT CARDS -->
-  <div class="stats">
+  <div class="stats" id="statsWrap">
     <div class="stat s-gold" id="widget-kendaraan">
-      <span class="stat-icon">🚗</span>
-      <div><div class="stat-val" id="sKendaraan">—</div>
+      <span class="stat-icon">&#128664;</span>
+      <div><div class="stat-val" id="sKendaraan">-</div>
       <div class="stat-lbl">Stok Kendaraan</div>
-      <div class="stat-foot"><span id="sTersedia">—</span> tersedia &nbsp;·&nbsp; <span id="sTerjual">—</span> terjual</div></div>
+      <div class="stat-foot"><span id="sTersedia">-</span> tersedia &nbsp;&#183;&nbsp; <span id="sTerjual">-</span> terjual</div></div>
     </div>
     <div class="stat s-green" id="widget-pendapatan">
-      <span class="stat-icon">💰</span>
-      <div><div class="stat-val" id="sPendapatan">—</div>
-      <div class="stat-lbl">Pendapatan</div>
-      <div class="stat-foot">Bulan ini (juta)</div></div>
+      <span class="stat-icon">&#128176;</span>
+      <div><div class="stat-val" id="sPendapatan">-</div>
+      <div class="stat-lbl">Pendapatan Bulan Ini</div>
+      <div class="stat-foot">Semua divisi</div></div>
     </div>
     <div class="stat s-blue" id="widget-terjual">
-      <span class="stat-icon">📈</span>
-      <div><div class="stat-val" id="sTerjualBulan">—</div>
+      <span class="stat-icon">&#128200;</span>
+      <div><div class="stat-val" id="sTerjualBulan">-</div>
       <div class="stat-lbl">Terjual Bulan Ini</div>
       <div class="stat-foot">Unit kendaraan</div></div>
     </div>
     <div class="stat s-orange" id="widget-pelanggan">
-      <span class="stat-icon">👥</span>
-      <div><div class="stat-val" id="sPelanggan">—</div>
+      <span class="stat-icon">&#128101;</span>
+      <div><div class="stat-val" id="sPelanggan">-</div>
       <div class="stat-lbl">Pelanggan</div>
       <div class="stat-foot">Terdaftar</div></div>
     </div>
   </div>
 
-  <!-- STAT CARDS KECIL - Divisi Pendukung -->
-  <div class="stats stats-sm">
+  <div class="stats stats-sm" id="statsSmWrap">
     <div class="stat s-blue" id="widget-servis">
-      <span class="stat-icon">🔧</span>
-      <div><div class="stat-val" id="sServis">—</div>
+      <span class="stat-icon">&#128295;</span>
+      <div><div class="stat-val" id="sServis">-</div>
       <div class="stat-lbl">Antrian Servis</div>
       <div class="stat-foot">Hari ini</div></div>
     </div>
     <div class="stat s-orange" id="widget-sparepart">
-      <span class="stat-icon">🔩</span>
-      <div><div class="stat-val" id="sSparepart">—</div>
+      <span class="stat-icon">&#128297;</span>
+      <div><div class="stat-val" id="sSparepart">-</div>
       <div class="stat-lbl">Item Sparepart</div>
       <div class="stat-foot">Stok aktif</div></div>
     </div>
+    <div class="stat s-green" id="widget-komisi" style="display:none">
+      <span class="stat-icon">&#128181;</span>
+      <div><div class="stat-val" id="sKomisi">-</div>
+      <div class="stat-lbl">Komisi Bulan Ini</div>
+      <div class="stat-foot" id="sKomisiInfo">Target: - unit</div></div>
+    </div>
   </div>
 
-  <!-- ROW 2 - Kendaraan dominan -->
+  <!-- ROW 2 -->
   <div class="row2" style="grid-template-columns: 2fr 1fr;">
 
-    <!-- Stok Kendaraan - UTAMA -->
-    <div class="panel">
+    <div class="panel" id="panelUtama">
       <div class="panel-hd">
-        <div class="panel-title">🚗 Stok Kendaraan</div>
-        <a class="panel-link" onclick="goPage('kendaraan')">Lihat semua →</a>
+        <div class="panel-title" id="panelUtamaTitle">&#128664; Stok Kendaraan</div>
+        <a class="panel-link" id="panelUtamaLink" onclick="goPage('kendaraan')">Lihat semua &rarr;</a>
       </div>
       <div class="panel-bd">
         <table class="tbl">
-          <thead>
-            <tr>
-              <th>Unit</th>
-              <th>Tahun</th>
-              <th>Harga Jual</th>
-              <th>Status</th>
-            </tr>
+          <thead id="tblUtamaHead">
+            <tr><th>Unit</th><th>Tahun</th><th>Harga Jual</th><th>Status</th></tr>
           </thead>
           <tbody id="tbKendaraan">
-            <tr><td colspan="4">
-              <div class="empty">
-                <div class="empty-icon">🚗</div>
-                Belum ada kendaraan
-              </div>
-            </td></tr>
+            <tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128664;</div>Memuat data...</div></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Aktivitas -->
     <div class="panel">
       <div class="panel-hd">
-        <div class="panel-title">⚡ Log Aktivitas</div>
-        <a class="panel-link" onclick="loadLogAktivitas()">🔄 Refresh</a>
+        <div class="panel-title">&#9889; Log Aktivitas</div>
+        <a class="panel-link" onclick="loadLogAktivitas()">&#128260; Refresh</a>
       </div>
       <div class="panel-bd">
         <div id="logAktivitasList">
@@ -1000,29 +995,18 @@
 
   </div>
 
-  <!-- Antrian Servis - PENDUKUNG, lebih kecil -->
-  <div class="panel" style="margin-bottom:24px;">
+  <div class="panel" style="margin-bottom:24px;" id="panelServis">
     <div class="panel-hd">
-      <div class="panel-title">🔧 Antrian Servis Hari Ini</div>
-      <a class="panel-link" onclick="goPage('servis')">Lihat semua →</a>
+      <div class="panel-title">&#128295; Antrian Servis Hari Ini</div>
+      <a class="panel-link" onclick="goPage('servis')">Lihat semua &rarr;</a>
     </div>
     <div class="panel-bd">
       <table class="tbl">
         <thead>
-          <tr>
-            <th>Pelanggan</th>
-            <th>Kendaraan</th>
-            <th>Jenis Servis</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>Pelanggan</th><th>Kendaraan</th><th>Jenis Servis</th><th>Status</th></tr>
         </thead>
         <tbody id="tbServis">
-          <tr><td colspan="4">
-            <div class="empty">
-              <div class="empty-icon">🔧</div>
-              Tidak ada antrian servis hari ini
-            </div>
-          </td></tr>
+          <tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128295;</div>Tidak ada antrian</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -1059,6 +1043,123 @@
   // ── Cek login ──
   
   // ── Update Sidebar sesuai Role ──
+  // ── Setup Dashboard per Role ──
+  function setupDashboardByRole() {
+    const role = amuRole;
+    const nama = amuNama || 'Admin';
+
+    // Greeting sesuai role
+    const greet = {
+      owner:   'Selamat datang, ' + nama,
+      mekanik: 'Halo, ' + nama + ' — Mekanik',
+      sales:   'Halo, ' + nama + ' — Sales',
+      kasir:   'Halo, ' + nama + ' — Kasir',
+      staff:   'Halo, ' + nama,
+    };
+    const sub = {
+      owner:   'Ringkasan operasional hari ini',
+      mekanik: 'Antrian servis dan stok sparepart',
+      sales:   'Stok kendaraan dan penjualan Anda',
+      kasir:   'Ringkasan keuangan hari ini',
+      staff:   'Ringkasan operasional hari ini',
+    };
+    document.getElementById('pgTitle').textContent = greet[role] || greet.staff;
+    document.getElementById('pgSub').textContent   = sub[role]   || sub.staff;
+
+    // Sembunyikan widget toggle untuk non-owner
+    const wtWrap = document.getElementById('widgetToggleWrap');
+    if (role !== 'owner' && wtWrap) wtWrap.style.display = 'none';
+
+    // Konfigurasi widget per role
+    const showWidgets = {
+      owner:   ['kendaraan','pendapatan','terjual','pelanggan','servis','sparepart'],
+      mekanik: ['servis','sparepart'],
+      sales:   ['kendaraan','terjual','pelanggan'],
+      kasir:   ['pendapatan','terjual'],
+      staff:   ['kendaraan','servis','sparepart','pelanggan'],
+    };
+
+    const myWidgets = showWidgets[role] || showWidgets.owner;
+    const allWidgets = ['kendaraan','pendapatan','terjual','pelanggan','servis','sparepart'];
+    allWidgets.forEach(w => {
+      const el = document.getElementById('widget-' + w);
+      if (el) el.style.display = myWidgets.includes(w) ? '' : 'none';
+    });
+
+    // Widget komisi untuk sales
+    if (role === 'sales') {
+      const wKomisi = document.getElementById('widget-komisi');
+      if (wKomisi) wKomisi.style.display = '';
+      loadKomisiSales();
+    }
+
+    // Panel utama sesuai role
+    if (role === 'mekanik') {
+      document.getElementById('panelUtamaTitle').textContent = 'Antrian Servis';
+      document.getElementById('panelUtamaLink').setAttribute('onclick', "goPage('servis')");
+      document.getElementById('tblUtamaHead').innerHTML = '<tr><th>Pelanggan</th><th>Kendaraan</th><th>Jenis Servis</th><th>Status</th></tr>';
+    } else if (role === 'kasir') {
+      document.getElementById('panelUtamaTitle').textContent = 'Ringkasan Keuangan';
+      document.getElementById('panelUtamaLink').setAttribute('onclick', "goPage('keuangan')");
+      document.getElementById('tblUtamaHead').innerHTML = '<tr><th>Divisi</th><th>Pemasukan</th><th>Pengeluaran</th></tr>';
+    }
+
+    // Sembunyikan panel servis untuk kasir
+    if (role === 'kasir') {
+      const ps = document.getElementById('panelServis');
+      if (ps) ps.style.display = 'none';
+    }
+  }
+
+  // ── Load Komisi Sales ──
+  async function loadKomisiSales() {
+    try {
+      const now     = new Date();
+      const bulan   = now.getMonth();
+      const tahun   = now.getFullYear();
+
+      // Load pengaturan komisi
+      const komisiSnap = await getDoc(doc(db,'pengaturan','komisi'));
+      const komisiGlobal = komisiSnap.exists() ? komisiSnap.data() : {tipe:'persen',nilai:1,target:5};
+
+      // Load data penjualan sales ini bulan ini
+      const kSnap = await getDocs(collection(db,'kendaraan'));
+      const penjualanSales = kSnap.docs
+        .map(d => ({id:d.id,...d.data()}))
+        .filter(d => {
+          if (d.status !== 'terjual') return false;
+          const tgl = new Date(d.penjualan?.tanggalJual||'');
+          if (tgl.getMonth() !== bulan || tgl.getFullYear() !== tahun) return false;
+          return (d.penjualan?.salesNik === amuNik) ||
+                 (d.penjualan?.sales?.toUpperCase() === amuNama.toUpperCase());
+        });
+
+      // Hitung komisi
+      let totalKomisi = 0;
+      penjualanSales.forEach(d => {
+        const harga = parseInt(d.penjualan?.hargaJualFinal||d.hargaJual||0);
+        if (komisiGlobal.tipe === 'persen') {
+          totalKomisi += harga * (komisiGlobal.nilai/100);
+        } else {
+          totalKomisi += komisiGlobal.nilai;
+        }
+      });
+
+      const unit   = penjualanSales.length;
+      const target = komisiGlobal.target || 5;
+      const fmt    = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+
+      document.getElementById('sKomisi').textContent = fmt(totalKomisi);
+      document.getElementById('sKomisiInfo').textContent = unit + '/' + target + ' unit target';
+
+      // Warna sesuai progress
+      const wKomisi = document.getElementById('widget-komisi');
+      if (wKomisi) {
+        wKomisi.style.borderColor = unit >= target ? 'var(--success)' : 'rgba(255,255,255,0.05)';
+      }
+    } catch(e) {}
+  }
+
   function updateSidebarByRole() {
     const role = sessionStorage.getItem("amu_role") || "owner";
     if (role === "owner") return;
@@ -1099,6 +1200,7 @@
     await loadNotifikasi();
     await loadLogAktivitas();
     updateSidebarByRole();
+    setupDashboardByRole();
   });
 
   // ── Notifikasi Lonceng ──
