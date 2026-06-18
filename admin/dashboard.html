@@ -1153,37 +1153,29 @@
   }
 
   window.toggleNotifPanel = function() {
-    let panel = document.getElementById('notifPanel');
-    if (panel) { panel.remove(); return; }
-
-    const html = `
-      <div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:320px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden">
-        <div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi</div>
-          <span style="background:var(--gold);color:#1a1000;font-size:0.65em;font-weight:700;padding:2px 6px;border-radius:10px">${notifList.length}</span>
-        </div>
-        <div style="max-height:320px;overflow-y:auto">
-          ${notifList.length === 0
-            ? `<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>`
-            : notifList.map(n => `
-              <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px;align-items:flex-start">
-                <span style="font-size:1.1em;flex-shrink:0">${n.icon}</span>
-                <div>
-                  <div style="font-size:0.82em;color:${n.tipe==='error'?'var(--error)':n.tipe==='warning'?'var(--warning)':'var(--info)'}">${n.pesan}</div>
-                </div>
-              </div>`).join('')}
-        </div>
-      </div>`;
-    document.body.insertAdjacentHTML('beforeend', html);
-    // Tutup kalau klik di luar
+    const existing = document.getElementById('notifPanel');
+    if (existing) { existing.remove(); return; }
+    let items = '';
+    if (notifList.length === 0) {
+      items = '<div style="padding:20px;text-align:center;color:#686868;font-size:0.82em">Tidak ada notifikasi</div>';
+    } else {
+      notifList.forEach(n => {
+        const c = n.tipe==='error'?'#e05858':n.tipe==='warning'?'#e8a030':'#4890e8';
+        items += '<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px">';
+        items += '<span style="font-size:1.1em">' + n.icon + '</span>';
+        items += '<div style="font-size:0.82em;color:' + c + '">' + n.pesan + '</div></div>';
+      });
+    }
+    const panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.style.cssText = 'position:fixed;top:64px;right:16px;width:320px;background:#272727;border:1px solid #3a3a3a;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden';
+    panel.innerHTML = '<div style="padding:12px 16px;background:#2d2d2d;border-bottom:1px solid #333;font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:#d0d0d0;letter-spacing:1.5px;text-transform:uppercase">NOTIFIKASI (' + notifList.length + ')</div><div style="max-height:320px;overflow-y:auto">' + items + '</div>';
+    document.body.appendChild(panel);
     setTimeout(() => {
-      document.addEventListener('click', function closePanel(e) {
-        const panel = document.getElementById('notifPanel');
-        const btn   = document.getElementById('btnNotif');
-        if (panel && !panel.contains(e.target) && !btn?.contains(e.target)) {
-          panel.remove();
-          document.removeEventListener('click', closePanel);
-        }
+      document.addEventListener('click', function cp(e) {
+        const p = document.getElementById('notifPanel');
+        const b = document.getElementById('btnNotif');
+        if (p && !p.contains(e.target) && b && !b.contains(e.target)) { p.remove(); document.removeEventListener('click',cp); }
       });
     }, 100);
   };

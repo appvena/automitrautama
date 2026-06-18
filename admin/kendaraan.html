@@ -751,29 +751,53 @@
   async function loadNotifikasi() {
     notifList = [];
     try {
-      const spSnap = await getDocs(collection(db,"sparepart"));
+      const spSnap = await getDocs(collection(db,'sparepart'));
       spSnap.docs.forEach(d => {
         const sp = d.data();
         const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
-        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
-        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+        if (stok === 0) notifList.push({tipe:'error', icon:'🔩', pesan:'Stok ' + (sp.nama||'?') + ' HABIS!'});
+        else if (stok <= min) notifList.push({tipe:'warning', icon:'⚠️', pesan:'Stok ' + (sp.nama||'?') + ' menipis (' + stok + ')'});
       });
-      const sSnap = await getDocs(collection(db,"servis"));
-      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
-      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+      const sSnap = await getDocs(collection(db,'servis'));
+      const antri = sSnap.docs.filter(d => d.data().status === 'antri').length;
+      if (antri > 0) notifList.push({tipe:'info', icon:'🔧', pesan: antri + ' antrian servis menunggu'});
     } catch(e) {}
-    const dot = document.getElementById("notifDot");
-    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+    const dot = document.getElementById('notifDot');
+    if (dot) dot.style.display = notifList.length > 0 ? 'block' : 'none';
   }
+
   window.toggleNotifPanel = function() {
-    let panel = document.getElementById("notifPanel");
-    if (panel) { panel.remove(); return; }
-    const items = notifList.length === 0
-      ? "<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>"
-      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
-    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
-    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+    const existing = document.getElementById('notifPanel');
+    if (existing) { existing.remove(); return; }
+    let items = '';
+    if (notifList.length === 0) {
+      items = '<div style="padding:20px;text-align:center;color:#686868;font-size:0.82em">Tidak ada notifikasi</div>';
+    } else {
+      notifList.forEach(n => {
+        const c = n.tipe === 'error' ? '#e05858' : n.tipe === 'warning' ? '#e8a030' : '#4890e8';
+        items += '<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px">';
+        items += '<span>' + n.icon + '</span>';
+        items += '<div style="font-size:0.82em;color:' + c + '">' + n.pesan + '</div>';
+        items += '</div>';
+      });
+    }
+    const panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.style.cssText = 'position:fixed;top:64px;right:16px;width:300px;background:#272727;border:1px solid #3a3a3a;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden';
+    panel.innerHTML = '<div style="padding:12px 16px;background:#2d2d2d;border-bottom:1px solid #333;font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:#d0d0d0;letter-spacing:1.5px;text-transform:uppercase">NOTIFIKASI (' + notifList.length + ')</div><div style="max-height:280px;overflow-y:auto">' + items + '</div>';
+    document.body.appendChild(panel);
+    setTimeout(() => {
+      document.addEventListener('click', function cp(e) {
+        const p = document.getElementById('notifPanel');
+        const b = document.getElementById('btnNotif');
+        if (p && !p.contains(e.target) && b && !b.contains(e.target)) {
+          p.remove();
+          document.removeEventListener('click', cp);
+        }
+      });
+    }, 100);
   };
+
 
   
   // Cek akses halaman
@@ -823,7 +847,7 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
-    if (!redirectIfNoAccess('kendaraan')) return;
+    if (sessionStorage.getItem('amu_role') && !redirectIfNoAccess('kendaraan')) return;
     currentUserId = user.uid;
     const email   = user.email || '';
     const inisial = (amuNama || email).substring(0,2).toUpperCase();
@@ -1117,7 +1141,7 @@
 
     document.getElementById('tblBody').innerHTML = data.map((d, i) => {
       let tdHtml = `<td style="color:var(--text3)">${i+1}</td>`;
-      if (visibleCols.includes('foto'))      tdHtml += `<td>${d.foto ? `<img src="${d.foto}" class="foto-thumb" onerror="this.style.display='none'">` : `<div class="foto-placeholder">🚗</div>`}</td>`;
+      if (visibleCols.includes('foto'))      tdHtml += '<td>' + (d.foto ? '<img src="' + d.foto + '" class="foto-thumb" onerror="this.style.display=\'none\'">' : '<div class="foto-placeholder">🚗</div>') + '</td>';
       if (visibleCols.includes('merek'))     tdHtml += `<td><div style="font-weight:600;color:var(--silver2)">${d.merek||'-'} ${d.model||''}</div><div style="font-size:0.75em;color:var(--text3)">${d.kategori||''} · ${d.kondisi||''}</div></td>`;
       if (visibleCols.includes('tahun'))     tdHtml += `<td>${d.tahun||'-'}</td>`;
       if (visibleCols.includes('warna'))     tdHtml += `<td>${d.warna||'-'}</td>`;
@@ -1126,7 +1150,7 @@
       if (visibleCols.includes('namaBpkb'))  tdHtml += `<td>${d.namaBpkb||'-'}</td>`;
       if (visibleCols.includes('hargaBeli')) tdHtml += `<td><span class="harga">${d.hargaBeli ? 'Rp '+parseInt(d.hargaBeli).toLocaleString('id-ID') : '-'}</span></td>`;
       if (visibleCols.includes('hargaJual')) tdHtml += `<td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>`;
-      if (visibleCols.includes('waPenjual')) tdHtml += `<td>${d.waPenjual ? `<a href="https://wa.me/${d.waPenjual}" target="_blank" style="color:var(--success)">${d.waPenjual}</a>` : '-'}</td>`;
+      if (visibleCols.includes('waPenjual')) tdHtml += '<td>' + (d.waPenjual ? '<a href="https://wa.me/' + d.waPenjual + '" target="_blank" style="color:var(--success)">' + d.waPenjual + '</a>' : '-') + '</td>';
       if (visibleCols.includes('status'))    tdHtml += `<td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>`;
 
       // Kolom sales — tampil ke semua, tapi hanya kalau terjual

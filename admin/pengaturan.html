@@ -626,29 +626,53 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   async function loadNotifikasi() {
     notifList = [];
     try {
-      const spSnap = await getDocs(collection(db,"sparepart"));
+      const spSnap = await getDocs(collection(db,'sparepart'));
       spSnap.docs.forEach(d => {
         const sp = d.data();
         const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
-        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
-        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+        if (stok === 0) notifList.push({tipe:'error', icon:'🔩', pesan:'Stok ' + (sp.nama||'?') + ' HABIS!'});
+        else if (stok <= min) notifList.push({tipe:'warning', icon:'⚠️', pesan:'Stok ' + (sp.nama||'?') + ' menipis (' + stok + ')'});
       });
-      const sSnap = await getDocs(collection(db,"servis"));
-      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
-      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+      const sSnap = await getDocs(collection(db,'servis'));
+      const antri = sSnap.docs.filter(d => d.data().status === 'antri').length;
+      if (antri > 0) notifList.push({tipe:'info', icon:'🔧', pesan: antri + ' antrian servis menunggu'});
     } catch(e) {}
-    const dot = document.getElementById("notifDot");
-    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+    const dot = document.getElementById('notifDot');
+    if (dot) dot.style.display = notifList.length > 0 ? 'block' : 'none';
   }
+
   window.toggleNotifPanel = function() {
-    let panel = document.getElementById("notifPanel");
-    if (panel) { panel.remove(); return; }
-    const items = notifList.length === 0
-      ? "<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>"
-      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
-    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
-    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+    const existing = document.getElementById('notifPanel');
+    if (existing) { existing.remove(); return; }
+    let items = '';
+    if (notifList.length === 0) {
+      items = '<div style="padding:20px;text-align:center;color:#686868;font-size:0.82em">Tidak ada notifikasi</div>';
+    } else {
+      notifList.forEach(n => {
+        const c = n.tipe === 'error' ? '#e05858' : n.tipe === 'warning' ? '#e8a030' : '#4890e8';
+        items += '<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px">';
+        items += '<span>' + n.icon + '</span>';
+        items += '<div style="font-size:0.82em;color:' + c + '">' + n.pesan + '</div>';
+        items += '</div>';
+      });
+    }
+    const panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.style.cssText = 'position:fixed;top:64px;right:16px;width:300px;background:#272727;border:1px solid #3a3a3a;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden';
+    panel.innerHTML = '<div style="padding:12px 16px;background:#2d2d2d;border-bottom:1px solid #333;font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:#d0d0d0;letter-spacing:1.5px;text-transform:uppercase">NOTIFIKASI (' + notifList.length + ')</div><div style="max-height:280px;overflow-y:auto">' + items + '</div>';
+    document.body.appendChild(panel);
+    setTimeout(() => {
+      document.addEventListener('click', function cp(e) {
+        const p = document.getElementById('notifPanel');
+        const b = document.getElementById('btnNotif');
+        if (p && !p.contains(e.target) && b && !b.contains(e.target)) {
+          p.remove();
+          document.removeEventListener('click', cp);
+        }
+      });
+    }, 100);
   };
+
 
   
   // Cek akses halaman
@@ -698,7 +722,7 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
-    if (!redirectIfNoAccess('pengaturan')) return;
+    if (sessionStorage.getItem('amu_role') && !redirectIfNoAccess('pengaturan')) return;
     const email = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
@@ -910,55 +934,36 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
   function renderAkunList() {
     const wrap = document.getElementById('akunList');
     if (allAkun.length === 0) {
-      wrap.innerHTML = `<div class="empty" style="padding:20px;text-align:center;color:var(--text3)">
-        Belum ada akun staff. Klik "+ Tambah Akun" untuk menambah.
-      </div>`;
+      wrap.innerHTML = '<div class="empty" style="padding:20px;text-align:center;color:var(--text3)">Belum ada akun staff. Klik "+ Tambah Akun" untuk menambah.</div>';
       return;
     }
-    const roleBadge = {
-      owner:'role-owner', mekanik:'role-mekanik',
-      sales:'role-sales', kasir:'role-kasir', staff:'role-staff'
-    };
-    wrap.innerHTML = `<table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="border-bottom:1px solid var(--border)">
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Nama</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Email</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Role</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Status</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${allAkun.map(a => `
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
-            <td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">${a.nama||'-'}<br><span style="font-size:0.75em;color:var(--text3)">${a.nik||''}</span></td>
-            <td style="padding:9px 12px;font-size:0.82em;color:var(--text3)">${a.email||'-'}</td>
-            <td style="padding:9px 12px"><span class="role-badge ${roleBadge[a.role]||'role-staff'}">${a.role||'staff'}</span></td>
-            <td style="padding:9px 12px">
-              <span style="font-size:0.72em;color:${a.aktif?'var(--success)':'var(--error)'}">${a.aktif?'● Aktif':'● Nonaktif'}</span>
-            </td>
-            <td style="padding:9px 12px;display:flex;gap:4px;flex-wrap:wrap">
-              <button onclick="editAkun('${a.id}')"
-                style="background:rgba(72,144,232,0.1);border:1px solid rgba(72,144,232,0.2);color:var(--info);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
-                ✏️ Edit
-              </button>
-              <button onclick="resetPasswordAkun('${a.email}')"
-                style="background:rgba(232,160,48,0.1);border:1px solid rgba(232,160,48,0.2);color:var(--warning);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
-                🔑 Reset PW
-              </button>
-              <button onclick="toggleAkunAktif('${a.id}',${a.aktif})"
-                style="background:none;border:1px solid var(--border2);color:var(--text);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
-                ${a.aktif?'Nonaktifkan':'Aktifkan'}
-              </button>
-              <button onclick="hapusAkun('${a.id}','${a.nama}','${a.uid||''}')"
-                style="background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">
-                🗑️ Hapus
-              </button>
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+    const roleBadge = {owner:'role-owner',mekanik:'role-mekanik',sales:'role-sales',kasir:'role-kasir',staff:'role-staff'};
+    let html = '<table style="width:100%;border-collapse:collapse">';
+    html += '<thead><tr style="border-bottom:1px solid var(--border)">';
+    html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">Nama</th>';
+    html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">Email</th>';
+    html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">Role</th>';
+    html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">Status</th>';
+    html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3)">Aksi</th>';
+    html += '</tr></thead><tbody>';
+    allAkun.forEach(a => {
+      const badge = roleBadge[a.role] || 'role-staff';
+      const statusColor = a.aktif ? 'var(--success)' : 'var(--error)';
+      const statusText  = a.aktif ? '● Aktif' : '● Nonaktif';
+      html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">';
+      html += '<td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">' + (a.nama||'-') + '<br><span style="font-size:0.75em;color:var(--text3)">' + (a.nik||'') + '</span></td>';
+      html += '<td style="padding:9px 12px;font-size:0.82em;color:var(--text3)">' + (a.email||'-') + '</td>';
+      html += '<td style="padding:9px 12px"><span class="role-badge ' + badge + '">' + (a.role||'staff') + '</span></td>';
+      html += '<td style="padding:9px 12px"><span style="font-size:0.72em;color:' + statusColor + '">' + statusText + '</span></td>';
+      html += '<td style="padding:9px 12px;display:flex;gap:4px;flex-wrap:wrap">';
+      html += '<button onclick="editAkun(\'' + a.id + '\')" style="background:rgba(72,144,232,0.1);border:1px solid rgba(72,144,232,0.2);color:var(--info);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">✏️ Edit</button>';
+      html += '<button onclick="resetPasswordAkun(\'' + a.email + '\')" style="background:rgba(232,160,48,0.1);border:1px solid rgba(232,160,48,0.2);color:var(--warning);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">🔑 Reset PW</button>';
+      html += '<button onclick="toggleAkunAktif(\'' + a.id + '\',' + a.aktif + ')" style="background:none;border:1px solid var(--border2);color:var(--text);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">' + (a.aktif?'Nonaktifkan':'Aktifkan') + '</button>';
+      html += '<button onclick="hapusAkun(\'' + a.id + '\',\'' + (a.nama||'') + '\')" style="background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.7em;padding:3px 8px;border-radius:4px;cursor:pointer">🗑️ Hapus</button>';
+      html += '</td></tr>';
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
   }
 
   window.onRoleChange = async function() {
@@ -1186,47 +1191,35 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
   function renderRolePermission() {
     const wrap = document.getElementById('rolePermissionWrap');
-    wrap.innerHTML = ROLES.map(role => {
+    let html = '';
+    ROLES.forEach(role => {
       const perm = currentPermissions[role.id] || DEFAULT_PERMISSIONS[role.id];
       const isOwner = role.locked;
-      return `
-        <div class="role-card">
-          <div class="role-card-hd">
-            <span class="role-badge ${role.badge}">${role.label}</span>
-            <span class="role-desc">${role.desc}</span>
-            ${isOwner ? '<span style="font-size:0.7em;color:var(--gold)">🔒 Tidak dapat diubah</span>' : ''}
-          </div>
-          <div style="overflow-x:auto">
-            <table class="role-table">
-              <thead>
-                <tr>
-                  <th style="min-width:120px">Halaman</th>
-                  <th>Lihat</th>
-                  <th>Edit</th>
-                  <th>Hapus</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${PAGES.map(page => {
-                  const p = perm[page.id]||{v:0,e:0,d:0};
-                  if (isOwner) {
-                    return `<tr>
-                      <td>${page.label}</td>
-                      <td>✅</td><td>✅</td><td>✅</td>
-                    </tr>`;
-                  }
-                  return `<tr>
-                    <td>${page.label}</td>
-                    <td><input type="checkbox" class="role-check" ${p.v?'checked':''} onchange="updatePerm('${role.id}','${page.id}','v',this.checked)" ${page.id==='dashboard'?'disabled':''}></td>
-                    <td><input type="checkbox" class="role-check" ${p.e?'checked':''} onchange="updatePerm('${role.id}','${page.id}','e',this.checked)"></td>
-                    <td><input type="checkbox" class="role-check" ${p.d?'checked':''} onchange="updatePerm('${role.id}','${page.id}','d',this.checked)"></td>
-                  </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>`;
-    }).join('');
+      html += '<div class="role-card">';
+      html += '<div class="role-card-hd">';
+      html += '<span class="role-badge ' + role.badge + '">' + role.label + '</span>';
+      html += '<span class="role-desc">' + role.desc + '</span>';
+      if (isOwner) html += '<span style="font-size:0.7em;color:var(--gold)">🔒 Tidak dapat diubah</span>';
+      html += '</div>';
+      html += '<div style="overflow-x:auto"><table class="role-table"><thead><tr>';
+      html += '<th style="min-width:120px">Halaman</th><th>Lihat</th><th>Edit</th><th>Hapus</th>';
+      html += '</tr></thead><tbody>';
+      PAGES.forEach(page => {
+        const p = perm[page.id] || {v:0,e:0,d:0};
+        html += '<tr><td>' + page.label + '</td>';
+        if (isOwner) {
+          html += '<td>✅</td><td>✅</td><td>✅</td>';
+        } else {
+          const disabled = page.id === 'dashboard' ? ' disabled' : '';
+          html += '<td><input type="checkbox" class="role-check"' + (p.v?'checked':'') + disabled + ' onchange="updatePerm(\'' + role.id + '\',\'' + page.id + '\',\'v\',this.checked)"></td>';
+          html += '<td><input type="checkbox" class="role-check"' + (p.e?'checked':'') + ' onchange="updatePerm(\'' + role.id + '\',\'' + page.id + '\',\'e\',this.checked)"></td>';
+          html += '<td><input type="checkbox" class="role-check"' + (p.d?'checked':'') + ' onchange="updatePerm(\'' + role.id + '\',\'' + page.id + '\',\'d\',this.checked)"></td>';
+        }
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    });
+    wrap.innerHTML = html;
   }
 
   window.updatePerm = function(roleId, pageId, type, checked) {
@@ -1268,7 +1261,6 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
   // ── Komisi Sales ──
   async function loadKomisiTab() {
-    // Load pengaturan komisi
     try {
       const snap = await getDoc(doc(db,'pengaturan','komisi'));
       if (snap.exists()) {
@@ -1281,7 +1273,6 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     } catch(e) {}
     updateKomisiPreview();
 
-    // Load daftar sales dari staff
     try {
       const snap = await getDocs(query(collection(db,'staff'), orderBy('nama')));
       const salesList = snap.docs.map(d => ({id:d.id,...d.data()}))
@@ -1289,47 +1280,42 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
 
       const wrap = document.getElementById('komisiPerSalesList');
       if (salesList.length === 0) {
-        wrap.innerHTML = `<div class="empty">Belum ada staff dengan jabatan Sales</div>`;
+        wrap.innerHTML = '<div class="empty">Belum ada staff dengan jabatan Sales</div>';
         return;
       }
-      wrap.innerHTML = `<table style="width:100%;border-collapse:collapse">
-        <thead><tr style="border-bottom:1px solid var(--border)">
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">Nama</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:left">NIK</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Tipe Komisi</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Nilai</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Target</th>
-          <th style="padding:8px 12px;font-size:0.62em;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">Aksi</th>
-        </tr></thead>
-        <tbody>
-          ${salesList.map(s => {
-            const k = s.komisi || {};
-            return `<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
-              <td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">${s.nama||'-'}</td>
-              <td style="padding:9px 12px;font-size:0.75em;color:var(--text3)">${s.nik||'-'}</td>
-              <td style="padding:9px 12px;text-align:center">
-                <select class="set-select" id="kt_${s.id}" style="font-size:0.75em;padding:4px 8px">
-                  <option value="">Global</option>
-                  <option value="persen" ${k.tipe==='persen'?'selected':''}>%</option>
-                  <option value="nominal" ${k.tipe==='nominal'?'selected':''}>Rp/unit</option>
-                </select>
-              </td>
-              <td style="padding:9px 12px;text-align:center">
-                <input type="number" class="set-input" id="kv_${s.id}" value="${k.nilai||''}" placeholder="Global" style="font-size:0.75em;padding:4px 8px;max-width:80px"/>
-              </td>
-              <td style="padding:9px 12px;text-align:center">
-                <input type="number" class="set-input" id="ktg_${s.id}" value="${k.target||''}" placeholder="Global" style="font-size:0.75em;padding:4px 8px;max-width:60px"/>
-              </td>
-              <td style="padding:9px 12px;text-align:center">
-                <button onclick="simpanKomisiSales('${s.id}','${s.nama}')"
-                  style="background:var(--gold-bg);border:1px solid var(--gold-dim);color:var(--gold);font-size:0.72em;padding:4px 10px;border-radius:4px;cursor:pointer">
-                  💾 Simpan
-                </button>
-              </td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>`;
+
+      let html = '<table style="width:100%;border-collapse:collapse">';
+      html += '<thead><tr style="border-bottom:1px solid var(--border)">';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">Nama</th>';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3);text-align:left">NIK</th>';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3)">Tipe</th>';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3)">Nilai</th>';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3)">Target</th>';
+      html += '<th style="padding:8px 12px;font-size:0.62em;color:var(--text3)">Aksi</th>';
+      html += '</tr></thead><tbody>';
+
+      salesList.forEach(s => {
+        const k = s.komisi || {};
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">';
+        html += '<td style="padding:9px 12px;font-size:0.82em;color:var(--silver2);font-weight:600">' + (s.nama||'-') + '</td>';
+        html += '<td style="padding:9px 12px;font-size:0.75em;color:var(--text3)">' + (s.nik||'-') + '</td>';
+        html += '<td style="padding:9px 12px;text-align:center">';
+        html += '<select class="set-select" id="kt_' + s.id + '" style="font-size:0.75em;padding:4px 8px">';
+        html += '<option value="">Global</option>';
+        html += '<option value="persen"' + (k.tipe==='persen'?' selected':'') + '>%</option>';
+        html += '<option value="nominal"' + (k.tipe==='nominal'?' selected':'') + '>Rp/unit</option>';
+        html += '</select></td>';
+        html += '<td style="padding:9px 12px;text-align:center">';
+        html += '<input type="number" class="set-input" id="kv_' + s.id + '" value="' + (k.nilai||'') + '" placeholder="Global" style="font-size:0.75em;padding:4px 8px;max-width:80px"/></td>';
+        html += '<td style="padding:9px 12px;text-align:center">';
+        html += '<input type="number" class="set-input" id="ktg_' + s.id + '" value="' + (k.target||'') + '" placeholder="Global" style="font-size:0.75em;padding:4px 8px;max-width:60px"/></td>';
+        html += '<td style="padding:9px 12px;text-align:center">';
+        html += '<button onclick="simpanKomisiSales(\'' + s.id + '\',\'' + (s.nama||'').replace(/'/g,"\\'") + '\')" style="background:var(--gold-bg);border:1px solid var(--gold-dim);color:var(--gold);font-size:0.72em;padding:4px 10px;border-radius:4px;cursor:pointer">💾 Simpan</button>';
+        html += '</td></tr>';
+      });
+
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
     } catch(e) {}
   }
 
@@ -1378,10 +1364,7 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
       showToast(`Komisi ${nama} berhasil disimpan ✓`,'success');
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
   };
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
 
-  // ── Clock ──
   // ── Toast ──
   function showToast(msg, type='success') {
     const t = document.getElementById('toast');
