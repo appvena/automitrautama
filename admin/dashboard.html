@@ -1290,19 +1290,21 @@
       const logEl = document.getElementById('logAktivitasList');
       if (!logEl) return;
       if (logs.length === 0) {
-        logEl.innerHTML = `<div style="text-align:center;color:var(--text3);padding:16px;font-size:0.78em">Belum ada aktivitas</div>`;
+        logEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:16px;font-size:0.78em">Belum ada aktivitas</div>';
         return;
       }
-      logEl.innerHTML = logs.map(l => {
-        const tgl = new Date(l.timestamp);
-        const tglStr = tgl.toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-        return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:1">
-            <div style="font-size:0.82em;color:var(--text2)">${l.aksi||'-'}</div>
-            <div style="font-size:0.7em;color:var(--text3);margin-top:2px">${l.user||'-'} · ${l.halaman||'-'} · ${tglStr}</div>
-          </div>
-        </div>`;
-      }).join('');
+      let html = '';
+      logs.forEach(l => {
+        const tgl     = new Date(l.timestamp);
+        const tglStr  = tgl.toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+        // Tampilkan nama saja - kalau email tampilkan sebelum @
+        const nama    = (l.user||'-').includes('@') ? (l.user||'-').split('@')[0] : (l.user||'-');
+        html += '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">';
+        html += '<div style="font-size:0.82em;color:var(--text2)">' + (l.aksi||'-') + '</div>';
+        html += '<div style="font-size:0.7em;color:var(--text3);margin-top:2px">' + nama + ' · ' + (l.halaman||'-') + ' · ' + tglStr + '</div>';
+        html += '</div>';
+      });
+      logEl.innerHTML = html;
     } catch(e) {}
   }
 
@@ -1363,10 +1365,70 @@
           `).join('');
       }
 
-      // Servis
+      // Servis - hanya yang antri dan dikerjakan
       const sSnap = await getDocs(collection(db, 'servis'));
-      document.getElementById('sServis').textContent    = sSnap.size;
-      document.getElementById('b-servis').textContent   = sSnap.size;
+      const sData = sSnap.docs.map(d => ({id:d.id,...d.data()}));
+      const sAktif = sData.filter(s => s.status === 'antri' || s.status === 'dikerjakan');
+      document.getElementById('sServis').textContent  = sAktif.length;
+      document.getElementById('b-servis').textContent = sAktif.length;
+
+      // Isi panel antrian servis - hanya aktif
+      if (sAktif.length === 0) {
+        document.getElementById('tbServis').innerHTML =
+          '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128295;</div>Tidak ada antrian servis</div></td></tr>';
+      } else {
+        let sHtml = '';
+        sAktif.slice(0,5).forEach(s => {
+          const statusColor = s.status === 'dikerjakan' ? 'var(--warning)' : 'var(--info)';
+          sHtml += '<tr>';
+          sHtml += '<td style="font-weight:600;color:var(--silver2)">' + (s.namaPelanggan||'-') + '</td>';
+          sHtml += '<td style="color:var(--text3)">' + (s.merekKendaraan||'') + ' ' + (s.modelKendaraan||'') + '</td>';
+          sHtml += '<td>' + (s.jenisServis||'-') + '</td>';
+          sHtml += '<td><span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:' + statusColor + '">' + (s.status||'-') + '</span></td>';
+          sHtml += '</tr>';
+        });
+        document.getElementById('tbServis').innerHTML = sHtml;
+      }
+
+      // Isi panel utama sesuai role
+      if (amuRole === 'mekanik') {
+        // Panel utama mekanik = antrian servis
+        if (sAktif.length === 0) {
+          document.getElementById('tbKendaraan').innerHTML =
+            '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128295;</div>Tidak ada antrian</div></td></tr>';
+        } else {
+          let mHtml = '';
+          sAktif.slice(0,5).forEach(s => {
+            const statusColor = s.status === 'dikerjakan' ? 'var(--warning)' : 'var(--info)';
+            mHtml += '<tr>';
+            mHtml += '<td style="font-weight:600;color:var(--silver2)">' + (s.namaPelanggan||'-') + '</td>';
+            mHtml += '<td style="color:var(--text3)">' + (s.merekKendaraan||'') + ' ' + (s.modelKendaraan||'') + '</td>';
+            mHtml += '<td>' + (s.jenisServis||'-') + '</td>';
+            mHtml += '<td><span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:' + statusColor + '">' + (s.status||'-') + '</span></td>';
+            mHtml += '</tr>';
+          });
+          document.getElementById('tbKendaraan').innerHTML = mHtml;
+        }
+      } else {
+        // Panel utama default = stok kendaraan (bukan terjual)
+        const kStok = kData.filter(k => k.status !== 'terjual');
+        if (kStok.length === 0) {
+          document.getElementById('tbKendaraan').innerHTML =
+            '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128664;</div>Stok kosong</div></td></tr>';
+        } else {
+          let kHtml = '';
+          kStok.slice(0,5).forEach(k => {
+            const hj = k.hargaJual ? 'Rp ' + parseInt(k.hargaJual).toLocaleString('id-ID') : '-';
+            kHtml += '<tr>';
+            kHtml += '<td style="font-weight:600;color:var(--silver2)">' + (k.merek||'-') + ' ' + (k.model||'') + '</td>';
+            kHtml += '<td>' + (k.tahun||'-') + '</td>';
+            kHtml += '<td style="color:var(--gold);font-family:Rajdhani,sans-serif;font-weight:600">' + hj + '</td>';
+            kHtml += '<td><span class="bs bs-' + (k.status||'tersedia') + '">' + (k.status||'tersedia') + '</span></td>';
+            kHtml += '</tr>';
+          });
+          document.getElementById('tbKendaraan').innerHTML = kHtml;
+        }
+      }
 
       // Sparepart
       const spSnap = await getDocs(collection(db, 'sparepart'));

@@ -1529,10 +1529,12 @@
   };
 
   // ── Ubah Status ──
+  let isUbahStatusLoading = false; // Flag untuk prevent double click
+
   window.ubahStatus = async function(status) {
     if (!currentServisId) return;
+    if (isUbahStatusLoading) return; // Prevent double click
 
-    // Kalau selesai → tampilkan pilihan metode bayar dulu
     if (status === 'selesai') {
       const metodeBayarWrap = document.getElementById('metodeBayarWrap');
       if (metodeBayarWrap) metodeBayarWrap.style.display = 'block';
@@ -1543,47 +1545,63 @@
         return;
       }
 
-      const metode    = metodeSel.value;
-      const bankId    = metodeSel.options[metodeSel.selectedIndex]?.dataset?.bankid || '';
+      // Cek apakah sudah selesai (prevent duplicate)
       const servisData = allData.find(d => d.id === currentServisId);
-      const total     = parseInt(servisData?.totalBiaya||0);
+      if (servisData?.status === 'selesai') {
+        showToast('Servis ini sudah selesai!', 'error');
+        return;
+      }
+
+      const metode = metodeSel.value;
+      const bankId = metodeSel.options[metodeSel.selectedIndex]?.dataset?.bankid || '';
+      const total  = parseInt(servisData?.totalBiaya||0);
+
+      isUbahStatusLoading = true;
+      // Disable semua tombol status saat proses
+      document.querySelectorAll('.btn-status').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
 
       try {
         await updateDoc(doc(db, 'servis', currentServisId), {
-          status, metodeBayar: metode, bankId, tglSelesai: new Date().toISOString().split('T')[0]
+          status, metodeBayar: metode, bankId,
+          tglSelesai: new Date().toISOString().split('T')[0]
         });
 
-        // Update saldo bank
         if (bankId && total > 0) await updateSaldoBank(bankId, total, 'masuk',
-          `Servis: ${servisData?.namaPelanggan||''} - ${servisData?.nopolServis||''}`, currentServisId);
+          'Servis: ' + (servisData?.namaPelanggan||'') + ' - ' + (servisData?.nopolServis||''), currentServisId);
 
-        // Catat log
-        await catatLog(`Servis selesai: ${servisData?.namaPelanggan||''} via ${metode} Rp ${total.toLocaleString('id-ID')}`);
+        await catatLog('Servis selesai: ' + (servisData?.namaPelanggan||'') + ' via ' + metode + ' Rp ' + total.toLocaleString('id-ID'));
 
         const idx = allData.findIndex(d => d.id === currentServisId);
         if (idx >= 0) allData[idx].status = status;
-        document.getElementById('dStatus').innerHTML = `<span class="bs bs-${status}">${status}</span>`;
+        document.getElementById('dStatus').innerHTML = '<span class="bs bs-' + status + '">' + status + '</span>';
         metodeBayarWrap.style.display = 'none';
         updateStats();
         renderTable(allData);
-        showToast(`Servis selesai! Pembayaran via ${metode} dicatat ✓`, 'success');
-      } catch(e) { showToast('Gagal ubah status: '+e.message, 'error'); }
+        showToast('Servis selesai! Pembayaran via ' + metode + ' dicatat ✓', 'success');
+      } catch(e) {
+        showToast('Gagal ubah status: ' + e.message, 'error');
+      }
+
+      isUbahStatusLoading = false;
+      document.querySelectorAll('.btn-status').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
       return;
     }
 
     // Status lain (antri, dikerjakan)
+    isUbahStatusLoading = true;
     try {
       const metodeBayarWrap = document.getElementById('metodeBayarWrap');
       if (metodeBayarWrap) metodeBayarWrap.style.display = 'none';
       await updateDoc(doc(db, 'servis', currentServisId), { status });
       const idx = allData.findIndex(d => d.id === currentServisId);
       if (idx >= 0) allData[idx].status = status;
-      document.getElementById('dStatus').innerHTML = `<span class="bs bs-${status}">${status}</span>`;
+      document.getElementById('dStatus').innerHTML = '<span class="bs bs-' + status + '">' + status + '</span>';
       updateStats();
       renderTable(allData);
-      showToast(`Status diubah ke "${status}" ✓`, 'success');
-      await catatLog(`Status servis diubah ke ${status}`);
+      showToast('Status diubah ke "' + status + '" ✓', 'success');
+      await catatLog('Status servis diubah ke ' + status);
     } catch(e) { showToast('Gagal ubah status', 'error'); }
+    isUbahStatusLoading = false;
   };
 
   // ── Update Saldo Bank ──
@@ -1605,9 +1623,10 @@
     try {
       const user = auth.currentUser;
       if (!user) return;
+      const nama = sessionStorage.getItem('amu_nama') || user.email || 'Admin';
       await addDoc(collection(db,'log_aktivitas'), {
         aksi, halaman: 'Servis',
-        user: sessionStorage.getItem('amu_nama') || user.email,
+        user: nama,
         role: sessionStorage.getItem('amu_role') || 'owner',
         timestamp: new Date().toISOString(),
         uid: user.uid
