@@ -1341,28 +1341,38 @@
   // ── Load Firestore ──
   async function loadData() {
     try {
-      // Kendaraan
+      // Kendaraan - stok aktif saja
       const kSnap = await getDocs(collection(db, 'kendaraan'));
-      const kData = kSnap.docs.map(d => d.data());
-      const total    = kData.length;
+      const kData    = kSnap.docs.map(d => ({id:d.id,...d.data()}));
+      const kStok    = kData.filter(k => k.status !== 'terjual');
       const tersedia = kData.filter(k => k.status === 'tersedia').length;
       const terjual  = kData.filter(k => k.status === 'terjual').length;
 
-      document.getElementById('sKendaraan').textContent = total;
-      document.getElementById('sTersedia').textContent  = tersedia;
-      document.getElementById('sTerjual').textContent   = terjual;
+      // Widget stok = hanya yang belum terjual
+      document.getElementById('sKendaraan').textContent   = kStok.length;
+      document.getElementById('sTersedia').textContent    = tersedia;
+      document.getElementById('sTerjual').textContent     = terjual;
       document.getElementById('sTerjualBulan').textContent = terjual;
-      document.getElementById('b-kendaraan').textContent = tersedia;
+      document.getElementById('b-kendaraan').textContent  = tersedia;
 
-      if (total > 0) {
-        document.getElementById('tbKendaraan').innerHTML =
-          kData.slice(0, 5).map(k => `
-            <tr>
-              <td>${k.merek||'-'} ${k.model||''}</td>
-              <td>${k.tahun||'-'}</td>
-              <td><span class="bs bs-${k.status||'available'}">${k.status||'tersedia'}</span></td>
-            </tr>
-          `).join('');
+      // Panel stok kendaraan - hanya yang belum terjual
+      if (amuRole !== 'mekanik') {
+        if (kStok.length === 0) {
+          document.getElementById('tbKendaraan').innerHTML =
+            '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128664;</div>Stok kosong</div></td></tr>';
+        } else {
+          let kHtml = '';
+          kStok.slice(0,5).forEach(k => {
+            const hj = k.hargaJual ? 'Rp ' + parseInt(k.hargaJual).toLocaleString('id-ID') : '-';
+            kHtml += '<tr>';
+            kHtml += '<td style="font-weight:600;color:var(--silver2)">' + (k.merek||'-') + ' ' + (k.model||'') + '</td>';
+            kHtml += '<td>' + (k.tahun||'-') + '</td>';
+            kHtml += '<td style="color:var(--gold);font-family:Rajdhani,sans-serif;font-weight:600">' + hj + '</td>';
+            kHtml += '<td><span class="bs bs-' + (k.status||'tersedia') + '">' + (k.status||'tersedia') + '</span></td>';
+            kHtml += '</tr>';
+          });
+          document.getElementById('tbKendaraan').innerHTML = kHtml;
+        }
       }
 
       // Servis - hanya yang antri dan dikerjakan
@@ -1390,9 +1400,8 @@
         document.getElementById('tbServis').innerHTML = sHtml;
       }
 
-      // Isi panel utama sesuai role
+      // Panel utama mekanik = antrian servis
       if (amuRole === 'mekanik') {
-        // Panel utama mekanik = antrian servis
         if (sAktif.length === 0) {
           document.getElementById('tbKendaraan').innerHTML =
             '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128295;</div>Tidak ada antrian</div></td></tr>';
@@ -1400,33 +1409,12 @@
           let mHtml = '';
           sAktif.slice(0,5).forEach(s => {
             const statusColor = s.status === 'dikerjakan' ? 'var(--warning)' : 'var(--info)';
-            mHtml += '<tr>';
-            mHtml += '<td style="font-weight:600;color:var(--silver2)">' + (s.namaPelanggan||'-') + '</td>';
+            mHtml += '<tr><td style="font-weight:600;color:var(--silver2)">' + (s.namaPelanggan||'-') + '</td>';
             mHtml += '<td style="color:var(--text3)">' + (s.merekKendaraan||'') + ' ' + (s.modelKendaraan||'') + '</td>';
             mHtml += '<td>' + (s.jenisServis||'-') + '</td>';
-            mHtml += '<td><span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:' + statusColor + '">' + (s.status||'-') + '</span></td>';
-            mHtml += '</tr>';
+            mHtml += '<td><span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:' + statusColor + '">' + (s.status||'-') + '</span></td></tr>';
           });
           document.getElementById('tbKendaraan').innerHTML = mHtml;
-        }
-      } else {
-        // Panel utama default = stok kendaraan (bukan terjual)
-        const kStok = kData.filter(k => k.status !== 'terjual');
-        if (kStok.length === 0) {
-          document.getElementById('tbKendaraan').innerHTML =
-            '<tr><td colspan="4"><div class="empty"><div class="empty-icon">&#128664;</div>Stok kosong</div></td></tr>';
-        } else {
-          let kHtml = '';
-          kStok.slice(0,5).forEach(k => {
-            const hj = k.hargaJual ? 'Rp ' + parseInt(k.hargaJual).toLocaleString('id-ID') : '-';
-            kHtml += '<tr>';
-            kHtml += '<td style="font-weight:600;color:var(--silver2)">' + (k.merek||'-') + ' ' + (k.model||'') + '</td>';
-            kHtml += '<td>' + (k.tahun||'-') + '</td>';
-            kHtml += '<td style="color:var(--gold);font-family:Rajdhani,sans-serif;font-weight:600">' + hj + '</td>';
-            kHtml += '<td><span class="bs bs-' + (k.status||'tersedia') + '">' + (k.status||'tersedia') + '</span></td>';
-            kHtml += '</tr>';
-          });
-          document.getElementById('tbKendaraan').innerHTML = kHtml;
         }
       }
 
