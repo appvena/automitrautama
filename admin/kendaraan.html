@@ -320,7 +320,7 @@
     <div class="clock-date" id="clockDate">--</div>
   </div>
   <div class="navbar-sep"></div>
-  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <button class="btn-notif" id="btnNotif" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notifDot" style="display:none"></div></button>
   <div class="navbar-sep"></div>
   <div class="user-chip">
     <div class="user-av" id="uAv">--</div>
@@ -402,7 +402,8 @@
         <label class="col-item"><input type="checkbox" checked onchange="updateCols()" data-col="status"> Status</label>
       </div>
     </div>
-    <button class="btn-add" onclick="openModal()">+ Tambah</button>
+    <button class="btn-add" onclick="openModal()" id="btnTambahKendaraan">+ Tambah</button>
+    <button style="padding:8px 14px;background:rgba(76,175,128,0.12);border:1px solid rgba(76,175,128,0.3);border-radius:6px;color:var(--success);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif" onclick="exportExcelKendaraan()">📥 Excel</button>
   </div>
 
   <!-- Toolbar baris 2: filter (tersembunyi default) -->
@@ -648,15 +649,15 @@
         <div class="form-field">
           <label class="form-label">Metode Bayar</label>
           <select class="form-select" id="jMetodeBayar">
-            <option value="cash">Cash</option>
-            <option value="kredit">Kredit/Cicilan</option>
-            <option value="tukar_tambah">Tukar Tambah</option>
-            <option value="transfer">Transfer Bank</option>
+            <option value="">— Pilih —</option>
           </select>
         </div>
         <div class="form-field">
           <label class="form-label">Sales yang Handle</label>
-          <input type="text" class="form-input caps" id="jSales" placeholder="Nama sales..."/>
+          <select class="form-select" id="jSalesDropdown" onchange="piliihSales()">
+            <option value="">— Pilih Sales —</option>
+          </select>
+          <input type="hidden" id="jSales"/>
           <input type="hidden" id="jSalesNik"/>
         </div>
         <div class="form-field span2">
@@ -744,8 +745,85 @@
   const amuNama = sessionStorage.getItem('amu_nama') || '';
   const amuNik  = sessionStorage.getItem('amu_nik')  || '';
 
+  
+  // ── Notifikasi Panel ──
+  let notifList = [];
+  async function loadNotifikasi() {
+    notifList = [];
+    try {
+      const spSnap = await getDocs(collection(db,"sparepart"));
+      spSnap.docs.forEach(d => {
+        const sp = d.data();
+        const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
+        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
+        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+      });
+      const sSnap = await getDocs(collection(db,"servis"));
+      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
+      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+    } catch(e) {}
+    const dot = document.getElementById("notifDot");
+    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+  }
+  window.toggleNotifPanel = function() {
+    let panel = document.getElementById("notifPanel");
+    if (panel) { panel.remove(); return; }
+    const items = notifList.length === 0
+      ? "<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>"
+      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
+    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
+    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+  };
+
+  
+  // Cek akses halaman
+
+  // ── Cek Permission ──
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return true;
+    const dp = {
+      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+    };
+    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  }
+  function redirectIfNoAccess(h) {
+    if (!cekPermission(h)) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      return false;
+    }
+    return true;
+  }
+
+
+
+  // ── Update Sidebar sesuai Role ──
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return;
+    const dp = {
+      mekanik: ["servis","sparepart"],
+      sales:   ["kendaraan","pelanggan"],
+      kasir:   ["keuangan","laporan"],
+      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
+    };
+    const boleh = (dp[role] || dp.staff);
+    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    semua.forEach(m => {
+      if (!boleh.includes(m)) {
+        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
+          el.style.display = "none";
+        });
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    if (!redirectIfNoAccess('kendaraan')) return;
     currentUserId = user.uid;
     const email   = user.email || '';
     const inisial = (amuNama || email).substring(0,2).toUpperCase();
@@ -772,6 +850,8 @@
     await loadMasterDropdowns();
     await loadDynamicFields();
     await loadData();
+    await loadNotifikasi();
+    updateSidebarByRole();
   });
 
   // ── Load & Save preferensi kolom ──
@@ -920,7 +1000,44 @@
     fillSelect('fBahanBakar', results['bahan_bakar'],        'Pilih Bahan Bakar');
     fillSelect('filterKategori', results['kategori_kendaraan'], 'Semua Kategori', true);
     fillSelect('filterMerek',    results['merek'],              'Semua Merek', true);
+
+    // Bank dari master_bank untuk metode bayar
+    try {
+      const bankSnap = await getDocs(query(collection(db,'master_bank'), orderBy('nama')));
+      const bankList = bankSnap.docs.map(d => ({id:d.id,...d.data()})).filter(d => d.status === 'aktif');
+      const bankOpts = `<option value="">— Pilih —</option>` +
+        bankList.map(b => `<option value="${b.nama}" data-bankid="${b.id}">${b.nama}</option>`).join('');
+      const jMetode = document.getElementById('jMetodeBayar');
+      if (jMetode) jMetode.innerHTML = bankOpts;
+    } catch(e) {}
+
+    // Sales dari data staff (jabatan sales)
+    try {
+      const staffSnap = await getDocs(query(collection(db,'staff'), orderBy('nama')));
+      const salesList = staffSnap.docs.map(d => ({id:d.id,...d.data()}))
+        .filter(d => d.status === 'aktif' && (d.jabatan||'').toLowerCase().includes('sales'));
+      const salesEl = document.getElementById('jSalesDropdown');
+      if (salesEl) {
+        if (amuRole === 'sales' && amuNama) {
+          // Kalau login sebagai sales → auto pilih diri sendiri
+          salesEl.innerHTML = `<option value="${amuNama}" data-nik="${amuNik}">${amuNama}</option>`;
+          salesEl.disabled = true;
+          document.getElementById('jSales').value    = amuNama;
+          document.getElementById('jSalesNik').value = amuNik;
+        } else {
+          salesEl.innerHTML = `<option value="">— Pilih Sales —</option>` +
+            salesList.map(s => `<option value="${s.nama}" data-nik="${s.nik||''}">${s.nama} ${s.nik?'('+s.nik+')':''}</option>`).join('');
+        }
+      }
+    } catch(e) {}
   }
+
+  window.piliihSales = function() {
+    const sel = document.getElementById('jSalesDropdown');
+    const opt = sel.options[sel.selectedIndex];
+    document.getElementById('jSales').value    = opt.value;
+    document.getElementById('jSalesNik').value = opt.dataset.nik||'';
+  };
 
   function fillSelect(id, data, placeholder, isFilter = false) {
     const el = document.getElementById(id);
@@ -1254,6 +1371,7 @@
       }
       closeModal();
       await loadData();
+    await loadNotifikasi();
     } catch(e) {
       showToast('Gagal menyimpan: ' + e.message, 'error');
     }
@@ -1273,6 +1391,7 @@
       await deleteDoc(doc(db, 'kendaraan', id));
       showToast('Kendaraan berhasil dihapus ✓', 'success');
       await loadData();
+    await loadNotifikasi();
     } catch(e) {
       if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
         showToast('Password salah! Data tidak dihapus.', 'error');
@@ -1477,14 +1596,200 @@
         tglTerjual: tanggalJual,
       });
 
+      // Update saldo bank otomatis
+      const metodeSel  = document.getElementById('jMetodeBayar');
+      const bankId     = metodeSel?.options[metodeSel.selectedIndex]?.dataset?.bankid || '';
+      if (bankId) {
+        await updateSaldoBank(bankId, parseInt(hargaJual),
+          'masuk', `Jual: ${detailData.merek} ${detailData.model} - ${dataPenjualan.namaPembeli}`,
+          detailData.id);
+      }
+
+      // Catat harga beli sebagai pengeluaran bank (kalau ada bankBeli)
+      if (detailData.bankBeli && detailData.hargaBeli) {
+        await updateSaldoBank(detailData.bankBeli, parseInt(detailData.hargaBeli),
+          'keluar', `Beli: ${detailData.merek} ${detailData.model}`, detailData.id);
+      }
+
+      await catatLog(`Kendaraan terjual: ${detailData.merek} ${detailData.model} ke ${dataPenjualan.namaPembeli} via ${dataPenjualan.metodeBayar}`);
+
       showToast(`${detailData.merek} ${detailData.model} berhasil ditandai terjual ✓`, 'success');
       closeJualModal();
-      closeDetail();
+
+      // Tanya apakah mau cetak invoice
+      if (confirm('Kendaraan berhasil terjual! Cetak invoice penjualan?')) {
+        bukaInvoiceJual(detailData, dataPenjualan);
+      } else {
+        closeDetail();
+      }
       await loadData();
+    await loadNotifikasi();
     } catch(e) {
       showToast('Gagal menyimpan: ' + e.message, 'error');
     }
   };
+
+  // ── Update Saldo Bank ──
+  async function updateSaldoBank(bankId, jumlah, tipe, keterangan, refId) {
+    try {
+      await addDoc(collection(db,'transaksi_bank'), {
+        bankId, jumlah, tipe, keterangan,
+        referensi: refId,
+        tanggal: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
+      });
+    } catch(e) { console.log('Gagal catat transaksi bank:', e); }
+  }
+
+  // ── Catat Log ──
+  async function catatLog(aksi) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      await addDoc(collection(db,'log_aktivitas'), {
+        aksi, halaman: 'Kendaraan',
+        user: sessionStorage.getItem('amu_nama') || user.email,
+        role: sessionStorage.getItem('amu_role') || 'owner',
+        timestamp: new Date().toISOString(),
+        uid: user.uid
+      });
+    } catch(e) {}
+  }
+
+  // ── Invoice Penjualan Kendaraan ──
+  window.bukaInvoiceJual = function(kendaraan, penjualan) {
+    const fmt = v => 'Rp ' + parseInt(v||0).toLocaleString('id-ID');
+    const now = new Date();
+    const tgl = now.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const noInv = `AMU/JUAL/${now.getDate().toString().padStart(2,'0')}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getFullYear().toString().slice(2)}/001`;
+
+    const invoiceHtml = `
+      <div id="invoiceJualPrint" style="position:fixed;inset:0;background:#f5f5f5;z-index:9999;overflow-y:auto;font-family:'Inter',sans-serif">
+        <div style="position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10000">
+          <button onclick="document.getElementById('invoiceJualPrint').remove()" style="padding:8px 16px;background:#1a1a1a;color:#c9a84c;border:1px solid #c9a84c;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif">✕ Tutup</button>
+          <button onclick="window.print()" style="padding:8px 16px;background:#c9a84c;color:#1a1000;border:none;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">🖨️ Print / PDF</button>
+          <button onclick="kirimWaInvoiceJual('${penjualan.waPembeli}','${noInv}','${kendaraan.merek} ${kendaraan.model}',${penjualan.hargaJualFinal})" style="padding:8px 16px;background:rgba(37,211,102,0.8);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif">💬 WA</button>
+        </div>
+        <div style="max-width:700px;margin:60px auto 40px;background:#fff;padding:40px;box-shadow:0 4px 20px rgba(0,0,0,0.1);border-radius:8px">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #c9a84c">
+            <div style="display:flex;align-items:center;gap:12px">
+              <img src="../assets/logo.png" style="height:50px;object-fit:contain" onerror="this.style.display='none'"/>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:1.2em;font-weight:700;letter-spacing:2px;color:#1a1a1a">AUTO MITRA UTAMA</div>
+                <div style="font-size:0.75em;color:#c9a84c">Start Here, Drive Next</div>
+                <div style="font-size:0.72em;color:#666;margin-top:2px">Jl Dr Mr Mohd Hasan Batoh, Kota Banda Aceh</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Rajdhani',sans-serif;font-size:1.8em;font-weight:700;color:#c9a84c;letter-spacing:3px">INVOICE</div>
+              <div style="font-size:0.78em;color:#333;font-weight:600">${noInv}</div>
+              <div style="font-size:0.72em;color:#666">${tgl}</div>
+            </div>
+          </div>
+
+          <!-- Pembeli -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+            <div style="background:#f9f9f9;padding:14px;border-radius:6px;border-left:3px solid #c9a84c">
+              <div style="font-size:0.65em;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:8px;font-weight:600">👤 PEMBELI</div>
+              <div style="font-weight:600;color:#1a1a1a">${penjualan.namaPembeli||'-'}</div>
+              <div style="font-size:0.82em;color:#666;margin-top:3px">${penjualan.waPembeli ? '+'+penjualan.waPembeli : ''}</div>
+              <div style="font-size:0.82em;color:#666">${penjualan.alamatPembeli||''}</div>
+            </div>
+            <div style="background:#f9f9f9;padding:14px;border-radius:6px;border-left:3px solid #4890e8">
+              <div style="font-size:0.65em;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:8px;font-weight:600">🚗 KENDARAAN</div>
+              <div style="font-weight:600;color:#1a1a1a">${kendaraan.merek||''} ${kendaraan.model||''} ${kendaraan.tahun||''}</div>
+              <div style="font-size:0.82em;color:#666;margin-top:3px">No. Polisi: <strong>${kendaraan.nopol||'-'}</strong></div>
+              <div style="font-size:0.82em;color:#666">Warna: ${kendaraan.warna||'-'}</div>
+              <div style="font-size:0.82em;color:#666">No. Rangka: ${kendaraan.noRangka||'-'}</div>
+            </div>
+          </div>
+
+          <!-- Detail Transaksi -->
+          <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+            <thead>
+              <tr style="background:#1a1a1a;color:#fff">
+                <th style="padding:10px 14px;text-align:left;font-size:0.72em;letter-spacing:1px">KETERANGAN</th>
+                <th style="padding:10px 14px;text-align:right;font-size:0.72em;letter-spacing:1px">JUMLAH</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #eee">
+                <td style="padding:12px 14px;font-size:0.85em">
+                  Penjualan Kendaraan<br>
+                  <span style="font-size:0.85em;color:#888">${kendaraan.merek} ${kendaraan.model} ${kendaraan.tahun} - ${kendaraan.warna}</span>
+                </td>
+                <td style="padding:12px 14px;text-align:right;font-weight:600;color:#1a1a1a">${fmt(penjualan.hargaJualFinal)}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="background:#f9f9f9">
+                <td style="padding:10px 14px;font-size:0.85em;color:#666">Subtotal</td>
+                <td style="padding:10px 14px;text-align:right;font-weight:600">${fmt(penjualan.hargaJualFinal)}</td>
+              </tr>
+              <tr style="background:#1a1a1a">
+                <td style="padding:12px 14px;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#c9a84c;letter-spacing:2px">TOTAL</td>
+                <td style="padding:12px 14px;text-align:right;font-family:'Rajdhani',sans-serif;font-size:1.1em;font-weight:700;color:#c9a84c">${fmt(penjualan.hargaJualFinal)}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Info bayar & sales -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;font-size:0.82em">
+            <div><span style="color:#888">Metode Bayar:</span> <strong>${penjualan.metodeBayar||'-'}</strong></div>
+            <div><span style="color:#888">Tanggal:</span> <strong>${penjualan.tanggalJual||'-'}</strong></div>
+            <div><span style="color:#888">Sales:</span> <strong>${penjualan.sales||'-'}</strong></div>
+            <div><span style="color:#888">No. BPKB:</span> <strong>${kendaraan.noBpkb||'-'}</strong></div>
+          </div>
+
+          <!-- Footer -->
+          <div style="border-top:1px solid #eee;padding-top:16px;display:flex;justify-content:space-between;align-items:flex-end">
+            <div style="font-size:0.75em;color:#888;line-height:1.7">
+              Terima kasih telah mempercayakan pembelian kendaraan kepada kami.<br>
+              Semoga kendaraan Anda selalu dalam kondisi prima.<br>
+              <strong style="color:#c9a84c">Auto Mitra Utama</strong> — Start Here, Drive Next
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:0.72em;color:#888;margin-bottom:20px">Hormat kami,</div>
+              <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a1a1a">Auto Mitra Utama</div>
+              <div style="font-size:0.72em;color:#888">Bengkel & Showroom</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', invoiceHtml);
+  };
+
+  window.kirimWaInvoiceJual = function(wa, noInv, kendaraan, total) {
+    if (!wa) { alert('Nomor WA pembeli tidak ada!'); return; }
+    const fmt = v => parseInt(v||0).toLocaleString('id-ID');
+    const pesan = `*INVOICE PENJUALAN — Auto Mitra Utama*\nNo: ${noInv}\n\nKendaraan: ${kendaraan}\n*TOTAL: Rp ${fmt(total)}*\n\nTerima kasih telah berbelanja di Auto Mitra Utama 🚗\nStart Here, Drive Next`;
+    window.open(`https://wa.me/${wa}?text=${encodeURIComponent(pesan)}`, '_blank');
+  };
+  // ── Export Excel Kendaraan ──
+  window.exportExcelKendaraan = function() {
+    const header = ['No','Merek','Model','Tahun','Warna','No.Polisi','No.Rangka','Harga Beli','Harga Jual','Status','Pembeli','Sales','Tgl Jual'];
+    const rows = allData.map((d,i) => [
+      i+1,
+      d.merek||'', d.model||'', d.tahun||'', d.warna||'', d.nopol||'', d.noRangka||'',
+      d.hargaBeli||0, d.hargaJual||0, d.status||'',
+      d.penjualan?.namaPembeli||'',
+      d.penjualan?.sales||'',
+      d.penjualan?.tanggalJual||''
+    ]);
+    let csv = header.join(',') + '\n';
+    rows.forEach(r => { csv += r.map(v => `"${v}"`).join(',') + '\n'; });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `kendaraan-amu-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Export Excel berhasil ✓','success');
+    catatLog('Export data kendaraan ke Excel');
+  };
+
   let autoLogoutTimer;
   function resetTimer() {
     clearTimeout(autoLogoutTimer);

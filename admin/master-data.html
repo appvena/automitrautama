@@ -348,6 +348,12 @@
         <label class="form-label">Keterangan (opsional)</label>
         <input type="text" class="form-input" id="inputKeterangan" placeholder="Keterangan tambahan..."/>
       </div>
+      <!-- Saldo awal khusus bank -->
+      <div class="form-field" id="fieldSaldoAwal" style="display:none;">
+        <label class="form-label">Saldo Awal (Rp)</label>
+        <input type="number" class="form-input" id="inputSaldoAwal" placeholder="0" min="0"/>
+        <div style="font-size:0.7em;color:var(--text3);margin-top:4px">Saldo akan otomatis update dari setiap transaksi</div>
+      </div>
       <div class="form-field">
         <label class="form-label">Status</label>
         <select class="form-select" id="inputStatus">
@@ -609,11 +615,13 @@
   window.openModal = function() {
     editId = null;
     document.getElementById('modalTitle').textContent = `Tambah ${kategoriNama[currentKategori]}`;
-    document.getElementById('labelNama').textContent = kategoriLabel[currentKategori]||'Nama';
-    document.getElementById('inputNama').value = '';
-    document.getElementById('inputKeterangan').value = '';
-    document.getElementById('inputStatus').value = 'aktif';
+    document.getElementById('labelNama').textContent  = kategoriLabel[currentKategori]||'Nama';
+    document.getElementById('inputNama').value        = '';
+    document.getElementById('inputKeterangan').value  = '';
+    document.getElementById('inputSaldoAwal').value   = '0';
+    document.getElementById('inputStatus').value      = 'aktif';
     document.getElementById('fieldKeterangan').style.display = punyaKeterangan.includes(currentKategori) ? 'block' : 'none';
+    document.getElementById('fieldSaldoAwal').style.display  = currentKategori === 'bank' ? 'block' : 'none';
     document.getElementById('modalOverlay').classList.add('show');
     setTimeout(() => document.getElementById('inputNama').focus(), 100);
   };
@@ -623,11 +631,13 @@
     if (!d) return;
     editId = id;
     document.getElementById('modalTitle').textContent = `Edit ${kategoriNama[currentKategori]}`;
-    document.getElementById('labelNama').textContent = kategoriLabel[currentKategori]||'Nama';
-    document.getElementById('inputNama').value = d.nama||'';
-    document.getElementById('inputKeterangan').value = d.keterangan||'';
-    document.getElementById('inputStatus').value = d.status||'aktif';
+    document.getElementById('labelNama').textContent  = kategoriLabel[currentKategori]||'Nama';
+    document.getElementById('inputNama').value        = d.nama||'';
+    document.getElementById('inputKeterangan').value  = d.keterangan||'';
+    document.getElementById('inputSaldoAwal').value   = d.saldoAwal||0;
+    document.getElementById('inputStatus').value      = d.status||'aktif';
     document.getElementById('fieldKeterangan').style.display = punyaKeterangan.includes(currentKategori) ? 'block' : 'none';
+    document.getElementById('fieldSaldoAwal').style.display  = currentKategori === 'bank' ? 'block' : 'none';
     document.getElementById('modalOverlay').classList.add('show');
     setTimeout(() => document.getElementById('inputNama').focus(), 100);
   };
@@ -638,14 +648,16 @@
   };
 
   window.saveData = async function() {
-    const nama = document.getElementById('inputNama').value.trim().toUpperCase();
-    const ket  = document.getElementById('inputKeterangan').value.trim();
+    const nama   = document.getElementById('inputNama').value.trim().toUpperCase();
+    const ket    = document.getElementById('inputKeterangan').value.trim();
     const status = document.getElementById('inputStatus').value;
-    const btn  = document.getElementById('btnSave');
+    const saldoAwal = parseInt(document.getElementById('inputSaldoAwal').value||0);
+    const btn    = document.getElementById('btnSave');
     if (!nama) { showToast('Nama tidak boleh kosong!', 'error'); return; }
     btn.disabled = true; btn.textContent = 'Menyimpan...';
     const payload = {nama, status};
     if (punyaKeterangan.includes(currentKategori)) payload.keterangan = ket;
+    if (currentKategori === 'bank') payload.saldoAwal = saldoAwal;
     try {
       if (editId) {
         await updateDoc(doc(db, `master_${currentKategori}`, editId), payload);
@@ -774,6 +786,7 @@
   };
 
   window.editField = async function(id) {
+    currentFieldType = 'kendaraan';
     try {
       const snap = await getDocs(collection(db, 'field_kendaraan'));
       const d = snap.docs.map(x => ({id: x.id, ...x.data()})).find(x => x.id === id);

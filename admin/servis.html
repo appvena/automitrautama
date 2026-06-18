@@ -470,7 +470,7 @@
   <div class="navbar-spacer"></div>
   <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
   <div class="navbar-sep"></div>
-  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <button class="btn-notif" id="btnNotif" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notifDot" style="display:none"></div></button>
   <div class="navbar-sep"></div>
   <div class="user-chip">
     <div class="user-av" id="uAv">--</div>
@@ -538,6 +538,7 @@
       <input type="text" class="search-input" id="searchInput" placeholder="Cari pelanggan / kendaraan..." oninput="applyFilter()"/>
     </div>
     <button class="btn-add" onclick="openModal()">+ Servis Baru</button>
+    <button style="padding:8px 14px;background:rgba(76,175,128,0.12);border:1px solid rgba(76,175,128,0.3);border-radius:6px;color:var(--success);font-size:0.78em;cursor:pointer;font-family:'Inter',sans-serif" onclick="exportExcelServis()">📥 Excel</button>
   </div>
 
   <!-- TABLE -->
@@ -696,10 +697,17 @@
       <!-- Ubah Status -->
       <div class="detail-section">
         <div class="detail-section-title">🔄 Ubah Status</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
           <button class="btn-status btn-status-antri"      onclick="ubahStatus('antri')">⏳ Antri</button>
           <button class="btn-status btn-status-dikerjakan" onclick="ubahStatus('dikerjakan')">🔧 Dikerjakan</button>
           <button class="btn-status btn-status-selesai"    onclick="ubahStatus('selesai')">✅ Selesai</button>
+        </div>
+        <!-- Metode bayar saat selesai -->
+        <div id="metodeBayarWrap" style="display:none;margin-top:8px">
+          <div style="font-size:0.72em;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Pembayaran Via</div>
+          <select class="filter-select" id="fMetodeBayarServis" style="width:100%">
+            <option value="">— Pilih Metode Bayar —</option>
+          </select>
         </div>
       </div>
 
@@ -926,20 +934,103 @@
   let masterJenisServis = [];
   let dbSparepart = [];
   let tipePekerjaan = 'jasa';
+  const amuRole = sessionStorage.getItem('amu_role') || 'owner';
+  const amuNama = sessionStorage.getItem('amu_nama') || '';
 
   // ── Cek login ──
+  
+  // ── Notifikasi Panel ──
+  let notifList = [];
+  async function loadNotifikasi() {
+    notifList = [];
+    try {
+      const spSnap = await getDocs(collection(db,"sparepart"));
+      spSnap.docs.forEach(d => {
+        const sp = d.data();
+        const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
+        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
+        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+      });
+      const sSnap = await getDocs(collection(db,"servis"));
+      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
+      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+    } catch(e) {}
+    const dot = document.getElementById("notifDot");
+    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+  }
+  window.toggleNotifPanel = function() {
+    let panel = document.getElementById("notifPanel");
+    if (panel) { panel.remove(); return; }
+    const items = notifList.length === 0
+      ? "<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>"
+      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
+    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
+    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+  };
+
+  
+  // Cek akses halaman
+
+  // ── Cek Permission ──
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return true;
+    const dp = {
+      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+    };
+    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  }
+  function redirectIfNoAccess(h) {
+    if (!cekPermission(h)) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      return false;
+    }
+    return true;
+  }
+
+
+
+  // ── Update Sidebar sesuai Role ──
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return;
+    const dp = {
+      mekanik: ["servis","sparepart"],
+      sales:   ["kendaraan","pelanggan"],
+      kasir:   ["keuangan","laporan"],
+      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
+    };
+    const boleh = (dp[role] || dp.staff);
+    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    semua.forEach(m => {
+      if (!boleh.includes(m)) {
+        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
+          el.style.display = "none";
+        });
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    if (!redirectIfNoAccess('servis')) return;
     const email = user.email || '';
-    const inisial = email.substring(0, 2).toUpperCase();
+    const inisial = (amuNama || email).substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
-    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
-    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = amuNama || email.split('@')[0]);
+    const roleLabel = {owner:'Administrator',sales:'Sales',mekanik:'Mekanik',kasir:'Kasir',staff:'Staff'};
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = roleLabel[amuRole]||'Staff');
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadMaster();
     await loadSparepart();
     await loadKendaraanDB();
     await loadData();
+    await loadNotifikasi();
+    updateSidebarByRole();
+    await catatLog('Membuka halaman Servis');
   });
 
   // ── Load Sparepart dari DB ──
@@ -966,18 +1057,29 @@
   // ── Load Master Data ──
   async function loadMaster() {
     try {
+      // Jenis Servis
       const jsSnap = await getDocs(query(collection(db, 'master_jenis_servis'), orderBy('nama')));
       masterJenisServis = jsSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(d => d.status === 'aktif');
-      const jsEl = document.getElementById('fJenisServis');
-      jsEl.innerHTML = `<option value="">— Pilih —</option>` +
+      document.getElementById('fJenisServis').innerHTML = `<option value="">— Pilih —</option>` +
         masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||0}">${j.nama}</option>`).join('');
-      const mSnap = await getDocs(query(collection(db, 'master_jabatan'), orderBy('nama')));
-      const mekanik = mSnap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
-      document.getElementById('fMekanik').innerHTML = `<option value="">— Pilih —</option>` +
-        mekanik.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('');
-      const ppEl = document.getElementById('pPilihJenis');
-      ppEl.innerHTML = `<option value="">— Pilih atau ketik manual —</option>` +
+      document.getElementById('pPilihJenis').innerHTML = `<option value="">— Pilih atau ketik manual —</option>` +
         masterJenisServis.map(j => `<option value="${j.nama}" data-harga="${j.keterangan||''}">${j.nama}</option>`).join('');
+
+      // Mekanik dari data STAFF (jabatan mekanik)
+      const staffSnap = await getDocs(query(collection(db, 'staff'), orderBy('nama')));
+      const mekanikList = staffSnap.docs.map(d => ({id:d.id,...d.data()}))
+        .filter(d => d.status === 'aktif' && (d.jabatan||'').toLowerCase().includes('mekanik'));
+      document.getElementById('fMekanik').innerHTML = `<option value="">— Pilih Mekanik —</option>` +
+        mekanikList.map(m => `<option value="${m.nama}" data-nik="${m.nik||''}">${m.nama} ${m.nik?'('+m.nik+')':''}</option>`).join('');
+
+      // Bank dari master_bank untuk metode bayar
+      const bankSnap = await getDocs(query(collection(db, 'master_bank'), orderBy('nama')));
+      const bankList = bankSnap.docs.map(d => ({id:d.id,...d.data()})).filter(d => d.status === 'aktif');
+      const metodeBayarEl = document.getElementById('fMetodeBayarServis');
+      if (metodeBayarEl) {
+        metodeBayarEl.innerHTML = `<option value="">— Pilih —</option>` +
+          bankList.map(b => `<option value="${b.nama}" data-bankid="${b.id}">${b.nama}</option>`).join('');
+      }
     } catch(e) { console.log('Master data:', e); }
   }
 
@@ -1123,6 +1225,7 @@
       }
       closeModal();
       await loadData();
+    await loadNotifikasi();
     } catch(e) { showToast('Gagal: ' + e.message, 'error'); }
 
     btn.disabled = false; btn.textContent = 'Simpan';
@@ -1273,6 +1376,15 @@
   };
 
   // ── Toggle tipe pekerjaan ──
+  window.isiDariMaster = function() {
+    const sel = document.getElementById('pPilihJenis');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    document.getElementById('pNama').value = opt.value;
+    const harga = opt.dataset.harga;
+    if (harga && parseInt(harga) > 0) document.getElementById('pHarga').value = harga;
+  };
+
   window.setTipePekerjaan = function(tipe) {
     tipePekerjaan = tipe;
     const btnJasa = document.getElementById('btnTipeJasa');
@@ -1395,17 +1507,89 @@
   // ── Ubah Status ──
   window.ubahStatus = async function(status) {
     if (!currentServisId) return;
+
+    // Kalau selesai → tampilkan pilihan metode bayar dulu
+    if (status === 'selesai') {
+      const metodeBayarWrap = document.getElementById('metodeBayarWrap');
+      if (metodeBayarWrap) metodeBayarWrap.style.display = 'block';
+
+      const metodeSel = document.getElementById('fMetodeBayarServis');
+      if (!metodeSel || !metodeSel.value) {
+        showToast('Pilih metode pembayaran terlebih dahulu!', 'error');
+        return;
+      }
+
+      const metode    = metodeSel.value;
+      const bankId    = metodeSel.options[metodeSel.selectedIndex]?.dataset?.bankid || '';
+      const servisData = allData.find(d => d.id === currentServisId);
+      const total     = parseInt(servisData?.totalBiaya||0);
+
+      try {
+        await updateDoc(doc(db, 'servis', currentServisId), {
+          status, metodeBayar: metode, bankId, tglSelesai: new Date().toISOString().split('T')[0]
+        });
+
+        // Update saldo bank
+        if (bankId && total > 0) await updateSaldoBank(bankId, total, 'masuk',
+          `Servis: ${servisData?.namaPelanggan||''} - ${servisData?.nopolServis||''}`, currentServisId);
+
+        // Catat log
+        await catatLog(`Servis selesai: ${servisData?.namaPelanggan||''} via ${metode} Rp ${total.toLocaleString('id-ID')}`);
+
+        const idx = allData.findIndex(d => d.id === currentServisId);
+        if (idx >= 0) allData[idx].status = status;
+        document.getElementById('dStatus').innerHTML = `<span class="bs bs-${status}">${status}</span>`;
+        metodeBayarWrap.style.display = 'none';
+        updateStats();
+        renderTable(allData);
+        showToast(`Servis selesai! Pembayaran via ${metode} dicatat ✓`, 'success');
+      } catch(e) { showToast('Gagal ubah status: '+e.message, 'error'); }
+      return;
+    }
+
+    // Status lain (antri, dikerjakan)
     try {
+      const metodeBayarWrap = document.getElementById('metodeBayarWrap');
+      if (metodeBayarWrap) metodeBayarWrap.style.display = 'none';
       await updateDoc(doc(db, 'servis', currentServisId), { status });
-      // Update lokal
       const idx = allData.findIndex(d => d.id === currentServisId);
       if (idx >= 0) allData[idx].status = status;
       document.getElementById('dStatus').innerHTML = `<span class="bs bs-${status}">${status}</span>`;
       updateStats();
       renderTable(allData);
       showToast(`Status diubah ke "${status}" ✓`, 'success');
+      await catatLog(`Status servis diubah ke ${status}`);
     } catch(e) { showToast('Gagal ubah status', 'error'); }
   };
+
+  // ── Update Saldo Bank ──
+  async function updateSaldoBank(bankId, jumlah, tipe, keterangan, refId) {
+    try {
+      // Catat transaksi bank
+      await addDoc(collection(db, 'transaksi_bank'), {
+        bankId, jumlah, tipe, keterangan,
+        referensi: refId,
+        tanggal: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
+        createdBy: sessionStorage.getItem('amu_nama') || ''
+      });
+    } catch(e) { console.log('Gagal catat transaksi bank:', e); }
+  }
+
+  // ── Catat Log Aktivitas ──
+  async function catatLog(aksi) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      await addDoc(collection(db,'log_aktivitas'), {
+        aksi, halaman: 'Servis',
+        user: sessionStorage.getItem('amu_nama') || user.email,
+        role: sessionStorage.getItem('amu_role') || 'owner',
+        timestamp: new Date().toISOString(),
+        uid: user.uid
+      });
+    } catch(e) {}
+  }
 
   // ── Hapus Servis ──
   window.hapusData = async function(id, nama) {
@@ -1420,6 +1604,7 @@
       await deleteDoc(doc(db, 'servis', id));
       showToast('Data servis dihapus ✓', 'success');
       await loadData();
+    await loadNotifikasi();
     } catch(e) {
       if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
         showToast('Password salah!', 'error');
@@ -1642,6 +1827,27 @@
   tick(); setInterval(tick, 1000);
 
   // ── Auto Logout 5 Menit ──
+  // ── Export Excel Servis ──
+  window.exportExcelServis = function() {
+    const header = ['No','Pelanggan','WA','Kendaraan','No.Polisi','Jenis Servis','Mekanik','Tgl Masuk','Status','Total Biaya','Metode Bayar'];
+    const rows = allData.map((d,i) => [
+      i+1,
+      d.namaPelanggan||'', d.waPelanggan||'',
+      `${d.merekKendaraan||''} ${d.modelKendaraan||''}`.trim(),
+      d.nopolServis||'', d.jenisServis||'', d.mekanik||'',
+      d.tglMasukServis||'', d.status||'',
+      d.totalBiaya||0, d.metodeBayar||''
+    ]);
+    let csv = header.join(',') + '\n';
+    rows.forEach(r => { csv += r.map(v => `"${v}"`).join(',') + '\n'; });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `servis-amu-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Export Excel berhasil ✓','success');
+  };
+
   let autoLogoutTimer;
   function resetTimer() {
     clearTimeout(autoLogoutTimer);

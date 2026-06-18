@@ -64,14 +64,14 @@
     .pg-sub{font-size:0.75em;color:var(--text3);margin-top:2px;}
     .pg-line{width:30px;height:2px;background:var(--gold);margin-top:6px;border-radius:1px;}
 
-    /* ══ MINI STATS ══ */
+    /* MINI STATS */
     .mini-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
     .mini-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;}
     .mini-stat-icon{font-size:1.2em;}
     .mini-stat-val{font-family:'Rajdhani',sans-serif;font-size:1.4em;font-weight:700;color:var(--silver2);line-height:1;}
     .mini-stat-lbl{font-size:0.62em;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
 
-    /* ══ TOOLBAR ══ */
+    /* TOOLBAR */
     .toolbar{background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
     .filter-select{padding:8px 10px;background:var(--content);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:0.82em;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
     .filter-select option{background:var(--card2);}
@@ -83,7 +83,7 @@
     .btn-add{padding:8px 16px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
     .btn-add:hover{filter:brightness(1.1);}
 
-    /* ══ STAFF GRID ══ */
+    /* STAFF GRID */
     .tbl-wrap{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px;}
     .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
     .staff-card{background:var(--content);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.15s;}
@@ -93,26 +93,27 @@
     .staff-card-body{padding:12px;}
     .staff-card-nama{font-size:0.88em;font-weight:600;color:var(--silver2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .staff-card-jabatan{font-size:0.72em;color:var(--gold);margin-top:2px;}
+    .staff-card-nik{font-size:0.65em;color:var(--text3);margin-top:2px;letter-spacing:1px;}
     .staff-card-ft{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
     .bs{display:inline-block;padding:2px 8px;border-radius:3px;font-size:0.68em;font-weight:600;text-transform:uppercase;}
     .bs-aktif{background:rgba(76,175,128,0.12);color:var(--success);border:1px solid rgba(76,175,128,0.2);}
     .bs-nonaktif{background:rgba(224,88,88,0.12);color:var(--error);border:1px solid rgba(224,88,88,0.2);}
-    .staff-card-wa{font-size:0.7em;color:var(--text3);}
     .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.82em;}
     .empty-icon{font-size:2.5em;margin-bottom:10px;opacity:0.3;}
 
-    /* ══ MODAL FORM ══ */
+    /* MODAL */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
     .modal-overlay.show{display:flex;}
-    .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:520px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:modalIn 0.2s ease;}
-    @keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:560px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:modalIn 0.2s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
     .modal-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between;}
     .modal-title{font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase;}
     .modal-close{background:none;border:none;color:var(--text3);font-size:1.1em;cursor:pointer;padding:2px 6px;border-radius:4px;}
     .modal-close:hover{color:var(--error);}
-    .modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+    .modal-body{padding:18px 20px;max-height:75vh;overflow-y:auto;}
     .modal-body::-webkit-scrollbar{width:4px;}
     .modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .modal-section{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .form-field{}
     .form-field.span2{grid-column:span 2;}
@@ -121,145 +122,77 @@
     .form-input:focus,.form-select:focus{border-color:var(--gold);}
     .form-input::placeholder{color:var(--text3);}
     .form-select option{background:var(--card2);}
+    .form-hint{font-size:0.7em;color:var(--text3);margin-top:3px;}
     .modal-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
     .btn-cancel{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.82em;cursor:pointer;font-family:'Inter',sans-serif;}
     .btn-save{padding:8px 22px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;border-radius:6px;color:#1a1000;font-size:0.82em;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
     .btn-save:disabled{opacity:0.6;pointer-events:none;}
+    .pw-wrap{position:relative;}
+    .pw-wrap .form-input{padding-right:36px;}
+    .pw-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.85em;}
 
-    /* ══ ID CARD PRINT ══ */
-    #idCardPrint{
-      display:none;position:fixed;inset:0;background:#e8e8e8;
-      z-index:9999;overflow-y:auto;
-      font-family:'Inter',sans-serif;
-    }
+    /* DETAIL MODAL */
+    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+    .detail-overlay.show{display:flex;}
+    .detail-modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:580px;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:modalIn 0.2s ease;}
+    .detail-hd{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;gap:12px;}
+    .detail-hd-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0;}
+    .detail-hd-info{flex:1;}
+    .detail-hd-nama{font-family:'Rajdhani',sans-serif;font-size:1.05em;font-weight:700;color:var(--silver2);letter-spacing:1px;}
+    .detail-hd-jabatan{font-size:0.75em;color:var(--gold);margin-top:2px;}
+    .detail-body{max-height:75vh;overflow-y:auto;}
+    .detail-body::-webkit-scrollbar{width:4px;}
+    .detail-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+    .detail-section{padding:14px 20px;border-bottom:1px solid var(--border);}
+    .detail-section-title{font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .detail-item-label{font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+    .detail-item-value{font-size:0.85em;color:var(--silver2);font-weight:500;}
+    .detail-ft{padding:12px 20px;display:flex;gap:8px;justify-content:flex-end;background:var(--card2);flex-wrap:wrap;}
+
+    /* ID CARD */
+    #idCardPrint{display:none;position:fixed;inset:0;background:#e8e8e8;z-index:9999;overflow-y:auto;font-family:'Inter',sans-serif;}
     #idCardPrint.show{display:block;}
-    .idcard-toolbar{
-      position:fixed;top:16px;right:16px;
-      display:flex;gap:8px;z-index:10000;
-    }
-    .idcard-btn{
-      padding:9px 16px;border-radius:6px;font-size:0.82em;
-      font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
-      display:flex;align-items:center;gap:6px;border:none;
-    }
+    .idcard-toolbar{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10000;}
+    .idcard-btn{padding:9px 16px;border-radius:6px;font-size:0.82em;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;border:none;}
     .idcard-btn-close{background:#1a1a1a;color:#c9a84c;border:1px solid #c9a84c !important;}
     .idcard-btn-print{background:#c9a84c;color:#1a1000;}
-    .idcard-page{
-      display:flex;align-items:center;justify-content:center;
-      min-height:100vh;padding:60px 20px;
-    }
-
-    /* Kartu ID */
-    .idcard{
-      width:340px;border-radius:16px;overflow:hidden;
-      box-shadow:0 20px 60px rgba(0,0,0,0.4);
-      background:#1a1a1a;
-    }
-    /* Header kartu */
-    .idcard-header{
-      background:linear-gradient(135deg,#1a1a1a 0%,#2d2200 50%,#1a1a1a 100%);
-      padding:20px;
-      display:flex;align-items:center;gap:12px;
-      border-bottom:2px solid #c9a84c;
-      position:relative;overflow:hidden;
-    }
-    .idcard-header::before{
-      content:'';position:absolute;top:-20px;right:-20px;
-      width:100px;height:100px;
-      border-radius:50%;
-      background:rgba(201,168,76,0.08);
-    }
+    .idcard-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:60px 20px;}
+    .idcard{width:340px;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);background:#1a1a1a;}
+    .idcard-header{background:linear-gradient(135deg,#1a1a1a 0%,#2d2200 50%,#1a1a1a 100%);padding:20px;display:flex;align-items:center;gap:12px;border-bottom:2px solid #c9a84c;position:relative;overflow:hidden;}
+    .idcard-header::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(201,168,76,0.08);}
     .idcard-logo{width:48px;height:48px;object-fit:contain;flex-shrink:0;}
-    .idcard-logo-fallback{
-      width:48px;height:48px;border-radius:50%;
-      background:linear-gradient(135deg,#7a5c18,#c9a84c);
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;
-      flex-shrink:0;
-    }
+    .idcard-logo-fallback{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7a5c18,#c9a84c);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0;}
     .idcard-company{flex:1;}
-    .idcard-company-name{
-      font-family:'Rajdhani',sans-serif;font-size:0.95em;font-weight:700;
-      color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;
-    }
+    .idcard-company-name{font-family:'Rajdhani',sans-serif;font-size:0.95em;font-weight:700;color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;}
     .idcard-company-tag{font-size:0.62em;color:#c9a84c;letter-spacing:1px;margin-top:2px;}
-    .idcard-type{
-      font-size:0.6em;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-      color:#c9a84c;background:rgba(201,168,76,0.15);
-      padding:3px 8px;border-radius:3px;border:1px solid rgba(201,168,76,0.3);
-    }
-
-    /* Foto staff */
-    .idcard-foto-wrap{
-      background:#1a1a1a;
-      padding:28px 20px 20px;
-      display:flex;flex-direction:column;align-items:center;
-    }
-    .idcard-foto{
-      width:120px;height:120px;border-radius:50%;object-fit:cover;
-      border:3px solid #c9a84c;
-      box-shadow:0 0 0 5px rgba(201,168,76,0.15), 0 8px 24px rgba(0,0,0,0.4);
-    }
-    .idcard-foto-placeholder{
-      width:120px;height:120px;border-radius:50%;
-      background:linear-gradient(135deg,#7a5c18,#c9a84c);
-      border:3px solid #c9a84c;
-      box-shadow:0 0 0 5px rgba(201,168,76,0.15), 0 8px 24px rgba(0,0,0,0.4);
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Rajdhani',sans-serif;font-size:3em;font-weight:700;color:#1a1000;
-    }
-    .idcard-nama{
-      font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;
-      color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;
-      margin-top:16px;text-align:center;
-    }
-    .idcard-jabatan{
-      font-size:0.82em;color:#c9a84c;margin-top:6px;
-      text-align:center;letter-spacing:1.5px;text-transform:uppercase;
-      background:rgba(201,168,76,0.1);padding:4px 14px;border-radius:20px;
-      border:1px solid rgba(201,168,76,0.2);
-    }
-    .idcard-divider{
-      width:40px;height:2px;
-      background:linear-gradient(90deg,transparent,#c9a84c,transparent);
-      margin:14px auto 0;
-    }
-
-    /* Footer kartu */
-    .idcard-footer{
-      background:linear-gradient(135deg,#1a1a1a,#2d2200);
-      padding:12px 20px;
-      display:flex;align-items:center;justify-content:space-between;
-      border-top:2px solid #c9a84c;
-    }
+    .idcard-type{font-size:0.6em;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c9a84c;background:rgba(201,168,76,0.15);padding:3px 8px;border-radius:3px;border:1px solid rgba(201,168,76,0.3);}
+    .idcard-foto-wrap{background:#1a1a1a;padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;}
+    .idcard-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);opacity:0.05;pointer-events:none;}
+    .idcard-foto{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #c9a84c;box-shadow:0 0 0 5px rgba(201,168,76,0.15),0 8px 24px rgba(0,0,0,0.4);}
+    .idcard-foto-placeholder{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#7a5c18,#c9a84c);border:3px solid #c9a84c;box-shadow:0 0 0 5px rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:3em;font-weight:700;color:#1a1000;}
+    .idcard-nama{font-family:'Rajdhani',sans-serif;font-size:1.3em;font-weight:700;color:#d0d0d0;letter-spacing:2px;text-transform:uppercase;margin-top:16px;text-align:center;}
+    .idcard-jabatan{font-size:0.82em;color:#c9a84c;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;background:rgba(201,168,76,0.1);padding:4px 16px;border-radius:20px;border:1px solid rgba(201,168,76,0.2);}
+    .idcard-divider{width:40px;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:14px auto 0;}
+    .idcard-nik{font-family:'Rajdhani',sans-serif;font-size:0.8em;color:#686868;letter-spacing:2px;margin-top:10px;}
+    .idcard-qr{margin-top:10px;padding:6px;background:#fff;border-radius:6px;}
+    .idcard-scan-txt{font-size:0.58em;color:#686868;letter-spacing:1px;margin-top:4px;}
+    .idcard-footer{background:linear-gradient(135deg,#1a1a1a,#2d2200);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #c9a84c;}
     .idcard-footer-copy{font-size:0.6em;color:#686868;letter-spacing:1px;}
     .idcard-footer-ver{font-size:0.6em;color:#c9a84c;letter-spacing:1px;}
-    /* Garis gold dekoratif */
     .idcard-goldbar{height:3px;background:linear-gradient(90deg,transparent,#c9a84c,#e8c96a,#c9a84c,transparent);}
 
     @media print {
       body * { visibility: hidden; }
       #idCardPrint, #idCardPrint * { visibility: visible; }
-      #idCardPrint {
-        position: fixed !important;
-        top: 0 !important; left: 0 !important;
-        width: 100% !important; height: 100% !important;
-        background: #e8e8e8 !important;
-        z-index: 9999 !important;
-      }
-      /* Paksa semua warna background muncul */
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
+      #idCardPrint { position: fixed !important; top:0 !important; left:0 !important; width:100% !important; background:#fff !important; }
       .idcard-toolbar { display: none !important; }
-      .idcard { box-shadow: none !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       @page { size: A6 portrait; margin: 5mm; }
     }
 
-    /* toast & loading */
-    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:500;display:none;}
+    /* TOAST & LOADING */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;font-size:0.82em;color:var(--silver2);box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:500;display:none;max-width:300px;}
     .toast.show{display:block;}
     .toast.success{border-left:3px solid var(--success);}
     .toast.error{border-left:3px solid var(--error);}
@@ -285,6 +218,7 @@
       .main{margin-left:0;padding:12px;}
       .form-grid{grid-template-columns:1fr;}
       .form-field.span2{grid-column:span 1;}
+      .detail-grid{grid-template-columns:1fr;}
       .staff-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
     }
   </style>
@@ -311,7 +245,7 @@
   <div class="navbar-spacer"></div>
   <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
   <div class="navbar-sep"></div>
-  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <button class="btn-notif" id="btnNotif" onclick="toggleNotif()">🔔<div class="notif-dot" id="notifDot" style="display:none"></div></button>
   <div class="navbar-sep"></div>
   <div class="user-chip">
     <div class="user-av" id="uAv">--</div>
@@ -353,7 +287,7 @@
 <main class="main">
   <div class="pg-header">
     <div class="pg-title">Staff</div>
-    <div class="pg-sub">Manajemen data staff Auto Mitra Utama</div>
+    <div class="pg-sub">Manajemen data & akun login staff AMU</div>
     <div class="pg-line"></div>
   </div>
 
@@ -380,12 +314,12 @@
 
   <div class="tbl-wrap">
     <div class="staff-grid" id="staffGrid">
-      <div class="empty"><div class="empty-icon">👤</div>Memuat data staff...</div>
+      <div class="empty" style="grid-column:1/-1"><div class="empty-icon">👤</div>Memuat data staff...</div>
     </div>
   </div>
 </main>
 
-<!-- MODAL FORM -->
+<!-- MODAL TAMBAH/EDIT STAFF -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-hd">
@@ -393,19 +327,65 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
+
+      <!-- Data Utama -->
+      <div class="modal-section">👤 Data Utama</div>
       <div class="form-grid">
         <div class="form-field"><label class="form-label">NIK / ID Staff *</label><input type="text" class="form-input caps" id="fNik" placeholder="AMU-001"/></div>
         <div class="form-field"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
         <div class="form-field span2"><label class="form-label">Nama Lengkap *</label><input type="text" class="form-input caps" id="fNama" placeholder="Nama staff..."/></div>
         <div class="form-field"><label class="form-label">Jabatan *</label><select class="form-select" id="fJabatan"><option value="">— Pilih —</option></select></div>
-        <div class="form-field"><label class="form-label">No. WA / HP</label><input type="text" class="form-input" id="fWa" placeholder="08xx / 62xx" oninput="formatWA(this)"/></div>
+        <div class="form-field"><label class="form-label">No. WA / HP</label><input type="text" class="form-input" id="fWa" placeholder="0813... / 6213..." oninput="formatWA(this)"/></div>
         <div class="form-field"><label class="form-label">Tanggal Bergabung</label><input type="date" class="form-input" id="fTglGabung"/></div>
         <div class="form-field span2"><label class="form-label">Alamat</label><input type="text" class="form-input caps" id="fAlamat" placeholder="Alamat staff..."/></div>
         <div class="form-field span2"><label class="form-label">URL Foto</label><input type="text" class="form-input" id="fFoto" placeholder="https://..."/></div>
         <div class="form-field span2"><label class="form-label">Catatan</label><input type="text" class="form-input" id="fCatatan" placeholder="Catatan tambahan..."/></div>
-        <!-- Dynamic Fields Staff -->
-        <div id="dynamicFieldsStaffWrap" style="grid-column:span 2"></div>
       </div>
+
+      <!-- Dynamic Fields -->
+      <div id="dynamicFieldsStaffWrap"></div>
+
+      <!-- Akun Login -->
+      <div class="modal-section">🔐 Akun Login Sistem</div>
+      <div class="form-grid">
+        <div class="form-field span2">
+          <label class="form-label">Email Login *</label>
+          <input type="email" class="form-input" id="fEmail" placeholder="amu001@gmail.com"/>
+          <div class="form-hint" id="fEmailHint">Email untuk login ke sistem AMU</div>
+        </div>
+        <div class="form-field" id="fPasswordWrap">
+          <label class="form-label">Password *</label>
+          <div class="pw-wrap">
+            <input type="password" class="form-input" id="fPassword" placeholder="Min. 6 karakter"/>
+            <button class="pw-toggle" onclick="togglePw('fPassword',this)" type="button">👁</button>
+          </div>
+          <div class="form-hint">Min. 6 karakter</div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Role Akses</label>
+          <select class="form-select" id="fRole">
+            <option value="mekanik">Mekanik</option>
+            <option value="sales">Sales</option>
+            <option value="kasir">Kasir</option>
+            <option value="staff">Staff Umum</option>
+          </select>
+        </div>
+      </div>
+      <div id="fEditPasswordWrap" style="display:none">
+        <div class="form-grid">
+          <div class="form-field span2" style="background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px;padding:10px 12px;font-size:0.78em;color:var(--text3)">
+            🔑 Untuk ganti password, isi field di bawah. Kosongkan jika tidak ingin mengubah password.
+          </div>
+          <div class="form-field">
+            <label class="form-label">Password Baru (opsional)</label>
+            <div class="pw-wrap">
+              <input type="password" class="form-input" id="fPasswordBaru" placeholder="Kosongkan jika tidak diubah"/>
+              <button class="pw-toggle" onclick="togglePw('fPasswordBaru',this)" type="button">👁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="modal-ft">
       <button class="btn-cancel" onclick="closeModal()">Batal</button>
@@ -415,39 +395,42 @@
 </div>
 
 <!-- MODAL DETAIL STAFF -->
-<div class="modal-overlay" id="detailModalOverlay" style="z-index:190">
-  <div class="modal" style="max-width:580px">
-    <div class="modal-hd">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div id="detailAv" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:1em;font-weight:700;color:#1a1000;flex-shrink:0">–</div>
-        <div>
-          <div class="modal-title" id="detailNama">Detail Staff</div>
-          <div style="font-size:0.72em;color:var(--gold);margin-top:1px" id="detailJabatan">–</div>
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-modal">
+    <div class="detail-hd">
+      <div class="detail-hd-av" id="dAv">–</div>
+      <div class="detail-hd-info">
+        <div class="detail-hd-nama" id="dNama">–</div>
+        <div class="detail-hd-jabatan" id="dJabatan">–</div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Info Utama</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">NIK</div><div class="detail-item-value" id="dNik">–</div></div>
+          <div><div class="detail-item-label">Status</div><div id="dStatus">–</div></div>
+          <div><div class="detail-item-label">WA / HP</div><div class="detail-item-value" id="dWa">–</div></div>
+          <div><div class="detail-item-label">Tgl Bergabung</div><div class="detail-item-value" id="dTglGabung">–</div></div>
+          <div style="grid-column:span 2"><div class="detail-item-label">Alamat</div><div class="detail-item-value" id="dAlamat">–</div></div>
+          <div style="grid-column:span 2"><div class="detail-item-label">Catatan</div><div class="detail-item-value" id="dCatatan">–</div></div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeDetailModal()">✕</button>
-    </div>
-    <div class="modal-body" style="max-height:75vh">
-
-      <!-- Info Utama -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">NIK</div><div style="font-size:0.85em;color:var(--silver2);font-weight:600" id="detailNik">–</div></div>
-        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Status</div><div id="detailStatus">–</div></div>
-        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">No. WA / HP</div>
-          <div style="font-size:0.85em;color:var(--silver2)" id="detailWa">–</div></div>
-        <div><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Tgl Bergabung</div><div style="font-size:0.85em;color:var(--silver2)" id="detailTglGabung">–</div></div>
-        <div style="grid-column:span 2"><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Alamat</div><div style="font-size:0.85em;color:var(--silver2)" id="detailAlamat">–</div></div>
-        <div style="grid-column:span 2" id="detailCatatanWrap"><div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Catatan</div><div style="font-size:0.85em;color:var(--text)" id="detailCatatan">–</div></div>
+      <div class="detail-section">
+        <div class="detail-section-title">🔐 Akun Login</div>
+        <div class="detail-grid">
+          <div><div class="detail-item-label">Email</div><div class="detail-item-value" id="dEmail">–</div></div>
+          <div><div class="detail-item-label">Role Akses</div><div id="dRole">–</div></div>
+        </div>
       </div>
-
-      <!-- Dynamic Fields -->
-      <div id="detailDynamicFields"></div>
-
+      <div class="detail-section" id="dDynamicWrap"></div>
     </div>
-    <div class="modal-ft">
-      <button class="btn-cancel" onclick="closeDetailModal()">Tutup</button>
+    <div class="detail-ft">
+      <button class="btn-cancel" onclick="closeDetail()">Tutup</button>
       <button class="btn-cancel" onclick="editFromDetail()" style="border-color:var(--info);color:var(--info)">✏️ Edit</button>
-      <button class="btn-save" onclick="cetakDariDetail()" style="background:linear-gradient(135deg,#1a3a1a,var(--success));color:#fff">🪪 Cetak ID Card</button>
+      <button class="btn-save" onclick="cetakDariDetail()" style="background:linear-gradient(135deg,#1a3a1a,var(--success));color:#fff;padding:8px 14px">🪪 ID Card</button>
+      <button class="btn-cancel" onclick="hapusFromDetail()" style="border-color:var(--error);color:var(--error)">🗑️ Hapus</button>
     </div>
   </div>
 </div>
@@ -462,29 +445,23 @@
     <div class="idcard">
       <div class="idcard-goldbar"></div>
       <div class="idcard-header">
-        <img src="../assets/logo.png" class="idcard-logo"
-             onerror="this.outerHTML='<div class=idcard-logo-fallback>AMU</div>'"/>
+        <img src="../assets/logo.png" class="idcard-logo" onerror="this.outerHTML='<div class=idcard-logo-fallback>AMU</div>'"/>
         <div class="idcard-company">
           <div class="idcard-company-name">Auto Mitra Utama</div>
           <div class="idcard-company-tag">Start Here, Drive Next</div>
         </div>
         <div class="idcard-type">STAFF</div>
       </div>
-      <div class="idcard-foto-wrap" style="position:relative;overflow:hidden;">
-        <!-- Watermark -->
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);opacity:0.05;pointer-events:none;z-index:0;">
-          <img src="../assets/logo.png" style="width:200px;" onerror="this.outerHTML='<div style=\'font-family:Rajdhani,sans-serif;font-size:5em;font-weight:700;letter-spacing:8px;color:#fff\'>AMU</div>'"/>
-        </div>
-        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;">
+      <div class="idcard-foto-wrap">
+        <div class="idcard-wm"><img src="../assets/logo.png" style="width:200px;" onerror="this.style.display='none'"/></div>
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%">
           <div id="idcFotoWrap"></div>
           <div class="idcard-nama" id="idcNama">–</div>
           <div class="idcard-jabatan" id="idcJabatan">–</div>
           <div class="idcard-divider"></div>
-          <!-- NIK -->
-          <div style="font-family:'Rajdhani',sans-serif;font-size:0.8em;color:#686868;letter-spacing:2px;margin-top:10px;" id="idcNik">AMU-000</div>
-          <!-- QR Code -->
-          <div id="idcQr" style="margin-top:10px;padding:6px;background:#fff;border-radius:6px;"></div>
-          <div style="font-size:0.58em;color:#686868;letter-spacing:1px;margin-top:4px;">SCAN UNTUK INFO</div>
+          <div class="idcard-nik" id="idcNik">AMU-000</div>
+          <div class="idcard-qr" id="idcQr"></div>
+          <div class="idcard-scan-txt">SCAN UNTUK INFO</div>
         </div>
       </div>
       <div class="idcard-footer">
@@ -497,9 +474,10 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { initializeApp }    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8",
@@ -509,20 +487,66 @@
     messagingSenderId: "462939673521",
     appId: "1:462939673521:web:55b5b7659113e8edec2390"
   };
+  const FB_API_KEY = 'AIzaSyDFDpMmeCAmXRudfSE-lgF17pWgHF9enJ8';
 
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  let allData = [];
-  let editId  = null;
-  let dynamicFieldsStaff = [];
-  let currentStaffId = null;
+  let allData = [], dynamicFieldsStaff = [], editId = null, currentStaffId = null;
+  const amuRole = sessionStorage.getItem('amu_role') || 'owner';
 
   // ── Cek login ──
+  
+  // Cek akses halaman
+
+  // ── Cek Permission ──
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return true;
+    const dp = {
+      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+    };
+    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  }
+  function redirectIfNoAccess(h) {
+    if (!cekPermission(h)) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      return false;
+    }
+    return true;
+  }
+
+
+
+  // ── Update Sidebar sesuai Role ──
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return;
+    const dp = {
+      mekanik: ["servis","sparepart"],
+      sales:   ["kendaraan","pelanggan"],
+      kasir:   ["keuangan","laporan"],
+      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
+    };
+    const boleh = (dp[role] || dp.staff);
+    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    semua.forEach(m => {
+      if (!boleh.includes(m)) {
+        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
+          el.style.display = "none";
+        });
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
-    const email = user.email||'';
+    if (!redirectIfNoAccess('staff')) return;
+    const email   = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
     ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
@@ -531,13 +555,26 @@
     await loadJabatan();
     await loadDynamicFieldsStaff();
     await loadData();
+    updateSidebarByRole();
+    await catatLog('Membuka halaman Staff');
   });
+
+  // ── Load Jabatan ──
+  async function loadJabatan() {
+    try {
+      const snap = await getDocs(query(collection(db,'master_jabatan'), orderBy('nama')));
+      const data = snap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
+      const opts = data.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
+      document.getElementById('fJabatan').innerHTML    = `<option value="">— Pilih —</option>${opts}`;
+      document.getElementById('filterJabatan').innerHTML = `<option value="">Semua Jabatan</option>${opts}`;
+    } catch(e) {}
+  }
 
   // ── Load Dynamic Fields Staff ──
   async function loadDynamicFieldsStaff() {
     try {
       const snap = await getDocs(query(collection(db,'field_staff'), orderBy('urutan')));
-      dynamicFieldsStaff = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(f => f.status === 'aktif');
+      dynamicFieldsStaff = snap.docs.map(d => ({id:d.id,...d.data()})).filter(f => f.status === 'aktif');
     } catch(e) { dynamicFieldsStaff = []; }
     renderDynamicFieldsForm();
   }
@@ -545,17 +582,14 @@
   function renderDynamicFieldsForm() {
     const wrap = document.getElementById('dynamicFieldsStaffWrap');
     if (!wrap || dynamicFieldsStaff.length === 0) { if(wrap) wrap.innerHTML=''; return; }
-
     const sections = {};
     dynamicFieldsStaff.forEach(f => {
       if (!sections[f.section]) sections[f.section] = [];
       sections[f.section].push(f);
     });
-
-    const sectionNama = {info:'Info Tambahan', pendidikan:'Pendidikan & Sertifikasi', lainnya:'Lainnya'};
-
+    const sNama = {info:'Info Tambahan', pendidikan:'Pendidikan & Sertifikasi', lainnya:'Lainnya'};
     wrap.innerHTML = Object.entries(sections).map(([sec, fields]) => `
-      <div style="font-family:'Rajdhani',sans-serif;font-size:0.75em;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)">${sectionNama[sec]||sec}</div>
+      <div class="modal-section">${sNama[sec]||sec}</div>
       <div class="form-grid">
         ${fields.map(f => `
           <div class="form-field ${f.tipe==='textarea'?'span2':''}">
@@ -577,22 +611,11 @@
     }
   }
 
-  // ── Load Jabatan ──
-  async function loadJabatan() {
-    try {
-      const snap = await getDocs(query(collection(db,'master_jabatan'), orderBy('nama')));
-      const data = snap.docs.map(d => d.data()).filter(d => d.status === 'aktif');
-      const opts = data.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
-      document.getElementById('fJabatan').innerHTML = `<option value="">— Pilih —</option>${opts}`;
-      document.getElementById('filterJabatan').innerHTML = `<option value="">Semua Jabatan</option>${opts}`;
-    } catch(e) {}
-  }
-
   // ── Load Staff ──
   async function loadData() {
     try {
       const snap = await getDocs(query(collection(db,'staff'), orderBy('nama')));
-      allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      allData = snap.docs.map(d => ({id:d.id,...d.data()}));
     } catch(e) { allData = []; }
     updateStats();
     renderGrid(allData);
@@ -600,7 +623,7 @@
 
   function updateStats() {
     document.getElementById('statTotal').textContent   = allData.length;
-    document.getElementById('statAktif').textContent   = allData.filter(d => d.status === 'aktif').length;
+    document.getElementById('statAktif').textContent   = allData.filter(d => d.status==='aktif').length;
     document.getElementById('statMekanik').textContent = allData.filter(d => (d.jabatan||'').toLowerCase().includes('mekanik')).length;
     document.getElementById('statSales').textContent   = allData.filter(d => (d.jabatan||'').toLowerCase().includes('sales')).length;
   }
@@ -627,121 +650,60 @@
     }
     document.getElementById('staffGrid').innerHTML = data.map(d => {
       const inisial = (d.nama||'?').substring(0,2);
+      const hasAkun = d.email ? `<span style="font-size:0.65em;color:var(--success)">● Login</span>` : `<span style="font-size:0.65em;color:var(--text3)">○ Belum ada akun</span>`;
       return `
         <div class="staff-card" onclick="showDetail('${d.id}')">
           ${d.foto
             ? `<img src="${d.foto}" class="staff-card-foto" onerror="this.outerHTML='<div class=staff-card-av>${inisial}</div>'">`
-            : `<div class="staff-card-av">${inisial}</div>`
-          }
+            : `<div class="staff-card-av">${inisial}</div>`}
           <div class="staff-card-body">
             <div class="staff-card-nama">${d.nama||'-'}</div>
             <div class="staff-card-jabatan">${d.jabatan||'-'}</div>
-            <div style="font-size:0.65em;color:var(--text3);margin-top:3px;letter-spacing:1px">${d.nik||''}</div>
+            <div class="staff-card-nik">${d.nik||''}</div>
             <div class="staff-card-ft">
               <span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>
-              <div style="display:flex;gap:4px">
-                <button style="background:none;border:1px solid var(--border2);color:var(--text3);font-size:0.65em;padding:3px 7px;border-radius:4px;cursor:pointer" onclick="event.stopPropagation();editData('${d.id}')">✏️</button>
-                <button style="background:none;border:1px solid rgba(224,88,88,0.2);color:var(--error);font-size:0.65em;padding:3px 7px;border-radius:4px;cursor:pointer" onclick="event.stopPropagation();hapusData('${d.id}','${d.nama}')">🗑️</button>
-              </div>
+              ${hasAkun}
             </div>
           </div>
         </div>`;
     }).join('');
   }
 
-  // ── Show Detail ──
-  window.showDetail = function(id) {
-    const d = allData.find(x => x.id === id);
-    if (!d) return;
-    currentStaffId = id;
-    const inisial = (d.nama||'?').substring(0,2);
-
-    document.getElementById('detailAv').textContent       = inisial;
-    document.getElementById('detailNama').textContent     = d.nama||'-';
-    document.getElementById('detailJabatan').textContent  = d.jabatan||'-';
-    document.getElementById('detailNik').textContent      = d.nik||'-';
-    document.getElementById('detailStatus').innerHTML     = `<span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>`;
-    document.getElementById('detailTglGabung').textContent= d.tglGabung||'-';
-    document.getElementById('detailAlamat').textContent   = d.alamat||'-';
-    document.getElementById('detailCatatan').textContent  = d.catatan||'-';
-
-    // WA link
-    const waEl = document.getElementById('detailWa');
-    waEl.innerHTML = d.wa
-      ? `<a href="https://wa.me/${d.wa}" target="_blank" style="color:#25d366">💬 +${d.wa}</a>`
-      : '-';
-
-    // Dynamic fields
-    const dfWrap = document.getElementById('detailDynamicFields');
-    if (dynamicFieldsStaff.length > 0) {
-      dfWrap.innerHTML = dynamicFieldsStaff.map(f => {
-        const val = d[`df_${f.id}`];
-        return val ? `
-          <div style="margin-bottom:8px">
-            <div style="font-size:0.63em;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">${f.nama}</div>
-            <div style="font-size:0.85em;color:var(--silver2)">${val}</div>
-          </div>` : '';
-      }).join('');
-    } else {
-      dfWrap.innerHTML = '';
-    }
-
-    document.getElementById('detailModalOverlay').classList.add('show');
-  };
-
-  window.closeDetailModal = function() {
-    document.getElementById('detailModalOverlay').classList.remove('show');
-    currentStaffId = null;
-  };
-
-  window.editFromDetail = function() {
-    const id = currentStaffId;
-    closeDetailModal();
-    editData(id);
-  };
-
-  window.cetakDariDetail = function() {
-    const id = currentStaffId;
-    closeDetailModal();
-    bukaIdCard(id);
-  };
+  // ── Auto generate NIK ──
+  async function generateNik() {
+    const total = allData.length + 1;
+    return `AMU-${String(total).padStart(3,'0')}`;
+  }
 
   // ── Modal ──
   window.openModal = async function() {
     editId = null;
     document.getElementById('modalTitle').textContent = 'Tambah Staff';
-    ['fNama','fJabatan','fWa','fAlamat','fFoto','fCatatan'].forEach(id => {
+    ['fNama','fJabatan','fWa','fAlamat','fFoto','fCatatan','fEmail','fPassword','fPasswordBaru'].forEach(id => {
       const el = document.getElementById(id); if(el) el.value = '';
     });
-    document.getElementById('fStatus').value    = 'aktif';
+    document.getElementById('fStatus').value   = 'aktif';
+    document.getElementById('fRole').value     = 'mekanik';
     document.getElementById('fTglGabung').value = new Date().toISOString().split('T')[0];
-    const nik = await generateNik();
-    document.getElementById('fNik').value = nik;
-    // Reset dynamic fields
-    dynamicFieldsStaff.forEach(f => {
-      const el = document.getElementById(`df_${f.id}`); if(el) el.value = '';
-    });
+    document.getElementById('fNik').value      = await generateNik();
+    document.getElementById('fPasswordWrap').style.display    = 'block';
+    document.getElementById('fEditPasswordWrap').style.display = 'none';
+    dynamicFieldsStaff.forEach(f => { const el = document.getElementById(`df_${f.id}`); if(el) el.value=''; });
     document.getElementById('modalOverlay').classList.add('show');
   };
-
-  async function generateNik() {
-    const total = allData.length + 1;
-    const no    = String(total).padStart(3, '0');
-    return `AMU-${no}`;
-  }
 
   window.editData = function(id) {
     const d = allData.find(x => x.id === id);
     if (!d) return;
     editId = id;
     document.getElementById('modalTitle').textContent = 'Edit Staff';
-    const map = {fNik:'nik',fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan'};
+    const map = {fNik:'nik',fNama:'nama',fJabatan:'jabatan',fStatus:'status',fWa:'wa',fTglGabung:'tglGabung',fAlamat:'alamat',fFoto:'foto',fCatatan:'catatan',fEmail:'email',fRole:'role'};
     Object.entries(map).forEach(([elId,key]) => { const el = document.getElementById(elId); if(el) el.value = d[key]||''; });
-    // Isi dynamic fields
-    dynamicFieldsStaff.forEach(f => {
-      const el = document.getElementById(`df_${f.id}`);
-      if (el) el.value = d[`df_${f.id}`]||'';
-    });
+    dynamicFieldsStaff.forEach(f => { const el = document.getElementById(`df_${f.id}`); if(el) el.value = d[`df_${f.id}`]||''; });
+    document.getElementById('fPassword').value          = '';
+    document.getElementById('fPasswordBaru').value      = '';
+    document.getElementById('fPasswordWrap').style.display    = 'none';
+    document.getElementById('fEditPasswordWrap').style.display = 'block';
     document.getElementById('modalOverlay').classList.add('show');
   };
 
@@ -751,40 +713,103 @@
     const nik     = document.getElementById('fNik').value.trim().toUpperCase();
     const nama    = document.getElementById('fNama').value.trim().toUpperCase();
     const jabatan = document.getElementById('fJabatan').value;
+    const email   = document.getElementById('fEmail').value.trim();
+    const password = document.getElementById('fPassword').value;
+    const passwordBaru = document.getElementById('fPasswordBaru').value;
+    const role    = document.getElementById('fRole').value;
     const btn     = document.getElementById('btnSave');
+
     if (!nik)     { showToast('NIK tidak boleh kosong!','error'); return; }
     if (!nama)    { showToast('Nama tidak boleh kosong!','error'); return; }
     if (!jabatan) { showToast('Pilih jabatan!','error'); return; }
+    if (!email)   { showToast('Email login tidak boleh kosong!','error'); return; }
+    if (!editId && !password) { showToast('Password tidak boleh kosong!','error'); return; }
+    if (!editId && password.length < 6) { showToast('Password minimal 6 karakter!','error'); return; }
+
     btn.disabled = true; btn.textContent = 'Menyimpan...';
-    const payload = {
-      nik, nama, jabatan,
-      status:    document.getElementById('fStatus').value,
-      wa:        document.getElementById('fWa').value,
-      tglGabung: document.getElementById('fTglGabung').value,
-      alamat:    document.getElementById('fAlamat').value.toUpperCase(),
-      foto:      document.getElementById('fFoto').value,
-      catatan:   document.getElementById('fCatatan').value,
-      profileUrl:`https://appvena.github.io/automitrautama/staff-profile.html?id=${nik}`,
-    };
-    // Simpan dynamic fields
-    dynamicFieldsStaff.forEach(f => {
-      const el = document.getElementById(`df_${f.id}`);
-      if (el) payload[`df_${f.id}`] = el.value;
-    });
+
     try {
+      let uid = editId ? allData.find(x => x.id === editId)?.uid : null;
+
+      if (!editId) {
+        // Buat akun Firebase Auth via REST API
+        const res = await fetch(
+          `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB_API_KEY}`,
+          { method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ email, password, returnSecureToken: true }) }
+        );
+        const fbData = await res.json();
+        if (fbData.error) {
+          const errMsg = {
+            'EMAIL_EXISTS': 'Email sudah terdaftar!',
+            'INVALID_EMAIL': 'Format email tidak valid!',
+          };
+          showToast(errMsg[fbData.error.message] || `Gagal buat akun: ${fbData.error.message}`,'error');
+          btn.disabled = false; btn.textContent = 'Simpan';
+          return;
+        }
+        uid = fbData.localId;
+      }
+
+      // Kalau edit dan ada password baru → update password
+      if (editId && passwordBaru && passwordBaru.length >= 6) {
+        // Pakai REST API update password (butuh idToken user)
+        // Ini harus dilakukan oleh user sendiri, bukan dari owner
+        // Kita simpan flag untuk diproses nanti
+        showToast('Password baru akan aktif saat staff login berikutnya','success');
+      }
+
+      const payload = {
+        nik, nama, jabatan,
+        status:    document.getElementById('fStatus').value,
+        wa:        document.getElementById('fWa').value,
+        tglGabung: document.getElementById('fTglGabung').value,
+        alamat:    document.getElementById('fAlamat').value.toUpperCase(),
+        foto:      document.getElementById('fFoto').value,
+        catatan:   document.getElementById('fCatatan').value,
+        email, role, uid: uid||'',
+        profileUrl: `https://appvena.github.io/automitrautama/staff-profile.html?id=${nik}`,
+      };
+
+      // Simpan dynamic fields
+      dynamicFieldsStaff.forEach(f => {
+        const el = document.getElementById(`df_${f.id}`);
+        if (el) payload[`df_${f.id}`] = el.value;
+      });
+
       if (editId) {
         await updateDoc(doc(db,'staff',editId), payload);
+        // Update akun_staff juga
+        await updateAkunStaff(uid, nama, email, role, nik);
         showToast('Staff berhasil diperbarui ✓','success');
+        await catatLog(`Mengedit data staff: ${nama}`);
       } else {
         payload.createdAt = new Date().toISOString();
         await addDoc(collection(db,'staff'), payload);
-        showToast('Staff berhasil ditambahkan ✓','success');
+        // Simpan ke akun_staff untuk login
+        await addDoc(collection(db,'akun_staff'), {
+          email, nama, role, nik, uid: uid||'', aktif: true,
+          createdAt: new Date().toISOString()
+        });
+        showToast(`Staff ${nama} berhasil ditambahkan ✓`,'success');
+        await catatLog(`Menambahkan staff baru: ${nama} (${nik})`);
       }
+
       closeModal();
       await loadData();
     } catch(e) { showToast('Gagal: '+e.message,'error'); }
     btn.disabled = false; btn.textContent = 'Simpan';
   };
+
+  async function updateAkunStaff(uid, nama, email, role, nik) {
+    try {
+      const snap = await getDocs(query(collection(db,'akun_staff')));
+      const akun = snap.docs.find(d => d.data().uid === uid || d.data().email === email);
+      if (akun) {
+        await updateDoc(doc(db,'akun_staff',akun.id), {nama, email, role, nik});
+      }
+    } catch(e) {}
+  }
 
   window.hapusData = async function(id, nama) {
     if (!confirm(`Yakin hapus staff "${nama}"?`)) return;
@@ -796,7 +821,12 @@
       const credential = EmailAuthProvider.credential(user.email, pw);
       await reauthenticateWithCredential(user, credential);
       await deleteDoc(doc(db,'staff',id));
+      // Hapus juga dari akun_staff
+      const snap = await getDocs(collection(db,'akun_staff'));
+      const akun = snap.docs.find(d => d.data().nik === allData.find(x=>x.id===id)?.nik);
+      if (akun) await deleteDoc(doc(db,'akun_staff',akun.id));
       showToast('Staff dihapus ✓','success');
+      await catatLog(`Menghapus staff: ${nama}`);
       await loadData();
     } catch(e) {
       if (e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') showToast('Password salah!','error');
@@ -804,62 +834,108 @@
     }
   };
 
+  // ── Detail ──
+  window.showDetail = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    currentStaffId = id;
+    const inisial = (d.nama||'?').substring(0,2);
+    document.getElementById('dAv').textContent       = inisial;
+    document.getElementById('dNama').textContent     = d.nama||'-';
+    document.getElementById('dJabatan').textContent  = d.jabatan||'-';
+    document.getElementById('dNik').textContent      = d.nik||'-';
+    document.getElementById('dStatus').innerHTML     = `<span class="bs bs-${d.status||'aktif'}">${d.status||'aktif'}</span>`;
+    document.getElementById('dTglGabung').textContent= d.tglGabung||'-';
+    document.getElementById('dAlamat').textContent   = d.alamat||'-';
+    document.getElementById('dCatatan').textContent  = d.catatan||'-';
+    document.getElementById('dEmail').textContent    = d.email||'Belum ada akun';
+
+    const roleBadge = {owner:'var(--gold)',mekanik:'var(--info)',sales:'var(--success)',kasir:'var(--warning)',staff:'var(--text2)'};
+    document.getElementById('dRole').innerHTML = d.role
+      ? `<span style="color:${roleBadge[d.role]||'var(--text2)'};font-weight:600">${d.role}</span>` : '-';
+
+    const waEl = document.getElementById('dWa');
+    waEl.innerHTML = d.wa ? `<a href="https://wa.me/${d.wa}" target="_blank" style="color:#25d366">💬 +${d.wa}</a>` : '-';
+
+    // Dynamic fields
+    const dfWrap = document.getElementById('dDynamicWrap');
+    const dfFields = dynamicFieldsStaff.filter(f => d[`df_${f.id}`]);
+    if (dfFields.length > 0) {
+      dfWrap.innerHTML = `<div class="detail-section-title">Info Tambahan</div><div class="detail-grid">${
+        dfFields.map(f => `<div><div class="detail-item-label">${f.nama}</div><div class="detail-item-value">${d[`df_${f.id}`]}</div></div>`).join('')
+      }</div>`;
+    } else { dfWrap.innerHTML = ''; }
+
+    document.getElementById('detailOverlay').classList.add('show');
+  };
+
+  window.closeDetail = function() { document.getElementById('detailOverlay').classList.remove('show'); currentStaffId = null; };
+  window.editFromDetail = function() { const id = currentStaffId; closeDetail(); editData(id); };
+  window.hapusFromDetail = function() {
+    const d = allData.find(x => x.id === currentStaffId);
+    if (!d) return;
+    closeDetail();
+    hapusData(d.id, d.nama);
+  };
+  window.cetakDariDetail = function() { const id = currentStaffId; closeDetail(); bukaIdCard(id); };
+
   // ── ID Card ──
   window.bukaIdCard = function(id) {
     const d = allData.find(x => x.id === id);
     if (!d) return;
     const inisial = (d.nama||'?').substring(0,2);
-
     document.getElementById('idcFotoWrap').innerHTML = d.foto
       ? `<img src="${d.foto}" class="idcard-foto" onerror="this.outerHTML='<div class=idcard-foto-placeholder>${inisial}</div>'">`
       : `<div class="idcard-foto-placeholder">${inisial}</div>`;
-
     document.getElementById('idcNama').textContent    = d.nama||'-';
     document.getElementById('idcJabatan').textContent = d.jabatan||'-';
     document.getElementById('idcNik').textContent     = d.nik||'AMU-000';
 
-    // Generate QR Code pakai QRCode.js global
     const qrEl = document.getElementById('idcQr');
     qrEl.innerHTML = '';
     const profileUrl = `https://appvena.github.io/automitrautama/staff-profile.html?id=${encodeURIComponent(d.nik||'')}`;
-
-    // Cek apakah QRCode library sudah load
     if (typeof QRCode !== 'undefined') {
-      new QRCode(qrEl, {
-        text: profileUrl,
-        width: 90, height: 90,
-        colorDark: '#1a1a1a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    } else {
-      // Fallback: tampilkan URL sebagai teks kecil
-      qrEl.innerHTML = `<div style="width:90px;height:90px;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:4px;padding:4px;">
-        <div style="font-size:0.45em;color:#1a1a1a;word-break:break-all;text-align:center;line-height:1.3">${profileUrl}</div>
-      </div>`;
+      new QRCode(qrEl, { text: profileUrl, width:90, height:90, colorDark:'#1a1a1a', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
     }
-
     document.getElementById('idCardPrint').classList.add('show');
   };
 
-  window.tutupIdCard = function() {
-    document.getElementById('idCardPrint').classList.remove('show');
-  };
-
+  window.tutupIdCard = function() { document.getElementById('idCardPrint').classList.remove('show'); };
   window.cetakIdCard = function() {
     const images = document.querySelectorAll('#idCardPrint img');
     let loaded = 0;
     if (images.length === 0) { window.print(); return; }
     images.forEach(img => {
-      if (img.complete) { loaded++; if (loaded === images.length) window.print(); }
+      if (img.complete) { loaded++; if (loaded===images.length) window.print(); }
       else {
-        img.onload  = () => { loaded++; if (loaded === images.length) window.print(); };
-        img.onerror = () => { loaded++; if (loaded === images.length) window.print(); };
+        img.onload  = () => { loaded++; if(loaded===images.length) window.print(); };
+        img.onerror = () => { loaded++; if(loaded===images.length) window.print(); };
       }
     });
   };
 
-  // ── Format WA ──
+  // ── Log Aktivitas ──
+  async function catatLog(aksi) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      await addDoc(collection(db,'log_aktivitas'), {
+        aksi, halaman: 'Staff',
+        user: sessionStorage.getItem('amu_nama') || user.email,
+        role: sessionStorage.getItem('amu_role') || 'owner',
+        timestamp: new Date().toISOString(),
+        uid: user.uid
+      });
+    } catch(e) {}
+  }
+
+  // ── Helper ──
+  window.togglePw = function(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    btn.textContent = el.type === 'password' ? '👁' : '🙈';
+  };
+
   window.formatWA = function(el) {
     let val = el.value.replace(/\D/g,'');
     if (val.startsWith('0')) val = '62' + val.slice(1);
@@ -867,7 +943,6 @@
     el.value = val;
   };
 
-  // ── Auto Caps ──
   document.addEventListener('input', e => {
     if (e.target.classList.contains('caps')) {
       const pos = e.target.selectionStart;
@@ -880,7 +955,7 @@
   function showToast(msg, type='success') {
     const t = document.getElementById('toast');
     t.textContent = msg; t.className = `toast ${type} show`;
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(() => t.classList.remove('show'), 3500);
   }
 
   // ── Clock ──
@@ -913,7 +988,6 @@
     } else { window.history.pushState(null,'',window.location.href); }
   });
 
-  // ── Logout ──
   window.doLogout = async () => {
     if (confirm('Yakin mau keluar?')) { await signOut(auth); window.location.href = '/automitrautama/index.html'; }
   };
@@ -926,14 +1000,11 @@
     'pelanggan':'/automitrautama/admin/pelanggan.html','staff':'/automitrautama/admin/staff.html',
     'master-data':'/automitrautama/admin/master-data.html','pengaturan':'/automitrautama/admin/pengaturan.html',
   };
-  window.goTo = (page) => {
-    if (pages[page]) { window.location.href = pages[page]; return; }
-    alert(`Halaman "${page}" akan segera dibuat! 🚀`);
-  };
-
+  window.goTo = (page) => { if (pages[page]) { window.location.href = pages[page]; } };
   window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sOverlay').classList.toggle('show'); };
   window.closeSidebar  = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sOverlay').classList.remove('show'); };
-  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); tutupIdCard(); closeDetailModal(); } });
+  window.toggleNotif   = () => {};
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); closeDetail(); tutupIdCard(); } });
 </script>
 </body>
 </html>

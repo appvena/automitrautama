@@ -796,8 +796,8 @@
 
   <div class="navbar-sep"></div>
 
-  <button class="btn-notif" title="Notifikasi">
-    🔔 <div class="notif-dot"></div>
+  <button class="btn-notif" id="btnNotif" title="Notifikasi" onclick="toggleNotifPanel()">
+    🔔 <div class="notif-dot" id="notifDot" style="display:none"></div>
   </button>
 
   <div class="navbar-sep"></div>
@@ -988,25 +988,13 @@
     <!-- Aktivitas -->
     <div class="panel">
       <div class="panel-hd">
-        <div class="panel-title">⚡ Aktivitas</div>
+        <div class="panel-title">⚡ Log Aktivitas</div>
+        <a class="panel-link" onclick="loadLogAktivitas()">🔄 Refresh</a>
       </div>
       <div class="panel-bd">
-        <ul class="act-list" id="actList">
-          <li class="act-item">
-            <div class="act-dot" style="background:var(--gold)"></div>
-            <div>
-              <div class="act-text">Sistem AMU siap</div>
-              <div class="act-time">Baru saja</div>
-            </div>
-          </li>
-          <li class="act-item">
-            <div class="act-dot" style="background:var(--success)"></div>
-            <div>
-              <div class="act-text">Firebase terhubung</div>
-              <div class="act-time">Baru saja</div>
-            </div>
-          </li>
-        </ul>
+        <div id="logAktivitasList">
+          <div style="text-align:center;color:var(--text3);padding:16px;font-size:0.78em">Memuat aktivitas...</div>
+        </div>
       </div>
     </div>
 
@@ -1046,7 +1034,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, setDoc }
+  import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1065,36 +1053,164 @@
   let currentUserId = null;
   const DEFAULT_WIDGETS = ['kendaraan','pendapatan','terjual','pelanggan','servis','sparepart'];
   let activeWidgets = [...DEFAULT_WIDGETS];
+  const amuRole = sessionStorage.getItem('amu_role') || 'owner';
+  const amuNama = sessionStorage.getItem('amu_nama') || '';
 
   // ── Cek login ──
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = '/automitrautama/index.html';
-      return;
-    }
+  
+  // ── Update Sidebar sesuai Role ──
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return;
+    const dp = {
+      mekanik: ["servis","sparepart"],
+      sales:   ["kendaraan","pelanggan"],
+      kasir:   ["keuangan","laporan"],
+      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
+    };
+    const boleh = (dp[role] || dp.staff);
+    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    semua.forEach(m => {
+      if (!boleh.includes(m)) {
+        document.querySelectorAll(`[onclick*="goPage(\'${m}\')"],[onclick*="goPage(\"${m}\")"]`).forEach(el => {
+          el.style.display = "none";
+        });
+      }
+    });
+  }
 
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/automitrautama/index.html'; return; }
     currentUserId = user.uid;
 
-    // User info navbar
     const email   = user.email || '';
-    const inisial = email.substring(0, 2).toUpperCase();
-    document.getElementById('uAv').textContent   = inisial;
-    document.getElementById('uName').textContent = email.split('@')[0];
-    document.getElementById('uRole').textContent = 'Administrator';
+    const inisial = (amuNama || email).substring(0,2).toUpperCase();
+    const roleLabel = {owner:'Administrator',sales:'Sales',mekanik:'Mekanik',kasir:'Kasir',staff:'Staff'};
 
-    // User info sidebar
-    document.getElementById('suAv').textContent   = inisial;
-    document.getElementById('suName').textContent = email.split('@')[0];
-    document.getElementById('suRole').textContent = 'Administrator';
+    ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = amuNama || email.split('@')[0]);
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = roleLabel[amuRole]||'Staff');
 
-    // Hide overlay setelah animasi
-    setTimeout(() => {
-      document.getElementById('overlay').classList.add('hide');
-    }, 1800);
+    setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
 
     await loadWidgetPrefs();
     await loadData();
+    await loadNotifikasi();
+    await loadLogAktivitas();
+    updateSidebarByRole();
   });
+
+  // ── Notifikasi Lonceng ──
+  let notifList = [];
+
+  async function loadNotifikasi() {
+    notifList = [];
+
+    try {
+      // 1. Cek stok sparepart menipis
+      const spSnap = await getDocs(collection(db,'sparepart'));
+      spSnap.docs.forEach(d => {
+        const sp = d.data();
+        const stok = parseInt(sp.stok||0);
+        const min  = parseInt(sp.stokMin||0);
+        if (stok === 0) notifList.push({tipe:'error', icon:'🔩', pesan:`Stok ${sp.nama||'?'} HABIS!`, waktu: new Date().toISOString()});
+        else if (stok <= min) notifList.push({tipe:'warning', icon:'⚠️', pesan:`Stok ${sp.nama||'?'} menipis (${stok} tersisa)`, waktu: new Date().toISOString()});
+      });
+
+      // 2. Cek servis antri hari ini
+      const sSnap = await getDocs(collection(db,'servis'));
+      const antri = sSnap.docs.filter(d => d.data().status === 'antri');
+      if (antri.length > 0) notifList.push({tipe:'info', icon:'🔧', pesan:`${antri.length} antrian servis menunggu`, waktu: new Date().toISOString()});
+
+      // 3. Cek STNK kendaraan yang akan expired (30 hari ke depan)
+      const kSnap = await getDocs(collection(db,'kendaraan'));
+      const now = new Date();
+      kSnap.docs.forEach(d => {
+        const k = d.data();
+        if (k.tglStnk && k.status !== 'terjual') {
+          const tglStnk = new Date(k.tglStnk);
+          const selisih = Math.ceil((tglStnk - now) / (1000*60*60*24));
+          if (selisih >= 0 && selisih <= 30) {
+            notifList.push({tipe:'warning', icon:'📋', pesan:`STNK ${k.nopol||'?'} expire ${selisih} hari lagi`, waktu: new Date().toISOString()});
+          }
+        }
+      });
+
+    } catch(e) {}
+
+    // Update UI lonceng
+    const btnNotif = document.getElementById('btnNotif');
+    const notifDot = document.getElementById('notifDot');
+    if (btnNotif) {
+      btnNotif.onclick = toggleNotifPanel;
+    }
+    if (notifDot) {
+      notifDot.style.display = notifList.length > 0 ? 'block' : 'none';
+      notifDot.style.background = notifList.some(n => n.tipe==='error') ? 'var(--error)' :
+                                   notifList.some(n => n.tipe==='warning') ? 'var(--warning)' : 'var(--gold)';
+    }
+  }
+
+  window.toggleNotifPanel = function() {
+    let panel = document.getElementById('notifPanel');
+    if (panel) { panel.remove(); return; }
+
+    const html = `
+      <div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:320px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden">
+        <div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi</div>
+          <span style="background:var(--gold);color:#1a1000;font-size:0.65em;font-weight:700;padding:2px 6px;border-radius:10px">${notifList.length}</span>
+        </div>
+        <div style="max-height:320px;overflow-y:auto">
+          ${notifList.length === 0
+            ? `<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>`
+            : notifList.map(n => `
+              <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:1.1em;flex-shrink:0">${n.icon}</span>
+                <div>
+                  <div style="font-size:0.82em;color:${n.tipe==='error'?'var(--error)':n.tipe==='warning'?'var(--warning)':'var(--info)'}">${n.pesan}</div>
+                </div>
+              </div>`).join('')}
+        </div>
+      </div>`;
+    document.body.insertAdjacentHTML('beforeend', html);
+    // Tutup kalau klik di luar
+    setTimeout(() => {
+      document.addEventListener('click', function closePanel(e) {
+        const panel = document.getElementById('notifPanel');
+        const btn   = document.getElementById('btnNotif');
+        if (panel && !panel.contains(e.target) && !btn?.contains(e.target)) {
+          panel.remove();
+          document.removeEventListener('click', closePanel);
+        }
+      });
+    }, 100);
+  };
+
+  // ── Log Aktivitas ──
+  async function loadLogAktivitas() {
+    try {
+      const snap = await getDocs(query(collection(db,'log_aktivitas'), orderBy('timestamp','desc'), limit(10)));
+      const logs = snap.docs.map(d => d.data());
+      const logEl = document.getElementById('logAktivitasList');
+      if (!logEl) return;
+      if (logs.length === 0) {
+        logEl.innerHTML = `<div style="text-align:center;color:var(--text3);padding:16px;font-size:0.78em">Belum ada aktivitas</div>`;
+        return;
+      }
+      logEl.innerHTML = logs.map(l => {
+        const tgl = new Date(l.timestamp);
+        const tglStr = tgl.toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:0.82em;color:var(--text2)">${l.aksi||'-'}</div>
+            <div style="font-size:0.7em;color:var(--text3);margin-top:2px">${l.user||'-'} · ${l.halaman||'-'} · ${tglStr}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {}
+  }
 
   // ── Load preferensi widget dari Firebase ──
   async function loadWidgetPrefs() {

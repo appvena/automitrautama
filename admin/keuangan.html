@@ -201,7 +201,7 @@
   <div class="navbar-spacer"></div>
   <div class="navbar-clock"><div class="clock-time" id="clock">--:--</div><div class="clock-date" id="clockDate">--</div></div>
   <div class="navbar-sep"></div>
-  <button class="btn-notif">🔔<div class="notif-dot"></div></button>
+  <button class="btn-notif" id="btnNotif" onclick="toggleNotifPanel()">🔔<div class="notif-dot" id="notifDot" style="display:none"></div></button>
   <div class="navbar-sep"></div>
   <div class="user-chip">
     <div class="user-av" id="uAv">--</div>
@@ -320,40 +320,33 @@
     <div class="panel">
       <div class="panel-hd">
         <div class="panel-title">🏦 Saldo Kas & Rekening Bank</div>
-        <button class="btn-add" onclick="simpanKas()">💾 Simpan</button>
+        <button class="btn-add" onclick="loadKas()">🔄 Refresh</button>
       </div>
       <div style="padding:16px">
-        <div class="kas-grid">
-          <div class="kas-item">
-            <div class="kas-lbl">💵 Kas Tunai</div>
-            <input type="number" class="kas-input" id="kasKasTunai" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
-          <div class="kas-item">
-            <div class="kas-lbl">🏦 BRI</div>
-            <input type="number" class="kas-input" id="kasBRI" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
-          <div class="kas-item">
-            <div class="kas-lbl">🏦 BNI</div>
-            <input type="number" class="kas-input" id="kasBNI" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
-          <div class="kas-item">
-            <div class="kas-lbl">🏦 Mandiri</div>
-            <input type="number" class="kas-input" id="kasMandiri" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
-          <div class="kas-item">
-            <div class="kas-lbl">🏦 BCA</div>
-            <input type="number" class="kas-input" id="kasBCA" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
-          <div class="kas-item">
-            <div class="kas-lbl">🏦 Lainnya</div>
-            <input type="number" class="kas-input" id="kasLain" placeholder="0" oninput="hitungTotalKas()"/>
-          </div>
+        <div style="font-size:0.75em;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:6px">
+          💡 Saldo dihitung otomatis dari semua transaksi. Untuk menambah bank, buka Master Data → Bank / Rekening.
+        </div>
+        <div id="kasBankList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div class="kas-item"><div class="kas-lbl">Memuat...</div></div>
         </div>
         <div class="kas-total">
           <div class="kas-total-lbl">Total Saldo Keseluruhan</div>
           <div class="kas-total-val" id="kasTotal">Rp 0</div>
         </div>
-        <div style="font-size:0.72em;color:var(--text3)">Terakhir diupdate: <span id="kasTerakhir">–</span></div>
+        <div style="font-size:0.72em;color:var(--text3);margin-top:8px">Data diambil dari semua transaksi tercatat</div>
+      </div>
+    </div>
+
+    <!-- Riwayat Transaksi Bank -->
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">📋 Riwayat Transaksi Bank</div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Bank/Kas</th><th>Tipe</th><th>Jumlah</th><th>Keterangan</th><th>Tanggal</th></tr></thead>
+          <tbody id="tblTrxBank"><tr><td colspan="6"><div class="empty">Memuat...</div></td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -516,8 +509,85 @@
   let tglDari = '', tglSampai = '';
 
   // ── Cek login ──
+  
+  // ── Notifikasi Panel ──
+  let notifList = [];
+  async function loadNotifikasi() {
+    notifList = [];
+    try {
+      const spSnap = await getDocs(collection(db,"sparepart"));
+      spSnap.docs.forEach(d => {
+        const sp = d.data();
+        const stok = parseInt(sp.stok||0), min = parseInt(sp.stokMin||0);
+        if (stok === 0) notifList.push({tipe:"error",icon:"🔩",pesan:`Stok ${sp.nama||"?"} HABIS!`});
+        else if (stok <= min) notifList.push({tipe:"warning",icon:"⚠️",pesan:`Stok ${sp.nama||"?"} menipis (${stok})`});
+      });
+      const sSnap = await getDocs(collection(db,"servis"));
+      const antri = sSnap.docs.filter(d => d.data().status === "antri").length;
+      if (antri > 0) notifList.push({tipe:"info",icon:"🔧",pesan:`${antri} antrian servis menunggu`});
+    } catch(e) {}
+    const dot = document.getElementById("notifDot");
+    if (dot) dot.style.display = notifList.length > 0 ? "block" : "none";
+  }
+  window.toggleNotifPanel = function() {
+    let panel = document.getElementById("notifPanel");
+    if (panel) { panel.remove(); return; }
+    const items = notifList.length === 0
+      ? "<div style="padding:20px;text-align:center;color:var(--text3);font-size:0.82em">✅ Tidak ada notifikasi</div>"
+      : notifList.map(n => `<div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px"><span>${n.icon}</span><div style="font-size:0.82em;color:${n.tipe==="error"?"var(--error)":n.tipe==="warning"?"var(--warning)":"var(--info)"}">${n.pesan}</div></div>`).join("");
+    document.body.insertAdjacentHTML("beforeend", `<div id="notifPanel" style="position:fixed;top:calc(var(--navbar-h) + 8px);right:16px;width:300px;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:300;overflow:hidden"><div style="padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);font-family:Rajdhani,sans-serif;font-size:0.9em;font-weight:700;color:var(--silver2);letter-spacing:1.5px;text-transform:uppercase">🔔 Notifikasi (${notifList.length})</div><div style="max-height:280px;overflow-y:auto">${items}</div></div>`);
+    setTimeout(() => { document.addEventListener("click", function cp(e) { const p=document.getElementById("notifPanel"),b=document.getElementById("btnNotif"); if(p&&!p.contains(e.target)&&!b?.contains(e.target)){p.remove();document.removeEventListener("click",cp);} }); }, 100);
+  };
+
+  
+  // Cek akses halaman
+
+  // ── Cek Permission ──
+  function cekPermission(halaman) {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return true;
+    const dp = {
+      mekanik: {dashboard:1,kendaraan:0,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      sales:   {dashboard:1,kendaraan:1,servis:0,sparepart:0,keuangan:0,laporan:0,pelanggan:1,staff:0,"master-data":0,pengaturan:0},
+      kasir:   {dashboard:1,kendaraan:0,servis:0,sparepart:0,keuangan:1,laporan:1,pelanggan:0,staff:0,"master-data":0,pengaturan:0},
+      staff:   {dashboard:1,kendaraan:1,servis:1,sparepart:1,keuangan:0,laporan:0,pelanggan:1,staff:1,"master-data":0,pengaturan:0},
+    };
+    return ((dp[role]||dp.staff)[halaman]||0) === 1;
+  }
+  function redirectIfNoAccess(h) {
+    if (!cekPermission(h)) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1e1e;color:#686868;font-family:Inter,sans-serif;text-align:center"><div><div style="font-size:3em;margin-bottom:16px">🚫</div><div style="font-size:1.1em;color:#d0d0d0;margin-bottom:8px">Akses Ditolak</div><div style="font-size:0.85em">Anda tidak memiliki akses ke halaman ini</div><button onclick="history.back()" style="margin-top:16px;padding:8px 16px;background:rgba(201,168,76,0.07);border:1px solid #7a5c18;color:#c9a84c;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">← Kembali</button></div></div>';
+      return false;
+    }
+    return true;
+  }
+
+
+
+  // ── Update Sidebar sesuai Role ──
+  function updateSidebarByRole() {
+    const role = sessionStorage.getItem("amu_role") || "owner";
+    if (role === "owner") return;
+    const dp = {
+      mekanik: ["servis","sparepart"],
+      sales:   ["kendaraan","pelanggan"],
+      kasir:   ["keuangan","laporan"],
+      staff:   ["kendaraan","servis","sparepart","pelanggan","staff"],
+    };
+    const boleh = (dp[role] || dp.staff);
+    const semua = ["kendaraan","servis","sparepart","keuangan","laporan","pelanggan","staff","master-data","pengaturan"];
+    semua.forEach(m => {
+      if (!boleh.includes(m)) {
+        document.querySelectorAll(`[onclick*="goTo(\'${m}\')"],[onclick*="goTo(\"${m}\")"]`).forEach(el => {
+          el.style.display = "none";
+        });
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
+    if (!redirectIfNoAccess('keuangan')) return;
     const email = user.email||'';
     const inisial = email.substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
@@ -526,6 +596,8 @@
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadKas();
     await loadData();
+    await loadNotifikasi();
+    updateSidebarByRole();
   });
 
   // ── Set Periode ──
@@ -794,40 +866,66 @@
   // ── Kas & Bank ──
   async function loadKas() {
     try {
-      const snap = await getDoc(doc(db,'keuangan','kas'));
-      if (snap.exists()) {
-        const d = snap.data();
-        ['KasTunai','BRI','BNI','Mandiri','BCA','Lain'].forEach(k => {
-          const el = document.getElementById(`kas${k}`);
-          if(el) el.value = d[k === 'KasTunai' ? 'kastunai' : k.toLowerCase()]||'';
-        });
-        document.getElementById('kasTerakhir').textContent = d.updatedAt ? new Date(d.updatedAt).toLocaleString('id-ID') : '–';
-        hitungTotalKas();
-      }
-    } catch(e) {}
-  }
+      // Load daftar bank dari master_bank
+      const bankSnap = await getDocs(query(collection(db,'master_bank'), orderBy('nama')));
+      const bankList = bankSnap.docs.map(d => ({id:d.id,...d.data()})).filter(d => d.status==='aktif');
 
-  window.hitungTotalKas = function() {
-    const ids = ['kasKasTunai','kasBRI','kasBNI','kasMandiri','kasBCA','kasLain'];
-    const total = ids.reduce((s,id) => s + (parseInt(document.getElementById(id)?.value||0)), 0);
-    document.getElementById('kasTotal').textContent = fmt(total);
-  };
+      // Load semua transaksi bank
+      const trxSnap = await getDocs(collection(db,'transaksi_bank'));
+      const trxList = trxSnap.docs.map(d => ({id:d.id,...d.data()}));
 
-  window.simpanKas = async function() {
-    try {
-      await setDoc(doc(db,'keuangan','kas'), {
-        kastunai: parseInt(document.getElementById('kasKasTunai').value||0),
-        bri:      parseInt(document.getElementById('kasBRI').value||0),
-        bni:      parseInt(document.getElementById('kasBNI').value||0),
-        mandiri:  parseInt(document.getElementById('kasMandiri').value||0),
-        bca:      parseInt(document.getElementById('kasBCA').value||0),
-        lain:     parseInt(document.getElementById('kasLain').value||0),
-        updatedAt: new Date().toISOString()
+      // Hitung saldo per bank
+      const saldoMap = {};
+      bankList.forEach(b => {
+        const saldoAwal = parseInt(b.saldoAwal||0);
+        const masuk = trxList.filter(t => t.bankId===b.id && t.tipe==='masuk').reduce((s,t) => s+parseInt(t.jumlah||0), 0);
+        const keluar = trxList.filter(t => t.bankId===b.id && t.tipe==='keluar').reduce((s,t) => s+parseInt(t.jumlah||0), 0);
+        saldoMap[b.id] = { nama: b.nama, saldo: saldoAwal + masuk - keluar };
       });
-      document.getElementById('kasTerakhir').textContent = new Date().toLocaleString('id-ID');
-      showToast('Saldo kas & bank berhasil disimpan ✓','success');
-    } catch(e) { showToast('Gagal menyimpan: '+e.message,'error'); }
-  };
+
+      // Render kartu bank
+      const bankListEl = document.getElementById('kasBankList');
+      if (bankListEl) {
+        if (bankList.length === 0) {
+          bankListEl.innerHTML = `<div style="grid-column:span 2;text-align:center;color:var(--text3);padding:20px">Belum ada bank. Tambah di Master Data → Bank / Rekening</div>`;
+        } else {
+          bankListEl.innerHTML = bankList.map(b => {
+            const saldo = saldoMap[b.id]?.saldo||0;
+            return `<div class="kas-item">
+              <div class="kas-lbl">🏦 ${b.nama}</div>
+              <div class="kas-input" style="font-family:'Rajdhani',sans-serif;font-size:1.1em;font-weight:700;color:${saldo>=0?'var(--gold2)':'var(--error)'};padding:6px 0">${fmt(saldo)}</div>
+            </div>`;
+          }).join('');
+        }
+      }
+
+      // Total
+      const total = Object.values(saldoMap).reduce((s,b) => s+b.saldo, 0);
+      document.getElementById('kasTotal').textContent = fmt(total);
+
+      // Render riwayat transaksi bank
+      const tblTrxBank = document.getElementById('tblTrxBank');
+      if (tblTrxBank) {
+        const trxSorted = [...trxList].sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||'')).slice(0,50);
+        if (trxSorted.length === 0) {
+          tblTrxBank.innerHTML = `<tr><td colspan="6"><div class="empty">Belum ada transaksi bank</div></td></tr>`;
+        } else {
+          tblTrxBank.innerHTML = trxSorted.map((t,i) => {
+            const bankNama = bankList.find(b => b.id===t.bankId)?.nama || t.bankId || '-';
+            return `<tr>
+              <td style="color:var(--text3)">${i+1}</td>
+              <td style="font-weight:600;color:var(--silver2)">${bankNama}</td>
+              <td><span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:3px;background:${t.tipe==='masuk'?'rgba(76,175,128,0.15)':'rgba(224,88,88,0.15)'};color:${t.tipe==='masuk'?'var(--success)':'var(--error)'}">${t.tipe==='masuk'?'▲ MASUK':'▼ KELUAR'}</span></td>
+              <td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:${t.tipe==='masuk'?'var(--success)':'var(--error)'}">${fmt(t.jumlah)}</td>
+              <td style="color:var(--text3)">${t.keterangan||'-'}</td>
+              <td>${t.tanggal||'-'}</td>
+            </tr>`;
+          }).join('');
+        }
+      }
+
+    } catch(e) { console.log('Gagal load kas:', e); }
+  }
 
   // ── Pengeluaran Umum ──
   window.openModalPengeluaran = function() {
