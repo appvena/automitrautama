@@ -109,14 +109,18 @@
 
     .stok-ok{color:var(--success);font-weight:600;}
     .stok-low{color:var(--warning);font-weight:700;font-size:1.05em;}
-    .stok-empty{color:var(--error);font-weight:700;font-size:1.05em;animation:pulse-red 1.5s ease-in-out infinite;}
-    @keyframes pulse-red{0%,100%{opacity:1;}50%{opacity:0.5;}}
-    .tbl tr.row-low td{background:rgba(232,160,48,0.05);}
-    .tbl tr.row-empty td{background:rgba(224,88,88,0.07);}
-    .tbl tr.row-low:hover td{background:rgba(232,160,48,0.1);}
-    .tbl tr.row-empty:hover td{background:rgba(224,88,88,0.12);}
-    .stok-alert-bar{display:none;padding:10px 16px;background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.3);border-radius:8px;margin-bottom:12px;font-size:0.82em;color:var(--error);line-height:1.6;}
+    .stok-empty{color:var(--error);font-weight:800;font-size:1.1em;animation:pulse-red 1s ease-in-out infinite;}
+    @keyframes pulse-red{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(1.05);}}
+    .tbl tr.row-low td{background:rgba(232,160,48,0.06);border-left:3px solid var(--warning);}
+    .tbl tr.row-empty td{background:rgba(224,88,88,0.08);border-left:3px solid var(--error);}
+    .tbl tr.row-low td:first-child{border-left:3px solid var(--warning);}
+    .tbl tr.row-empty td:first-child{border-left:3px solid var(--error);}
+    .tbl tr.row-low:hover td{background:rgba(232,160,48,0.12);}
+    .tbl tr.row-empty:hover td{background:rgba(224,88,88,0.14);}
+    .stok-alert-bar{display:none;padding:12px 16px;background:rgba(224,88,88,0.1);border:1px solid rgba(224,88,88,0.3);border-radius:8px;margin-bottom:12px;font-size:0.82em;color:var(--error);line-height:1.8;}
     .stok-alert-bar.show{display:block;}
+    .stok-warn-bar{display:none;padding:12px 16px;background:rgba(232,160,48,0.1);border:1px solid rgba(232,160,48,0.3);border-radius:8px;margin-bottom:8px;font-size:0.82em;color:var(--warning);line-height:1.8;}
+    .stok-warn-bar.show{display:block;}
     .harga{font-family:'Rajdhani',sans-serif;font-size:0.95em;color:var(--gold2);font-weight:600;}
     .laba-val{font-family:'Rajdhani',sans-serif;font-size:0.9em;color:var(--success);font-weight:600;}
 
@@ -312,8 +316,10 @@
       <div class="mini-stat"><div class="mini-stat-icon">💰</div><div><div class="mini-stat-val" id="statNilai">0</div><div class="mini-stat-lbl">Nilai Stok (jt)</div></div></div>
     </div>
 
-    <!-- Banner alert stok kritis -->
+    <!-- Banner alert stok habis (merah) -->
     <div class="stok-alert-bar" id="stokAlertBar"></div>
+    <!-- Banner alert stok menipis (kuning) -->
+    <div class="stok-warn-bar" id="stokWarnBar"></div>
 
     <div class="toolbar">
       <select class="filter-select" id="filterKategori" onchange="applyFilter()"><option value="">Semua Kategori</option></select>
@@ -755,24 +761,30 @@
     const empty = allData.filter(d => parseInt(d.stok||0) === 0);
     const ok    = allData.filter(d => parseInt(d.stok||0) > parseInt(d.stokMin||0));
     const nilaiStok = allData.reduce((s,d) => s + (parseInt(d.stok||0) * parseInt(d.hargaBeli||0)), 0);
+
     document.getElementById('statTotal').textContent = allData.length;
     document.getElementById('statOk').textContent    = ok.length;
     document.getElementById('statLow').textContent   = low.length + empty.length;
     document.getElementById('statNilai').textContent = fmtJt(nilaiStok);
 
-    // Banner alert stok kritis
+    // Banner MERAH — stok habis
     const alertBar = document.getElementById('stokAlertBar');
-    const kritis = [...empty, ...low];
-    if (kritis.length > 0) {
-      let msg = '🚨 <strong>Perhatian Stok:</strong> ';
-      const habis   = empty.map(d => d.nama).join(', ');
-      const menipis = low.map(d => d.nama + ' (' + d.stok + ' ' + (d.satuan||'') + ')').join(', ');
-      if (habis)   msg += '<br>❌ <strong>Habis:</strong> ' + habis;
-      if (menipis) msg += '<br>⚠️ <strong>Menipis:</strong> ' + menipis;
-      alertBar.innerHTML = msg;
+    if (empty.length > 0) {
+      alertBar.innerHTML = '🚨 <strong>STOK HABIS!</strong> Segera restock:<br>' +
+        empty.map(d => '❌ ' + (d.nama||'?')).join('<br>');
       alertBar.classList.add('show');
     } else {
       alertBar.classList.remove('show');
+    }
+
+    // Banner KUNING — stok menipis
+    const warnBar = document.getElementById('stokWarnBar');
+    if (low.length > 0) {
+      warnBar.innerHTML = '⚠️ <strong>Stok Menipis:</strong><br>' +
+        low.map(d => '▸ ' + (d.nama||'?') + ' — sisa ' + d.stok + ' ' + (d.satuan||'')).join('<br>');
+      warnBar.classList.add('show');
+    } else {
+      warnBar.classList.remove('show');
     }
   }
 
@@ -818,13 +830,16 @@
       const laba   = parseInt(d.hargaJual||0) - parseInt(d.hargaBeli||0);
       const stokClass  = status === 'ok' ? 'stok-ok' : status === 'low' ? 'stok-low' : 'stok-empty';
       const badgeClass = 'bs-' + status;
-      const badgeText  = status === 'ok' ? 'Aman' : status === 'low' ? 'Menipis' : '❌ Habis';
+      const badgeText  = status === 'ok' ? 'Aman' : status === 'low' ? '⚠ Menipis' : '🚨 Habis';
       const rowClass   = status === 'empty' ? 'row-empty' : status === 'low' ? 'row-low' : '';
-      const stokIcon   = status === 'empty' ? '🔴 ' : status === 'low' ? '🟡 ' : '';
+      const stokIcon   = status === 'empty' ? '🔴 ' : status === 'low' ? '🟡 ' : '🟢 ';
 
       html += '<tr class="' + rowClass + '">';
       html += '<td style="color:var(--text3)">' + (i+1) + '</td>';
-      html += '<td><div style="font-weight:600;color:var(--silver2)">' + (d.nama||'-') + '</div><div style="font-size:0.75em;color:var(--text3)">' + (d.lokasi||'') + '</div></td>';
+      html += '<td><div style="display:flex;align-items:center;gap:6px">';
+      html += '<div style="font-weight:600;color:var(--silver2)">' + (d.nama||'-') + '</div>';
+      if (status !== 'ok') html += '<span class="bs ' + badgeClass + '">' + badgeText + '</span>';
+      html += '</div><div style="font-size:0.75em;color:var(--text3)">' + (d.lokasi||'') + '</div></td>';
       html += '<td style="color:var(--text3)">' + (d.sku||'-') + '</td>';
       html += '<td>' + (d.kategori||'-') + '</td>';
       html += '<td>' + (d.satuan||'-') + '</td>';
