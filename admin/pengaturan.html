@@ -498,17 +498,25 @@
       </div>
       <div style="margin-bottom:12px">
         <label class="set-label">Role</label>
-        <select class="set-select" id="aRole">
+        <select class="set-select" id="aRole" onchange="onRoleChange()">
           <option value="mekanik">Mekanik</option>
           <option value="sales">Sales</option>
           <option value="kasir">Kasir</option>
           <option value="staff">Staff Umum</option>
         </select>
       </div>
+      <!-- Dropdown pilih staff yang sudah ada (untuk role Sales) -->
+      <div style="margin-bottom:12px" id="aPilihStaffWrap" style="display:none">
+        <label class="set-label">Pilih dari Data Staff</label>
+        <select class="set-select" id="aPilihStaff" onchange="isiDariStaff()">
+          <option value="">— Pilih Staff (opsional) —</option>
+        </select>
+        <div class="set-hint">Pilih staff yang sudah ada untuk auto-isi nama & NIK</div>
+      </div>
       <div style="margin-bottom:12px">
         <label class="set-label">NIK Staff</label>
         <input type="text" class="set-input" id="aNik" placeholder="AMU-001"/>
-        <div class="set-hint">Opsional — untuk filter data sales per individu</div>
+        <div class="set-hint">Digunakan untuk filter data penjualan per sales</div>
       </div>
     </div>
     <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
@@ -822,17 +830,44 @@ Semoga kendaraan Anda selalu dalam kondisi prima.`;
     </table>`;
   }
 
+  window.onRoleChange = async function() {
+    const role = document.getElementById('aRole').value;
+    const wrap = document.getElementById('aPilihStaffWrap');
+    if (role === 'sales' || role === 'mekanik') {
+      wrap.style.display = 'block';
+      // Load staff dari Firestore
+      try {
+        const snap = await getDocs(query(collection(db,'staff'), orderBy('nama')));
+        const staffList = snap.docs.map(d => ({id:d.id,...d.data()}));
+        document.getElementById('aPilihStaff').innerHTML =
+          `<option value="">— Pilih Staff (opsional) —</option>` +
+          staffList.map(s => `<option value="${s.id}" data-nama="${s.nama||''}" data-nik="${s.nik||''}">${s.nama||'-'} (${s.nik||'-'})</option>`).join('');
+      } catch(e) {}
+    } else {
+      wrap.style.display = 'none';
+    }
+  };
+
+  window.isiDariStaff = function() {
+    const sel = document.getElementById('aPilihStaff');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    document.getElementById('aNama').value = opt.dataset.nama || '';
+    document.getElementById('aNik').value  = opt.dataset.nik  || '';
+  };
+
   window.openModalAkun = function() {
     editAkunId = null;
-    document.getElementById('modalAkunTitle').textContent = 'Tambah Akun Staff';
+    document.getElementById('modalAkunTitle').textContent  = 'Tambah Akun Staff';
     document.getElementById('aNama').value      = '';
-    document.getElementById('aEmail').value    = '';
-    document.getElementById('aPassword').value = '';
-    document.getElementById('aRole').value     = 'mekanik';
-    document.getElementById('aNik').value      = '';
-    document.getElementById('aPasswordWrap').style.display = 'block';
-    document.getElementById('btnSimpanAkun').textContent   = 'Buat Akun';
-    document.getElementById('modalAkun').style.cssText     = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    document.getElementById('aEmail').value     = '';
+    document.getElementById('aPassword').value  = '';
+    document.getElementById('aRole').value      = 'mekanik';
+    document.getElementById('aNik').value       = '';
+    document.getElementById('aPilihStaffWrap').style.display = 'none';
+    document.getElementById('aPasswordWrap').style.display   = 'block';
+    document.getElementById('btnSimpanAkun').textContent     = 'Buat Akun';
+    document.getElementById('modalAkun').style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
   };
 
   window.editAkun = function(id) {

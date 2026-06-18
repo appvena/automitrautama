@@ -657,6 +657,7 @@
         <div class="form-field">
           <label class="form-label">Sales yang Handle</label>
           <input type="text" class="form-input caps" id="jSales" placeholder="Nama sales..."/>
+          <input type="hidden" id="jSalesNik"/>
         </div>
         <div class="form-field span2">
           <label class="form-label">Catatan</label>
@@ -738,14 +739,34 @@
   let visibleCols = [...DEFAULT_COLS];
 
   // ── Cek login ──
+  // ── Role dari session ──
+  const amuRole = sessionStorage.getItem('amu_role') || 'owner';
+  const amuNama = sessionStorage.getItem('amu_nama') || '';
+  const amuNik  = sessionStorage.getItem('amu_nik')  || '';
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = '/automitrautama/index.html'; return; }
     currentUserId = user.uid;
-    const email = user.email || '';
-    const inisial = email.substring(0, 2).toUpperCase();
+    const email   = user.email || '';
+    const inisial = (amuNama || email).substring(0,2).toUpperCase();
     ['uAv','suAv'].forEach(id => document.getElementById(id).textContent = inisial);
-    ['uName','suName'].forEach(id => document.getElementById(id).textContent = email.split('@')[0]);
-    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = 'Administrator');
+    ['uName','suName'].forEach(id => document.getElementById(id).textContent = amuNama || email.split('@')[0]);
+
+    const roleLabel = {owner:'Administrator', sales:'Sales', mekanik:'Mekanik', kasir:'Kasir', staff:'Staff'};
+    ['uRole','suRole'].forEach(id => document.getElementById(id).textContent = roleLabel[amuRole]||'Staff');
+
+    // Kalau role sales → auto isi nama sales di form jual
+    if (amuRole === 'sales' && amuNama) {
+      const jSales = document.getElementById('jSales');
+      if (jSales) { jSales.value = amuNama; jSales.readOnly = true; }
+    }
+
+    // Sembunyikan tombol tambah kalau bukan owner/sales
+    if (amuRole !== 'owner' && amuRole !== 'sales') {
+      const btnTambah = document.getElementById('btnTambahKendaraan');
+      if (btnTambah) btnTambah.style.display = 'none';
+    }
+
     setTimeout(() => document.getElementById('overlay').classList.add('hide'), 1800);
     await loadKolomPrefs();
     await loadMasterDropdowns();
@@ -913,8 +934,18 @@
     try {
       const snap = await getDocs(collection(db, 'kendaraan'));
       allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      // Sort di client side biar tidak error kalau field kosong
       allData.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+      // Filter by sales kalau login sebagai sales
+      if (amuRole === 'sales' && amuNama) {
+        allData = allData.filter(d => {
+          // Tampilkan semua kendaraan tersedia (stok)
+          if (d.status !== 'terjual') return true;
+          // Untuk yang terjual — hanya tampilkan milik sales ini
+          return (d.penjualan?.salesNik === amuNik) ||
+                 (d.penjualan?.sales?.toUpperCase() === amuNama.toUpperCase());
+        });
+      }
     } catch(e) { allData = []; }
     updateStats();
     renderTable(allData);
@@ -980,10 +1011,19 @@
       if (visibleCols.includes('hargaJual')) tdHtml += `<td><span class="harga">${d.hargaJual ? 'Rp '+parseInt(d.hargaJual).toLocaleString('id-ID') : '-'}</span></td>`;
       if (visibleCols.includes('waPenjual')) tdHtml += `<td>${d.waPenjual ? `<a href="https://wa.me/${d.waPenjual}" target="_blank" style="color:var(--success)">${d.waPenjual}</a>` : '-'}</td>`;
       if (visibleCols.includes('status'))    tdHtml += `<td><span class="bs bs-${d.status||'tersedia'}">${d.status||'tersedia'}</span></td>`;
+
+      // Kolom sales — tampil ke semua, tapi hanya kalau terjual
+      tdHtml += `<td style="font-size:0.78em;color:var(--gold)">${d.status==='terjual' ? (d.penjualan?.sales||'-') : '-'}</td>`;
+
+      // Tombol aksi — sales hanya bisa hapus kalau itu miliknya
+      const isMilikSales = amuRole === 'owner' ||
+        (d.penjualan?.salesNik === amuNik) ||
+        (d.penjualan?.sales?.toUpperCase() === amuNama.toUpperCase());
+
       tdHtml += `<td>
         <button class="btn-detail" onclick="showDetail('${d.id}')">Detail</button>
-        <button class="btn-edit"   onclick="editData('${d.id}')">Edit</button>
-        <button class="btn-del"    onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>
+        ${amuRole !== 'sales' ? `<button class="btn-edit" onclick="editData('${d.id}')">Edit</button>` : ''}
+        ${(amuRole === 'owner' || isMilikSales) ? `<button class="btn-del" onclick="hapusData('${d.id}','${d.merek} ${d.model}')">Hapus</button>` : ''}
       </td>`;
       return `<tr>${tdHtml}</tr>`;
     }).join('');
@@ -1376,10 +1416,8 @@
   // ══ TANDAI TERJUAL ══
   window.openJualModal = function() {
     if (!detailData) return;
-    // Tampilkan info kendaraan
     document.getElementById('jualInfo').textContent =
       `${detailData.merek||''} ${detailData.model||''} ${detailData.tahun||''} — ${detailData.nopol||''}`;
-    // Set default nilai
     document.getElementById('jNamaPembeli').value  = '';
     document.getElementById('jWaPembeli').value    = '';
     document.getElementById('jHpPembeli').value    = '';
@@ -1387,8 +1425,20 @@
     document.getElementById('jHargaJual').value    = detailData.hargaJual || '';
     document.getElementById('jTanggalJual').value  = new Date().toISOString().split('T')[0];
     document.getElementById('jMetodeBayar').value  = 'cash';
-    document.getElementById('jSales').value        = '';
     document.getElementById('jCatatan').value      = '';
+
+    // Auto isi nama sales dari session
+    const salesEl = document.getElementById('jSales');
+    const salesNikEl = document.getElementById('jSalesNik');
+    if (amuRole === 'sales' && amuNama) {
+      salesEl.value    = amuNama;
+      salesEl.readOnly = true;
+      salesNikEl.value = amuNik;
+    } else {
+      salesEl.value    = '';
+      salesEl.readOnly = false;
+      salesNikEl.value = '';
+    }
     document.getElementById('jualModalOverlay').classList.add('show');
   };
 
@@ -1406,15 +1456,16 @@
     if (!tanggalJual) { showToast('Tanggal jual tidak boleh kosong!', 'error'); return; }
 
     const dataPenjualan = {
-      namaPembeli,
-      waPembeli:    document.getElementById('jWaPembeli').value,
-      hpPembeli:    document.getElementById('jHpPembeli').value,
-      alamatPembeli:document.getElementById('jAlamatPembeli').value,
+      namaPembeli:   namaPembeli.toUpperCase(),
+      waPembeli:     document.getElementById('jWaPembeli').value,
+      hpPembeli:     document.getElementById('jHpPembeli').value,
+      alamatPembeli: document.getElementById('jAlamatPembeli').value.toUpperCase(),
       hargaJualFinal: parseInt(hargaJual),
       tanggalJual,
-      metodeBayar:  document.getElementById('jMetodeBayar').value,
-      sales:        document.getElementById('jSales').value,
-      catatan:      document.getElementById('jCatatan').value,
+      metodeBayar:   document.getElementById('jMetodeBayar').value,
+      sales:         document.getElementById('jSales').value.toUpperCase(),
+      salesNik:      document.getElementById('jSalesNik').value || amuNik,
+      catatan:       document.getElementById('jCatatan').value,
     };
 
     try {
